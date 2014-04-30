@@ -220,6 +220,7 @@ class Tracker():
         if z_projection and 'Z' in self.metadata['DimensionOrder']:
             z_position = self.metadata['DimensionOrder'].index('Z')
             metadata = self.metadata.copy()
+            metadata['Shape'] = list(metadata['Shape'])
             metadata['Shape'][z_position] = 1
             metadata['SizeZ'] = 1
         else:

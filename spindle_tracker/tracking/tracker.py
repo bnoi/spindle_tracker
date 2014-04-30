@@ -196,6 +196,7 @@ class Tracker():
     def detect_peaks(self,
                      detection_parameters,
                      channel=0,
+                     z_projection=False,
                      show_progress=False,
                      parallel=True,
                      erase=False):
@@ -213,10 +214,19 @@ class Tracker():
                           base_dir=self.base_dir,
                           json_discovery=False)
 
-        data_iterator = self.st.image_iterator(channel_index=channel)
+        data_iterator = self.st.image_iterator(channel_index=channel,
+                                               z_projection=z_projection)
+
+        if z_projection and 'Z' in self.metadata['DimensionOrder']:
+            z_position = self.metadata['DimensionOrder'].index('Z')
+            metadata = self.metadata.copy()
+            metadata['Shape'][z_position] = 1
+            metadata['SizeZ'] = 1
+        else:
+            metadata = self.metadata
 
         peaks = peak_detector(data_iterator(),
-                              self.metadata,
+                              metadata,
                               parallel=parallel,
                               show_progress=show_progress,
                               parameters=detection_parameters)

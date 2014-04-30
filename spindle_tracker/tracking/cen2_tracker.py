@@ -1,24 +1,21 @@
 import logging
 import itertools
-import os
 
 import numpy as np
 import pandas as pd
 import scipy.spatial.distance as dist
 import scipy.cluster.hierarchy as hier
-from scipy.cluster import vq
 
 log = logging.getLogger(__name__)
 
 from ..tracking import Tracker
-from ..utils.sci import interp_nan
 
 
 class Cen2Tracker(Tracker):
 
     MINIMUM_METADATA = ['SizeX', 'SizeY', 'SizeZ',
-                        'PhysicalSizeX', 'PhysicalSizeY', 'PhysicalSizeZ',
-                        'TimeIncrement']
+                        'PhysicalSizeX', 'PhysicalSizeY',
+                        'PhysicalSizeZ', 'TimeIncrement']
 
     def __init__(self, *args, **kwargs):
         """
@@ -76,42 +73,13 @@ class Cen2Tracker(Tracker):
         else:
             log.error("Issue loading annotations")
 
+        self.stored_data.append('annotations')
+
     """
     Tracking methods
     """
 
-    def find_z_kmean(self, k=4, erase=False):
-        """
-        Find peaks with same x and y coordinate (with a cluster algorithm).
-        Keep the peak with biggest intensity and add z coordinates
-        according to his position in the z-stack.
-
-        Parameters
-        ----------
-        k: int
-            Number of cluster to detect.
-        """
-        if hasattr(self, "peaks_z") and isinstance(self.peaks_z, pd.DataFrame) and not erase:
-            return self.peaks_z
-
-        log.info("Find z relative coordinates with peaks"
-                 " clustering max intensity selection.")
-
-        peaks = self.raw.copy()
-        bads = []
-
-        for t, pos in peaks.groupby('t'):
-            if pos.shape[0] > 1:
-                centroids, _ = vq.kmeans(pos[['x', 'y']].values, k)
-                clusters, _ = vq.vq(pos[['x', 'y']].values, centroids)
-                pos['clusters'] = clusters
-                for cluster, p in pos.groupby('clusters'):
-                    bads.extend(p.sort(columns='I').iloc[:-1].index.values)
-
-        self.peaks_z = peaks.drop(bads)
-        self.stored_data.append('peaks_z')
-
-    def find_z(self, treshold=5, erase=False):
+    def find_z(self, treshold=0.1, erase=False):
         """
         Find peaks with same x and y coordinate (with a cluster algorithm).
         Keep the peak with biggest intensity and add z coordinates
@@ -127,8 +95,7 @@ class Cen2Tracker(Tracker):
         if hasattr(self, "peaks_z") and isinstance(self.peaks_z, pd.DataFrame) and not erase:
             return self.peaks_z
 
-        log.info("Find z relative coordinates with peaks"
-                 " clustering max intensity selection.")
+        log.info("*** Running find_z()")
 
         peaks = self.raw.copy()
         bads = []
@@ -153,37 +120,12 @@ class Cen2Tracker(Tracker):
         self.peaks_z['clusters_count'] = clusters_count
         self.stored_data.append('peaks_z')
 
-    def remove_weakers(self,
-                       num_kept=4,
-                       max_radius=0.3,
-                       erase=False):
-        """
-        """
+        log.info("*** End")
 
-        if hasattr(self, "peaks_z") and isinstance(self.peaks_z, pd.DataFrame) and not erase:
-            return self.peaks_z
-
-        peaks = self.peaks_z.copy()
-        bads = []
-
-        for t, pos in peaks.groupby('t'):
-            bads.extend(pos[pos['w'] > max_radius].index.values)
-
-            if pos.shape[0] >= num_kept:
-                bads.extend(pos.sort('I').iloc[:-num_kept].index.values)
-
-        bads = list(set(bads))
-
-        log.info('%i / %i peaks has been removed from peaks_z' %
-                 (len(bads), len(peaks)))
-
-        self.peaks_z = peaks.drop(bads)
-        self.stored_data.append('peaks_z')
-
-    def track(self, v_max, erase=False):
+    def track(self, v_max, num_kept, max_radius, erase=False):
         """
         Set real coordinates. This process contains severals steps:
-            1. Scale pixel coordinates to real world coordinates (µm)
+            1. Remove weak peaks
             2. Remove timepoints with less than 4 peaks
             3. Label peaks (spb or Kt and side A or side B)
             4. Remove outliers peaks which exceed a given speed
@@ -197,13 +139,13 @@ class Cen2Tracker(Tracker):
         self.peaks_real = self.peaks_z.copy()
         self.stored_data.append('peaks_real')
 
-        self._remove_uncomplete_timepoints()
+        self._remove_weakers(num_kept=num_kept, max_radius=max_radius)
+        self._remove_uncomplete_timepoints(num_kept=num_kept)
 
         if not self.peaks_real.empty:
             self._label_peaks()
             self._label_peaks_side()
-            # if v_max:
-            #     self._remove_outliers(v_max=v_max)
+            self._remove_outliers(v_max=v_max)
             self._project()
             self._interpolate()
 
@@ -211,24 +153,71 @@ class Cen2Tracker(Tracker):
         else:
             log.error("peaks_real is empty")
 
-    def _remove_uncomplete_timepoints(self, num_keep=4):
+    def _remove_weakers(self,
+                        num_kept=4,
+                        max_radius=0.3):
         """
         """
+
+        log.info("*** Running _remove_weakers()")
+
+        peaks = self.peaks_real.copy()
+        bads = []
+
+        n_bads_intensity = 0
+        n_bads_radius = 0
+
+        for t, pos in peaks.groupby('t'):
+
+            # Remove peaks with radius greater than treshold
+            bads_radius_index = pos[pos['w'] > max_radius].index.values
+            bads.extend(bads_radius_index)
+            n_bads_radius += len(bads_radius_index)
+
+            # Select n peaks by intensity
+            if pos.shape[0] >= num_kept:
+                bads_intensity_index = pos.sort('I').iloc[:-num_kept].index.values
+                bads.extend(bads_intensity_index)
+                n_bads_intensity += len(bads_intensity_index)
+
+        bads = list(set(bads))
+
+        mess = '{} peaks removed for weak intensity and {} peaks removed for too large radius'
+        log.info(mess.format(n_bads_intensity, n_bads_radius))
+        log.info('Total removed: {} / {} peaks'.format(len(bads), len(peaks)))
+
+        self.peaks_real = peaks.drop(bads)
+        self.stored_data.append('peaks_real')
+
+        log.info("*** End")
+
+    def _remove_uncomplete_timepoints(self, num_kept=4):
+        """
+        """
+
+        log.info("*** Running _remove_uncomplete_timepoints()")
 
         peaks = self.peaks_real.copy()
         bads = []
 
         removed_t = 0
+        num_removed = []
         for t, pos in peaks.groupby('t'):
-            if len(pos) < num_keep:
+            if len(pos) < num_kept:
                 bads.extend(pos.index)
                 removed_t += 1
+            num_removed.append(len(pos))
 
         bads = list(set(bads))
         self.peaks_real = peaks.drop(bads)
 
-        log.info('%i / %i uncomplete timepoints has been removed' %
-                 (removed_t, len(np.unique(peaks['t'].values))))
+        n, i = np.histogram(num_removed, bins=[0, 1, 2, 3, 4, 5])
+        log.info('Number of peaks by timepoints : {}'.format(dict(zip(i, n))))
+
+        n_unique_peaks = len(np.unique(peaks['t'].values))
+        log.info('{} / {} uncomplete timepoints removed'.format(removed_t, n_unique_peaks))
+
+        log.info("*** End")
 
         return self.peaks_real
 
@@ -241,7 +230,7 @@ class Cen2Tracker(Tracker):
             self.peaks_real: DataFrame
         """
 
-        log.info("Label SPB and Kt peaks")
+        log.info("*** Running _label_peaks()")
 
         new_peaks_real = pd.DataFrame()
         # new_peaks_real['main_label'] = None
@@ -277,6 +266,9 @@ class Cen2Tracker(Tracker):
         self.peaks_real = new_peaks_real
 
         self.stored_data.append('peaks_real')
+
+        log.info("*** End")
+
         return self.peaks_real
 
     def _label_peaks_side(self,):
@@ -289,7 +281,8 @@ class Cen2Tracker(Tracker):
         """
 
         peaks_real = self.peaks_real
-        log.info("Label peaks side")
+
+        log.info("*** Running _label_peaks_side()")
 
         # Add id for each peaks
         # Note: rows id should be in default pandas DataFrame
@@ -386,10 +379,14 @@ class Cen2Tracker(Tracker):
             peaks_real.set_value((t, 'kt', ktA_id), 'side', 'A')
             peaks_real.set_value((t, 'kt', ktB_id), 'side', 'B')
 
+        peaks_real.dropna(axis=0, inplace=True)
         peaks_real.reset_index(level='id', inplace=True)
         peaks_real.set_index('side', append=True, inplace=True)
 
         self.peaks_real = peaks_real
+
+        log.info("*** End")
+
         return self.peaks_real
 
     def _remove_outliers(self, v_max):
@@ -403,55 +400,42 @@ class Cen2Tracker(Tracker):
             maximum speed for one peak (in µm/s)
         """
 
-        log.info("Remove outliers from peaks_real")
+        log.info("*** Running _remove_outliers()")
 
-        new_peaks = pd.DataFrame()
+        def get_speed(pos):
+            x = pos['x']
+            y = pos['y']
+            t = pos['t']
+            dr = np.sqrt(np.diff(x) ** 2 + np.diff(y) ** 2)
+            dt = np.diff(t)
+            v = dr / dt
+            return v, t
+
+        t_stamp_to_remove = []
 
         for (main_label, side), peaks in self.peaks_real.groupby(level=('main_label', 'side')):
-            out = False
-            start_t_idx = 2
 
+            out = False
             while not out:
 
-                peaks['v'] = np.nan
-                times = peaks['t'].values
+                v, t = get_speed(peaks)
+                v_above_treshold = np.argwhere(v > 0.05)
 
-                for i in np.arange(start_t_idx, len(times)):
-                    dt = times[i]
-                    print(peaks)
-                    x = interp_nan(peaks.loc[:dt, 'x'])
-                    y = interp_nan(peaks.loc[:dt, 'y'])
-                    t = interp_nan(peaks.loc[:dt, 't'])
-
-                    dist = np.sqrt(np.diff(x) ** 2 + np.diff(y) ** 2)
-                    t = np.diff(t)
-                    v = dist / t
-
-                    peaks.loc[int(times[1]):int(dt), 'v'] = v
-
-                    nan_t = peaks.loc[:dt][peaks.loc[:dt]['v'] > v_max]['t']
-
-                    # If outliers detected
-                    if nan_t.any():
-                        start_t_idx = i + 1
-                        for t in nan_t:
-                            peaks.loc[t] = np.nan
-                        break
-
-                if dt == times[-1]:
+                if len(v_above_treshold) > 0:
+                    idx = v_above_treshold[0]
+                    t_stamp_idx = peaks.iloc[idx + 1].index.get_level_values('t_stamp')[0]
+                    peaks = peaks.drop(t_stamp_idx, level='t_stamp')
+                    t_stamp_to_remove.append(t_stamp_idx)
+                else:
                     out = True
 
-            peaks = peaks.dropna()  # or do interpolation
-            # peaks['x'] = interp_nan(peaks['x'])
-            # peaks['y'] = interp_nan(peaks['y'])
+        self.peaks_real.drop(t_stamp_to_remove, level='t_stamp', inplace=True)
 
-            new_peaks = new_peaks.append(peaks.reset_index())
+        n = np.unique(t_stamp_to_remove).size
+        tot = self.peaks_real['t'].unique().size
+        log.info("{} / {} timepoints removed because of outliers".format(n, tot))
 
-        new_peaks.set_index(['t', 'main_label', 'side'], inplace=True)
-        new_peaks.sort(inplace=True)
-
-        self.peaks_real = new_peaks
-        self._remove_uncomplete_timepoints()
+        log.info("*** End")
 
         return self.peaks_real
 
@@ -464,7 +448,8 @@ class Cen2Tracker(Tracker):
             self.peaks_real: DataFrame
         """
 
-        log.info("Project peaks from 2D to 1D defined by SPB - SPB axis.")
+        log.info("*** Running _project()")
+
         self.peaks_real['x_proj'] = None
         for t, peaks in self.peaks_real.groupby(level='t_stamp'):
             spbs = peaks.loc[t].loc['spb'].loc[:, ('x', 'y')]
@@ -524,15 +509,20 @@ class Cen2Tracker(Tracker):
                                       'x_proj', kts_new_values[:, 0][1])
 
         self.peaks_real['x_proj'] = self.peaks_real['x_proj'].astype('float')
+
+        log.info("*** End")
+
         return self.peaks_real
 
     def _interpolate(self, dt=1):
         """
         Interpolate data for x, y, z and x_proj. Then create new
         /peaks_real_interpolated with new times.
+
+        TODO: use sktracker.trajectories.Trajectories.interpolate()
         """
 
-        log.info('Interpolate peaks coordinates')
+        log.info("*** Running _interpolate()")
 
         peaks = self.peaks_real
 
@@ -562,6 +552,9 @@ class Cen2Tracker(Tracker):
 
         self.stored_data.append('peaks_real_interpolated')
         self.peaks_real_interpolated = peaks_interp
+
+        log.info("*** End")
+
         return self.peaks_real_interpolated
 
     """

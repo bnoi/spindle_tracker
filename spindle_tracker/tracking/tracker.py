@@ -53,7 +53,7 @@ class Tracker():
         self.st = None
         self.oio = None
 
-        if self.h5_path:
+        if self.h5_path and not force_metadata:
             self.oio = ObjectsIO.from_h5(self.h5_path,
                                          base_dir=self.base_dir,
                                          minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
@@ -237,18 +237,11 @@ class Tracker():
 
         self.save_oio()
 
-    def get_peaks_from_trackmate(self, erase=False):
+    def get_peaks_from_trackmate(self):
         """
         """
-
-        if hasattr(self, 'raw') and not erase:
-            log.info("Peaks already detected")
-            return None
 
         xml_file = self.has_xml()
         if not xml_file:
-            log.error("No XML file detected")
-
-        self.raw = trackmate_peak_import(self.full_xml_path)
-        self.stored_data.append('raw')
-        self.save_oio()
+            return None
+        self.raw_trackmate = trackmate_peak_import(self.full_xml_path)

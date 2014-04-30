@@ -15,7 +15,7 @@ class Cen2Tracker(Tracker):
 
     MINIMUM_METADATA = ['SizeX', 'SizeY', 'SizeZ',
                         'PhysicalSizeX', 'PhysicalSizeY',
-                        'PhysicalSizeZ', 'TimeIncrement']
+                        'TimeIncrement']
 
     def __init__(self, *args, **kwargs):
         """
@@ -79,7 +79,7 @@ class Cen2Tracker(Tracker):
     Tracking methods
     """
 
-    def find_z(self, treshold=0.1, erase=False):
+    def find_z(self, treshold=0.1, erase=False, use_trackmate=True):
         """
         Find peaks with same x and y coordinate (with a cluster algorithm).
         Keep the peak with biggest intensity and add z coordinates
@@ -97,7 +97,14 @@ class Cen2Tracker(Tracker):
 
         log.info("*** Running find_z()")
 
-        peaks = self.raw.copy()
+        if use_trackmate:
+            self.get_peaks_from_trackmate()
+
+        if hasattr(self, 'raw_trackmate'):
+            peaks = self.raw_trackmate.copy()
+        else:
+            peaks = self.raw.copy()
+
         bads = []
         clusters_count = []
 
@@ -429,10 +436,9 @@ class Cen2Tracker(Tracker):
                 else:
                     out = True
 
-        self.peaks_real.drop(t_stamp_to_remove, level='t_stamp', inplace=True)
-
         n = np.unique(t_stamp_to_remove).size
         tot = self.peaks_real['t'].unique().size
+        self.peaks_real.drop(t_stamp_to_remove, level='t_stamp', inplace=True)
         log.info("{} / {} timepoints removed because of outliers".format(n, tot))
 
         log.info("*** End")

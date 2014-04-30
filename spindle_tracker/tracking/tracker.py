@@ -166,7 +166,7 @@ class Tracker():
         """
         """
         if self.full_tif_path:
-            return TiffFile(self.full_tif_path)
+            return TiffFile(self.full_tif_path, multifile=True)
         else:
             raise IOError("Tif path does not exist.")
 

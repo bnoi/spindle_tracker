@@ -7,6 +7,6 @@ from ..tracking import Tracker
 
 class SPBTracker(Tracker):
 
-    MINIMUM_METADATA = ['SizeX', 'SizeY', 'SizeZ',
+    MINIMUM_METADATA = ['SizeX', 'SizeY',
                         'PhysicalSizeX', 'PhysicalSizeY',
                         'TimeIncrement']

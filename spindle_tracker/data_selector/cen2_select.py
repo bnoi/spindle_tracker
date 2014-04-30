@@ -4,8 +4,9 @@ import datetime
 
 import numpy as np
 
+from sktracker.utils.progress import print_progress
+
 from ..tracking import Cen2Tracker
-from ..utils.progress import pprogress
 from . import selector
 
 log = logging.getLogger(__name__)
@@ -13,40 +14,42 @@ log = logging.getLogger(__name__)
 __all__ = ['cen2_select', 'get_last_data']
 
 
-def cen2_select(data_path):
+def cen2_select(data_path, base_dir):
     description = {'wt': {'patterns': ["^.*/.*tcx262/cropped/.*.tif$",
                                        "^.*/.*tcx263/cropped/.*.tif$",
                                        "^.*/.*tcx264/cropped/.*.tif$",
                                        "^.*/1237/cropped/.*.tif$"],
                           'metadata': {'name': 'wt',}
-                         },
+                          },
                   'klp5/6Δ': {'patterns': ["^.*/.*tcx265/cropped/.*.tif$",
                                           "^.*/1267/cropped/.*.tif$",
                                           "^.*/1266/cropped/.*.tif$"],
                              'metadata': {'name': 'klp5/6$Δ$',}
-                            },
+                             },
                   'dam1Δ': {'patterns': ["^.*/.*tcx266/cropped/.*.tif$",
                                         "^.*/.*tcx267/cropped/.*.tif$",
                                         "^.*/.*tcx268/cropped/.*.tif$",
                                         "^.*/1277/cropped/.*.tif$"],
                           'metadata': {'name': 'dam1$Δ$',}
-                          },
-                  }
+                        }
+                   }
 
     keys = ['wt', 'klp5/6Δ', 'dam1Δ']
     labels = []
     dataset = {}
     all_dataset = []
 
-    def load_list_path(paths):
+    def load_list_path(paths, base_dir):
         ret = []
         n = len(paths)
         for i, path in enumerate(paths):
             p = int(float(i + 1) / n * 100.)
-            pprogress(p)
-            obj = Cen2Tracker(path, verbose=False, force_metadata=False)
+            #print_progress(p)
+            relpath = os.path.relpath(path, base_dir)
+            print(relpath)
+            obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=True)
             ret.append(obj)
-        pprogress(-1)
+        #print_progress(-1)
         return ret
 
     for label in keys:
@@ -56,7 +59,7 @@ def cen2_select(data_path):
         log.info('Load dataset with label %s' % label)
 
         paths = selector.select_pattern(data_path, patterns=values['patterns'])
-        dataset[label] = load_list_path(paths)
+        dataset[label] = load_list_path(paths, base_dir)
         all_dataset.extend(dataset[label])
         labels.append(values['metadata']['name'])
 

@@ -95,15 +95,22 @@ class Cen2Tracker(Tracker):
         if hasattr(self, "peaks_z") and isinstance(self.peaks_z, pd.DataFrame) and not erase:
             return self.peaks_z
 
-        log.info("*** Running find_z()")
-
         if use_trackmate:
             self.get_peaks_from_trackmate()
 
         if hasattr(self, 'raw_trackmate'):
+            log.info("Use trackmate detected peaks")
             peaks = self.raw_trackmate.copy()
         else:
             peaks = self.raw.copy()
+
+        z_position = self.metadata['DimensionOrder'].index('Z')
+        if self.metadata['Shape'][z_position] == 1:
+            log.info('No Z detected, pass Z projection clustering.')
+            self.peaks_z = peaks
+            return
+
+        log.info("*** Running find_z()")
 
         bads = []
         clusters_count = []
@@ -152,7 +159,8 @@ class Cen2Tracker(Tracker):
         if not self.peaks_real.empty:
             self._label_peaks()
             self._label_peaks_side()
-            self._remove_outliers(v_max=v_max)
+            if v_max:
+                self._remove_outliers(v_max=v_max)
             self._project()
             self._interpolate()
 

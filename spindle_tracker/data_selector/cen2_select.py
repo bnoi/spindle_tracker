@@ -44,12 +44,11 @@ def cen2_select(data_path, base_dir):
         n = len(paths)
         for i, path in enumerate(paths):
             p = int(float(i + 1) / n * 100.)
-            #print_progress(p)
+            print_progress(p)
             relpath = os.path.relpath(path, base_dir)
-            print(relpath)
-            obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=True)
+            obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=False)
             ret.append(obj)
-        #print_progress(-1)
+        print_progress(-1)
         return ret
 
     for label in keys:

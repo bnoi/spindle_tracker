@@ -9,6 +9,7 @@ from sktracker.io import ObjectsIO
 from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
 
+from ..utils.short_id import id_generator
 from ..utils.path import check_extension
 
 log = logging.getLogger(__name__)
@@ -174,9 +175,9 @@ class Tracker():
         """
         """
         if self.has_tif():
-            return self.tif_path
-        elif self.has_hdf5():
-            return self.h5_path
+            return self.has_tif()
+        elif self.has_h5():
+            return self.has_h5()
         else:
             return 'Error: No file found !'
 
@@ -245,3 +246,13 @@ class Tracker():
         if not xml_file:
             return None
         self.raw_trackmate = trackmate_peak_import(self.full_xml_path)
+
+    @property
+    def unique_id(self):
+        """
+        """
+        if 'unique_id' not in self.metadata.keys():
+            self.metadata['unique_id'] = id_generator(6)
+            self.save_oio()
+
+        return self.metadata['unique_id']

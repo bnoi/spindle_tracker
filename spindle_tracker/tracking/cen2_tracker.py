@@ -1,5 +1,4 @@
 import logging
-import itertools
 
 import numpy as np
 import pandas as pd
@@ -67,7 +66,7 @@ class Cen2Tracker(Tracker):
         """
 
         if not hasattr(self, 'annotations') or not isinstance(self.annotations, pd.Series):
-            self.annotations = {'kymo': 0}
+            self.annotations = {'kymo': 0, 'anaphase': -1}
         elif hasattr(self, 'annotations') and isinstance(self.annotations, pd.Series):
             self.annotations = self.annotations.to_dict()
         else:
@@ -539,37 +538,29 @@ class Cen2Tracker(Tracker):
         log.info("*** Running _interpolate()")
 
         peaks = self.peaks_real
-
-        peaks = self.peaks_real
+        dt = self.metadata['TimeIncrement']
         peaks_interp = pd.DataFrame([])
 
-        t = self.times
-        new_t = np.arange(0, t.max(), dt)
-        dims = ['x', 'y', 'x_proj']
-
         for (label, side), p in peaks.groupby(level=['main_label', 'side']):
-            new_pos = []
+            new_p = pd.DataFrame(np.arange(0, p['t'].values[-1], dt), columns=['t'])
+            new_p['main_label'] = label
+            new_p['side'] = side
 
-            new_pos.append(list(itertools.repeat(label, len(new_t))))
-            new_pos.append(list(itertools.repeat(side, len(new_t))))
-            new_pos.append(list(new_t))
+            for dim in p.columns:
+                if dim not in ['id', 't']:
+                    new_p[dim] = np.interp(new_p['t'], p['t'], p[dim])
 
-            for d in dims:
-                new_pos.append(list(np.interp(new_t, t, p[d])))
+            new_p['t_stamp'] = np.arange(0, new_p.shape[0])
 
-            peaks_interp = peaks_interp.append(pd.DataFrame(new_pos).T)
+            peaks_interp = peaks_interp.append(new_p)
 
-        peaks_interp.columns = ['main_label', 'side', 't'] + dims
-        peaks_interp = peaks_interp.set_index(['t', 'main_label', 'side'])
-        peaks_interp = peaks_interp.sort()
-        peaks_interp = peaks_interp.astype('float')
+        peaks_interp.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
+        peaks_interp.sort(inplace=True)
 
         self.stored_data.append('peaks_real_interpolated')
         self.peaks_real_interpolated = peaks_interp
 
         log.info("*** End")
-
-        return self.peaks_real_interpolated
 
     """
     Plot and visu methods

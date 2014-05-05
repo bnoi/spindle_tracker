@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 __all__ = ['cen2_select', 'get_last_data']
 
 
-def cen2_select(data_path, base_dir):
+def cen2_select(data_path, base_dir, force_metadata=False):
     description = {'wt': {'patterns': ["^.*/.*tcx262/cropped/.*.tif$",
                                        "^.*/.*tcx263/cropped/.*.tif$",
                                        "^.*/.*tcx264/cropped/.*.tif$",
@@ -46,7 +46,7 @@ def cen2_select(data_path, base_dir):
             p = int(float(i + 1) / n * 100.)
             print_progress(p)
             relpath = os.path.relpath(path, base_dir)
-            obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=False)
+            obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=force_metadata)
             ret.append(obj)
         print_progress(-1)
         return ret

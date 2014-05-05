@@ -28,13 +28,16 @@ class KymoAnnotator:
         display(self.button)
 
         self.fig = self.tracker.kymo()
-        plugins.clear(self.fig)
-        plugins.connect(self.fig,
-                        plugins.Reset(),
-                        plugins.BoxZoom(),
-                        plugins.Zoom(),
-                        plugins.MousePosition(fontsize=14))
-        self.fig.show()
+        if self.fig:
+            plugins.clear(self.fig)
+            plugins.connect(self.fig,
+                            plugins.Reset(),
+                            plugins.BoxZoom(),
+                            plugins.Zoom(),
+                            plugins.MousePosition(fontsize=14))
+            self.fig.show()
+        else:
+            display("No kymo to show !")
 
     def save_tracker(self, button=None):
         """
@@ -116,10 +119,13 @@ class DatasetKymoAnnotator:
         if self.ka:
             self.ka.clear()
 
-        display("n = {}/{}".format(i, self.n))
+        if i == self.n:
+            display('Done')
+        else:
+            display("n = {}/{}".format(i, self.n))
 
-        tracker = self.dataset[i]
-        self.ka = KymoAnnotator(i, tracker)
-        self.ka.run()
+            tracker = self.dataset[i]
+            self.ka = KymoAnnotator(i, tracker)
+            self.ka.run()
 
-        self.i += 1
+            self.i += 1

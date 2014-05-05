@@ -67,11 +67,6 @@ class Cen2Tracker(Tracker):
 
         if not hasattr(self, 'annotations'):
             self.annotations = {'kymo': 0, 'anaphase': -1}
-        elif hasattr(self, 'annotations') and isinstance(self.annotations, pd.Series):
-            self.annotations = self.annotations.to_dict()
-        else:
-            log.error("Issue loading annotations")
-
         self.stored_data.append('annotations')
 
     """

@@ -116,7 +116,7 @@ class DatasetKymoAnnotator:
         if self.ka:
             self.ka.clear()
 
-        display("n = {}/{}".format(i+1, self.n))
+        display("n = {}/{}".format(i, self.n))
 
         tracker = self.dataset[i]
         self.ka = KymoAnnotator(i, tracker)

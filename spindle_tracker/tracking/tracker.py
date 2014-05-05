@@ -55,10 +55,14 @@ class Tracker():
         self.oio = None
 
         if self.h5_path and not force_metadata:
-            self.oio = ObjectsIO.from_h5(self.h5_path,
-                                         base_dir=self.base_dir,
-                                         minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
-        elif self.tif_path:
+            try:
+                self.oio = ObjectsIO.from_h5(self.h5_path,
+                                             base_dir=self.base_dir,
+                                             minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
+            except ValueError as e:
+                log.error(e)
+
+        if self.tif_path and not self.oio:
             self.st = StackIO(image_path=self.tif_path,
                               base_dir=self.base_dir,
                               json_discovery=json_discovery)
@@ -68,8 +72,6 @@ class Tracker():
                                  store_path=self.h5_path,
                                  base_dir=self.base_dir,
                                  minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
-        else:
-            raise IOError("h5 or/and tif file does not exist.")
 
         self.load_oio()
 

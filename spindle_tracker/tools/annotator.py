@@ -36,7 +36,7 @@ class KymoAnnotator:
                         plugins.MousePosition(fontsize=14))
         self.fig.show()
 
-    def save_tracker(self, button):
+    def save_tracker(self, button=None):
         """
         """
 
@@ -79,6 +79,7 @@ class KymoAnnotator:
     def clear(self):
         """
         """
+        self.save_tracker()
         del self.fig
         plt.clf()
         plt.close()
@@ -91,11 +92,11 @@ class KymoAnnotator:
 
 class DatasetKymoAnnotator:
 
-    def __init__(self, dataset):
+    def __init__(self, dataset, start=0):
         """
         """
         self.dataset = dataset
-        self.i = 0
+        self.i = start
         self.n = len(self.dataset)
         self.ka = None
 

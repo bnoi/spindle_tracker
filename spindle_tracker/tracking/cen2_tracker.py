@@ -92,14 +92,15 @@ class Cen2Tracker(Tracker):
         if use_trackmate:
             self.get_peaks_from_trackmate()
 
-        if hasattr(self, 'raw_trackmate'):
-            log.info("Use trackmate detected peaks")
+        if hasattr(self, 'raw_trackmate') and use_trackmate:
+            log.info("Use TrackMate to import detected peaks")
             peaks = self.raw_trackmate.copy()
         else:
             peaks = self.raw.copy()
 
         z_position = self.metadata['DimensionOrder'].index('Z')
-        if self.metadata['Shape'][z_position] == 1:
+        z_in_raw = np.unique(peaks['z']).shape[0]
+        if self.metadata['Shape'][z_position] == 1 or z_in_raw == 1:
             log.info('No Z detected, pass Z projection clustering.')
             self.peaks_z = peaks
             return

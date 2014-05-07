@@ -47,7 +47,8 @@ def cen2_select(data_path, base_dir, force_metadata=False):
             print_progress(p)
             relpath = os.path.relpath(path, base_dir)
             try:
-                obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False, force_metadata=force_metadata)
+                obj = Cen2Tracker(relpath, base_dir=base_dir, verbose=False,
+                                  force_metadata=force_metadata)
                 ret.append(obj)
             except:
                 log.error("Error with {}".format(relpath))

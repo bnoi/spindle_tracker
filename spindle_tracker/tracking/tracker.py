@@ -42,6 +42,7 @@ class Tracker():
             log.disabled = True
         else:
             log.disabled = False
+        self.verbose = verbose
 
         # Init paths
         self.sample_path = sample_path
@@ -165,11 +166,11 @@ class Tracker():
 
         log.info("Data has been correctly saved to {}".format(self.h5_path))
 
-    def get_tif(self):
+    def get_tif(self, multifile=True):
         """
         """
         if self.full_tif_path:
-            return TiffFile(self.full_tif_path, multifile=True)
+            return TiffFile(self.full_tif_path, multifile=multifile)
         else:
             raise IOError("Tif path does not exist.")
 

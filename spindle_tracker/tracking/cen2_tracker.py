@@ -456,11 +456,12 @@ class Cen2Tracker(Tracker):
 
             # Setup vectors
             origin_vec = np.array([1, 0])
-            current_vec = (center - spbA)
+            current_vec = (center - spbB)
+            current_vec /= np.linalg.norm(current_vec)
 
             # Find the rotation angle
-            norm_vec = (np.linalg.norm(origin_vec) * np.linalg.norm(current_vec))
-            cosa = np.dot(origin_vec, current_vec) / norm_vec
+            cosa = np.dot(origin_vec, current_vec)
+            cosa = np.abs(cosa) * -1
             theta = np.arccos(cosa)
 
             # Make coordinate with (,3) shape to allow dot product with
@@ -472,7 +473,7 @@ class Cen2Tracker(Tracker):
 
             # Build rotation matrix
             R = np.array([[np.cos(theta), -np.sin(theta), 0],
-                          [-np.sin(theta), np.cos(theta), 0],
+                          [np.sin(theta), np.cos(theta), 0],
                           [0, 0, 1]], dtype="float")
 
             # Build translation matrix

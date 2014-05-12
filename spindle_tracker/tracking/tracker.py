@@ -42,7 +42,7 @@ class Tracker():
             log.disabled = True
         else:
             log.disabled = False
-        self.verbose = verbose
+        self._verbose = verbose
 
         # Init paths
         self.sample_path = sample_path
@@ -75,6 +75,15 @@ class Tracker():
                                  minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
 
         self.load_oio()
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        log.disabled = not value
+        self._verbose = value
 
     @property
     def full_tif_path(self):

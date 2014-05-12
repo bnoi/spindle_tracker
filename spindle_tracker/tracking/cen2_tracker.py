@@ -41,28 +41,44 @@ class Cen2Tracker(Tracker):
     @property
     def anaphase(self):
         try:
-            return self.analysis['anaphase_start']
+            return self.annotations['anaphase']
         except:
             return None
 
     @property
     def index_anaphase(self):
         if self.anaphase:
-            peaks = self.peaks_real
-            try:
-                return int(np.argmin(np.abs(self.anaphase - peaks['t'].values)) / 4)
-            except ValueError:
-                return None
+            return self.get_closest_time(self.anaphase, interpolated=False)
         else:
             return None
 
     @property
     def index_anaphase_interpolated(self):
         if self.anaphase:
-            peaks = self.peaks_real_interpolated
-            return int(np.argmin(np.abs(self.anaphase - peaks['t'].values)) / 4)
+            return self.get_closest_time(self.anaphase, interpolated=True)
         else:
             return None
+
+    def get_closest_time(self, t, interpolated=False):
+        """
+        """
+        if interpolated:
+            peaks = self.peaks_real_interpolated
+        else:
+            peaks = self.peaks_real
+
+        i = int(np.argmin(np.abs(self.anaphase - peaks['t'].unique())))
+        return peaks.index.get_level_values('t_stamp').unique()[i]
+
+    def get_time_from_stamp(self, vec_t_stamp, interpolated=False):
+        """
+        """
+        if interpolated:
+            peaks = self.peaks_real_interpolated
+        else:
+            peaks = self.peaks_real
+
+        return peaks.loc[vec_t_stamp, 't'].unique()
 
     def _enable_annotations(self):
         """

@@ -68,17 +68,14 @@ def cen2_select(data_path, base_dir, force_metadata=False):
 
     for label, values in dataset.items():
         nkymo = list(map(lambda x: x.annotations['kymo'], values))
-        nana = list(map(lambda x: x.annotations['anaphase'], values))
-        correct = list(filter(lambda x: x.annotations['kymo'] == 1 and x.annotations['anaphase'] == 1, values))
+        correct = list(filter(lambda x: x.annotations['kymo'] == 1 and x.annotations['anaphase'] != -1, values))
 
         nb_kymo = np.histogram(nkymo, bins=[0, 0.5, 1.5, 2.5])[0]
-        nb_ana = np.histogram(nana, bins=[0, 0.5, 1.5, 2.5])[0]
 
         spc = 15
         log.info("{0}: {1}".format("Label".rjust(spc), label))
         log.info('{0}: [ 0  1  2]'.format("Annotations ID".rjust(spc)))
         log.info("{0}: {1}".format("kymo".rjust(spc), nb_kymo))
-        log.info("{0}: {1}".format("anaphase".rjust(spc), nb_ana))
         log.info("{0}: {1}".format("total".rjust(spc), len(values)))
         log.info("{0}: {1}".format("total correct".rjust(spc), len(correct)))
         log.info("")

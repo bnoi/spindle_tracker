@@ -463,9 +463,6 @@ class Cen2Tracker(Tracker):
             cosa = np.dot(origin_vec, current_vec) / norm_vec
             theta = np.arccos(cosa)
 
-            if theta > np.pi / 2:
-                theta = 2 * np.pi - theta
-
             # Make coordinate with (,3) shape to allow dot product with
             # (3, 3) matrix (required for translation matrix)
             spbs_values = np.concatenate((spb_coords.values,
@@ -475,8 +472,8 @@ class Cen2Tracker(Tracker):
 
             # Build rotation matrix
             R = np.array([[np.cos(theta), -np.sin(theta), 0],
-                         [np.sin(theta), np.cos(theta), 0],
-                         [0, 0, 1]], dtype="float")
+                          [-np.sin(theta), np.cos(theta), 0],
+                          [0, 0, 1]], dtype="float")
 
             # Build translation matrix
             T = np.array([[1, 0, -center['x']],

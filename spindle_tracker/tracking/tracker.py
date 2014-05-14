@@ -258,6 +258,7 @@ class Tracker():
         if not xml_file:
             return None
         self.raw_trackmate = trackmate_peak_import(self.full_xml_path)
+        return self.raw_trackmate
 
     @property
     def unique_id(self):

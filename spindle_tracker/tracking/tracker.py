@@ -3,11 +3,14 @@ import os
 
 from dateutil import parser
 
+import numpy as np
+
 from sktracker.io import TiffFile
 from sktracker.io import StackIO
 from sktracker.io import ObjectsIO
 from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
+from sktracker.utils import print_progress
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
@@ -175,6 +178,13 @@ class Tracker():
 
         log.info("Data has been correctly saved to {}".format(self.h5_path))
 
+    def save(self, value, name):
+        """Save an attribute to HDF5.
+        """
+        setattr(self, name, value)
+        self.stored_data.append(name)
+        self.save_oio()
+
     def get_tif(self, multifile=True):
         """
         """
@@ -270,3 +280,78 @@ class Tracker():
             self.save_oio()
 
         return self.metadata['unique_id']
+
+    def project(self, ref_idx, var_name='trajs', coords=['x', 'y']):
+        """
+        """
+
+        log.info("*** Running projection")
+
+        trajs = getattr(self, var_name)
+
+        # First we check if both ref_idx are present in ALL t_stamp
+        n_t = trajs.index.get_level_values('t_stamp').unique().shape[0]
+        if (trajs.swaplevel("label", "t_stamp").loc[ref_idx[0]].shape[0] != n_t or
+           trajs.swaplevel("label", "t_stamp").loc[ref_idx[1]].shape[0] != n_t):
+            raise ValueError("Reference indexes are not both present in all t_stamp.")
+
+        if len(coords) not in (2, 3):
+            mess = "Length of coords {} is {}. Not supported number of dimensions"
+            raise ValueError(mess.format(coords, len(coords)))
+
+        trajs['x_proj'] = np.nan
+
+        ite = trajs.swaplevel("label", "t_stamp").groupby(level='t_stamp')
+        for i, (t_stamp, peaks) in enumerate(ite):
+
+            if self.verbose:
+                print_progress(i * 100 / n_t)
+
+            p1 = peaks.loc[ref_idx[0]][coords]
+            p2 = peaks.loc[ref_idx[1]][coords]
+
+            center = (p1 + p2) / 2
+
+            # Setup vectors
+            origin_vec = np.array([1, 0])
+            current_vec = (center - p1).values[0]
+            current_vec /= np.linalg.norm(current_vec)
+
+            # Find the rotation angle
+            cosa = np.dot(origin_vec, current_vec)
+            cosa = np.abs(cosa) * -1
+            theta = np.arccos(cosa)
+
+            # Build rotation matrix
+            R = np.array([[np.cos(theta), -np.sin(theta), 0],
+                          [np.sin(theta), np.cos(theta), 0],
+                          [0, 0, 1]], dtype="float")
+
+            # Build translation matrix
+            T = np.array([[1, 0, -center['x']],
+                          [0, 1, -center['y']],
+                          [0, 0, 1]], dtype="float")
+
+            # Make transformations from R and T in one
+            A = np.dot(T.T, R)
+
+            # Add an extra column if coords has two dimensions
+            if len(coords) == 2:
+                peaks_values = np.zeros((peaks[coords].shape[0], peaks[coords].shape[1] + 1)) + 1
+                peaks_values[:, :-1] = peaks[coords].values
+            elif len(coords) == 3:
+                peaks_values = peaks[coords].values
+
+            # Apply the transformation matrix
+            peaks_values = np.dot(peaks_values, A)[:, :-1]
+
+            trajs.loc[t_stamp, 'x_proj'] = peaks_values[:, 0]
+
+        if self.verbose:
+            print_progress(-1)
+
+        setattr(self, var_name, trajs)
+
+        log.info("*** End")
+
+        return getattr(self, var_name)

@@ -288,6 +288,7 @@ class Tracker():
         log.info("*** Running projection")
 
         trajs = getattr(self, var_name)
+        trajs.sort_index(inplace=True)
 
         # First we check if both ref_idx are present in ALL t_stamp
         n_t = trajs.index.get_level_values('t_stamp').unique().shape[0]

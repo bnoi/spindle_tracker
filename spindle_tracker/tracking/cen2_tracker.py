@@ -150,7 +150,14 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-    def track(self, v_max, num_kept, max_radius, coords=['x', 'y'], erase=False):
+    def track(self,
+              v_max,
+              num_kept,
+              max_radius,
+              coords=['x', 'y'],
+              erase=False,
+              reference=None,
+              keep_first_time=False):
         """
         Set real coordinates. This process contains severals steps:
             1. Remove weak peaks
@@ -176,10 +183,9 @@ class Cen2Tracker(Tracker):
             if v_max:
                 self._remove_outliers(v_max=v_max)
 
-            # Need to be run twice
-            # Probably Pandas index issues
-            self._project(coords=coords)
-            self._project(coords=coords)
+            self.project(coords=coords,
+                         reference=reference,
+                         keep_first_time=keep_first_time)
 
             self._interpolate()
 
@@ -414,7 +420,10 @@ class Cen2Tracker(Tracker):
 
         return self.peaks_real
 
-    def _project(self, coords=['x', 'y']):
+    def project(self,
+                coords=['x', 'y'],
+                reference=None,
+                keep_first_time=False):
         """
         Project peaks from 2D to 1D taking SPB - SPB for the main axis.
 
@@ -423,89 +432,26 @@ class Cen2Tracker(Tracker):
             self.peaks_real: DataFrame
         """
 
-        log.info("*** Running _project()")
-
         peaks = self.peaks_real
-
-        peaks['x_proj'] = np.nan
-
-        # Split peaks
-        peaks = peaks.swaplevel("main_label", "t_stamp")
-        spbs = peaks.loc['spb']
-        kts = peaks.loc['kt']
-
-        ite = zip(kts.groupby(level='t_stamp'), spbs.groupby(level='t_stamp'))
-        n = self.times.size
-
-        spbs = spbs.sort_index()
-        kts = kts.sort_index()
-
-        for i, ((t_stamp, kt), (t_stamp, spb)) in enumerate(ite):
-
-            if self.verbose:
-                print_progress(i * 100 / n)
-
-            spb_coords = spb[coords]
-            kt_coords = kt[coords]
-
-            spbA = spb.loc[t_stamp, 'A'][coords]
-            spbB = spb.loc[t_stamp, 'B'][coords]
-
-            # Get center between the two SPB
-            center = (spbA + spbB) / 2
-
-            # Setup vectors
-            origin_vec = np.array([1, 0])
-            current_vec = (center - spbB)
-            current_vec /= np.linalg.norm(current_vec)
-
-            # Find the rotation angle
-            cosa = np.dot(origin_vec, current_vec)
-            cosa = np.abs(cosa) * -1
-            theta = np.arccos(cosa)
-
-            # Make coordinate with (,3) shape to allow dot product with
-            # (3, 3) matrix (required for translation matrix)
-            spbs_values = np.concatenate((spb_coords.values,
-                                          np.array([[1, 1]]).T), axis=1)
-            kts_values = np.concatenate((kt_coords.values,
-                                         np.array([[1, 1]]).T), axis=1)
-
-            # Build rotation matrix
-            R = np.array([[np.cos(theta), -np.sin(theta), 0],
-                          [np.sin(theta), np.cos(theta), 0],
-                          [0, 0, 1]], dtype="float")
-
-            # Build translation matrix
-            T = np.array([[1, 0, -center['x']],
-                          [0, 1, -center['y']],
-                          [0, 0, 1]], dtype="float")
-
-            # Make transformations from R and T in one
-            A = np.dot(T.T, R)
-
-            # Apply the transformation matrix
-            spbs_new_values = np.dot(spbs_values, A)[:, :-1]
-            kts_new_values = np.dot(kts_values, A)[:, :-1]
-
-            spbs.loc[t_stamp, 'x_proj'] = spbs_new_values[:, 0]
-            kts.loc[t_stamp, 'x_proj'] = kts_new_values[:, 0]
-
-        if self.verbose:
-            print_progress(-1)
-
-        # Prepare to merge
-        spbs['main_label'] = 'spb'
-        kts['main_label'] = 'kt'
-
-        # Do the merge
-        peaks = pd.concat([kts, spbs]).sort_index()
         peaks.reset_index(inplace=True)
-        peaks.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
+
+        peaks['label'] = peaks['main_label'] + peaks['side']
+        peaks['label'] = peaks['label'].replace(['spbA', 'spbB'], [0, 1])
+
+        peaks.reset_index(inplace=True)
+        peaks.set_index(['t_stamp', 'label'], inplace=True)
+        peaks = peaks.sort_index()
 
         self.peaks_real = peaks
 
-        log.info("*** End")
+        super().project([0, 1], 'peaks_real', coords,
+                        keep_first_time=keep_first_time,
+                        reference=reference)
+
+        self.peaks_real.reset_index(inplace=True)
+        self.peaks_real.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
+        self.peaks_real.sort_index(inplace=True)
+        self.peaks_real.drop(['label', 'index'], axis=1, inplace=True)
 
         return self.peaks_real
 

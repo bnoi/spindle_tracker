@@ -319,7 +319,7 @@ class Tracker():
             else:
                 if not keep_first_time or (keep_first_time and first_time):
 
-                    if not reference:
+                    if reference is None:
                         ref = (p1 + p2) / 2
                         vec = (ref - p1).values[0]
                     else:

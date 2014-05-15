@@ -304,10 +304,10 @@ class Tracker():
             if self.verbose:
                 print_progress(i * 100 / n_t)
 
-            try:
-                p1 = peaks.loc[ref_idx[0]][coords]
-                p2 = peaks.loc[ref_idx[1]][coords]
-            except:
+            p1 = peaks.loc[ref_idx[0]][coords]
+            p2 = peaks.loc[ref_idx[1]][coords]
+
+            if p1.empty or p2.empty:
                 trajs.loc[t_stamp, 'x_proj'] = np.nan
             else:
                 center = (p1 + p2) / 2

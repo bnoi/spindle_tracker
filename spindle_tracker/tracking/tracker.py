@@ -256,6 +256,7 @@ class Tracker():
 
         xml_file = self.has_xml()
         if not xml_file:
+            log.warning("No Trackmate XML file detected.")
             return None
         self.raw_trackmate = trackmate_peak_import(self.full_xml_path)
         return self.raw_trackmate

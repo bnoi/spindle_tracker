@@ -320,13 +320,13 @@ class Tracker():
                 if not keep_first_time or (keep_first_time and first_time):
 
                     if not reference:
-                        center = (p1 + p2) / 2
-                        vec = (center - p1).values[0]
+                        ref = (p1 + p2) / 2
+                        vec = (ref - p1).values[0]
                     else:
                         ref = [p1, p2][reference]
                         vec = (((p1 + p2) / 2) - ref).values[0]
 
-                    A = build_transformations_matrix(center, vec)
+                    A = build_transformations_matrix(ref, vec)
                     first_time = False
 
                 # Add an extra column if coords has two dimensions

@@ -14,6 +14,7 @@ from sktracker.utils import print_progress
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
+from ..utils.geometry import build_transformations_matrix
 
 log = logging.getLogger(__name__)
 
@@ -281,7 +282,7 @@ class Tracker():
 
         return self.metadata['unique_id']
 
-    def project(self, ref_idx, var_name='trajs', coords=['x', 'y']):
+    def project(self, ref_idx, var_name='trajs', coords=['x', 'y'], keep_first_time=False):
         """
         """
 
@@ -300,6 +301,7 @@ class Tracker():
         trajs['x_proj'] = np.nan
 
         ite = trajs.swaplevel("label", "t_stamp").groupby(level='t_stamp')
+        A = None
         for i, (t_stamp, peaks) in enumerate(ite):
 
             if self.verbose:
@@ -311,30 +313,8 @@ class Tracker():
             if p1.empty or p2.empty:
                 trajs.loc[t_stamp, 'x_proj'] = np.nan
             else:
-                center = (p1 + p2) / 2
-
-                # Setup vectors
-                origin_vec = np.array([1, 0])
-                current_vec = (center - p1).values[0]
-                current_vec /= np.linalg.norm(current_vec)
-
-                # Find the rotation angle
-                cosa = np.dot(origin_vec, current_vec)
-                cosa = np.abs(cosa) * -1
-                theta = np.arccos(cosa)
-
-                # Build rotation matrix
-                R = np.array([[np.cos(theta), -np.sin(theta), 0],
-                              [np.sin(theta), np.cos(theta), 0],
-                              [0, 0, 1]], dtype="float")
-
-                # Build translation matrix
-                T = np.array([[1, 0, -center['x']],
-                              [0, 1, -center['y']],
-                              [0, 0, 1]], dtype="float")
-
-                # Make transformations from R and T in one
-                A = np.dot(T.T, R)
+                if not keep_first_time or (keep_first_time and i == 0):
+                    A = build_transformations_matrix(p1, p2)
 
                 # Add an extra column if coords has two dimensions
                 if len(coords) == 2:

@@ -285,7 +285,7 @@ class Tracker():
     def project(self, ref_idx, var_name='trajs',
                 coords=['x', 'y'],
                 keep_first_time=False,
-                center_reference=True):
+                center_reference=None):
         """
         """
 
@@ -319,12 +319,12 @@ class Tracker():
             else:
                 if not keep_first_time or (keep_first_time and first_time):
 
-                    if center_reference:
+                    if not center_reference:
                         center = (p1 + p2) / 2
                         vec = (center - p1).values[0]
                     else:
-                        center = p1
-                        vec = (((p1 + p2) / 2) - p1).values[0]
+                        ref = [p1, p2][center_reference]
+                        vec = (((p1 + p2) / 2) - ref).values[0]
 
                     A = build_transformations_matrix(center, vec)
                     first_time = False

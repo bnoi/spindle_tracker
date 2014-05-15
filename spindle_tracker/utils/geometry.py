@@ -1,16 +1,13 @@
 import numpy as np
 
 
-def build_transformations_matrix(p1, p2):
+def build_transformations_matrix(center, vec):
     """
     """
-
-    center = (p1 + p2) / 2
 
     # Setup vectors
     origin_vec = np.array([1, 0])
-    current_vec = (center - p1).values[0]
-    current_vec /= np.linalg.norm(current_vec)
+    current_vec = vec / np.linalg.norm(vec)
 
     # Find the rotation angle
     cosa = np.dot(origin_vec, current_vec)

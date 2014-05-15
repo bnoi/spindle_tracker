@@ -282,7 +282,10 @@ class Tracker():
 
         return self.metadata['unique_id']
 
-    def project(self, ref_idx, var_name='trajs', coords=['x', 'y'], keep_first_time=False):
+    def project(self, ref_idx, var_name='trajs',
+                coords=['x', 'y'],
+                keep_first_time=False,
+                center_reference=True):
         """
         """
 
@@ -315,7 +318,15 @@ class Tracker():
                 trajs.loc[t_stamp, 'x_proj'] = np.nan
             else:
                 if not keep_first_time or (keep_first_time and first_time):
-                    A = build_transformations_matrix(p1, p2)
+
+                    if center_reference:
+                        center = (p1 + p2) / 2
+                        vec = (center - p1).values[0]
+                    else:
+                        center = p1
+                        vec = (((p1 + p2) / 2) - p1).values[0]
+
+                    A = build_transformations_matrix(center, vec)
                     first_time = False
 
                 # Add an extra column if coords has two dimensions

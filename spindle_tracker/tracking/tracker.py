@@ -302,6 +302,7 @@ class Tracker():
 
         ite = trajs.swaplevel("label", "t_stamp").groupby(level='t_stamp')
         A = None
+        first_time = True
         for i, (t_stamp, peaks) in enumerate(ite):
 
             if self.verbose:
@@ -313,8 +314,9 @@ class Tracker():
             if p1.empty or p2.empty:
                 trajs.loc[t_stamp, 'x_proj'] = np.nan
             else:
-                if not keep_first_time or (keep_first_time and i == 0):
+                if not keep_first_time or (keep_first_time and first_time):
                     A = build_transformations_matrix(p1, p2)
+                    first_time = False
 
                 # Add an extra column if coords has two dimensions
                 if len(coords) == 2:

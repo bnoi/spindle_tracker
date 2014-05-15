@@ -11,6 +11,7 @@ from sktracker.io import ObjectsIO
 from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
 from sktracker.utils import print_progress
+from sktracker.trajectories import Trajectories
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
@@ -350,3 +351,22 @@ class Tracker():
         log.info("*** End")
 
         return getattr(self, var_name)
+
+    def show(self, var_name='trajs', marker='o', ls='-'):
+        """
+        """
+
+        import matplotlib.pyplot as plt
+
+        trajs = Trajectories(getattr(self, var_name))
+
+        fig, (ax1, ax2) = plt.subplots(nrows=2)
+        ax1 = trajs.show(xaxis='t', yaxis='x',
+                         groupby_args={'level': "label"},
+                         ax=ax1, ls=ls, marker=marker)
+
+        ax2 = trajs.show(xaxis='t', yaxis='y',
+                         groupby_args={'level': "label"},
+                         ax=ax2, ls=ls, marker=marker)
+
+        return fig

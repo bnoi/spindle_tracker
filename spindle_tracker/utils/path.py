@@ -1,7 +1,10 @@
 import os
 
 
-def check_extension(file_path, extension, suffix=None, force=False):
+def check_extension(file_path,
+                    extension,
+                    suffix=None,
+                    force=False):
     """
     Check if a given file (basename) as a same file with
     another check_extension. If force is True, new filename will be

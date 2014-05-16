@@ -4,6 +4,7 @@ import os
 from dateutil import parser
 
 import numpy as np
+import pandas as pd
 
 from sktracker.io import TiffFile
 from sktracker.io import StackIO
@@ -106,8 +107,8 @@ class Tracker():
 
     @property
     def full_xml_path(self):
-        if self.has_xml():
-            return os.path.join(self.base_dir, self.has_xml())
+        if self.xml_path:
+            return os.path.join(self.base_dir, self.xml_path)
         else:
             return None
 
@@ -147,17 +148,19 @@ class Tracker():
         else:
             return None
 
-    def has_xml(self, force=False):
+    def has_xml(self, force=False, suffix=None):
         """
         """
         extension = self.__class__.XML_EXTENSION
 
         full_path = check_extension(self.full_path,
                                     extension=extension,
+                                    suffix=suffix,
                                     force=force)
 
         if full_path:
-            return os.path.relpath(full_path, self.base_dir)
+            self.xml_path = os.path.relpath(full_path, self.base_dir)
+            return self.xml_path
         else:
             return None
 
@@ -167,7 +170,11 @@ class Tracker():
         for key in self.oio.keys():
             key = key.replace('/', '')
             self.stored_data.append(key)
-            setattr(self, key, self.oio[key])
+            obj = self.oio[key]
+            if isinstance(obj, pd.DataFrame):
+                setattr(self, key, Trajectories(obj))
+            else:
+                setattr(self, key, obj)
             log.info("Correctly loaded '{}'".format(key))
 
     def save_oio(self):
@@ -262,14 +269,16 @@ class Tracker():
 
         self.save_oio()
 
-    def get_peaks_from_trackmate(self):
+    def get_peaks_from_trackmate(self, suffix=None):
         """
         """
 
-        xml_file = self.has_xml()
+        xml_file = self.has_xml(suffix=suffix)
+
         if not xml_file:
             log.warning("No Trackmate XML file detected.")
             return None
+
         self.raw_trackmate = trackmate_peak_import(self.full_xml_path)
         return self.raw_trackmate
 

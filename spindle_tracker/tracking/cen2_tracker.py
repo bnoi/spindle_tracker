@@ -340,8 +340,10 @@ class Cen2Tracker(Tracker):
         n = self.times.size
 
         for i, ((t_stamp, kt), (t_stamp, spb)) in enumerate(ite):
+            
             if self.verbose:
                 print_progress(i * 100 / n)
+
             spb1 = spb.iloc[0][coords]
             kt1 = kt.iloc[0][coords]
             kt2 = kt.iloc[1][coords]

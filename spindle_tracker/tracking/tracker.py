@@ -351,6 +351,7 @@ class Tracker():
                 peaks_values = np.dot(peaks_values, A)[:, :-1]
 
                 trajs.loc[t_stamp, 'x_proj'] = peaks_values[:, 0]
+                trajs.loc[t_stamp, 'y_proj'] = peaks_values[:, 1]
 
         if self.verbose:
             print_progress(-1)

@@ -455,6 +455,16 @@ class Cen2Tracker(Tracker):
         self.peaks_real.sort_index(inplace=True)
         self.peaks_real.drop(['label', 'index'], axis=1, inplace=True)
 
+        # Find wether x_proj or y_proj contain the most informations
+        p = self.peaks_real
+        x_proj = p.xs('spb', level='main_label').xs('A', level='side')['x_proj'].mean()
+        y_proj = p.xs('spb', level='main_label').xs('A', level='side')['y_proj'].mean()
+
+        if x_proj < y_proj:
+            x_tmp = p['x_proj'].copy()
+            p['x_proj'] =  p['y_proj'].copy()
+            p['y_proj'] =  x_tmp
+
         return self.peaks_real
 
     def _interpolate(self, dt=1):

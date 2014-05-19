@@ -154,6 +154,7 @@ class Cen2Tracker(Tracker):
               v_max,
               num_kept,
               max_radius,
+              v_max_spb=1e50,
               coords=['x', 'y'],
               erase=False,
               reference=None,
@@ -179,7 +180,7 @@ class Cen2Tracker(Tracker):
 
         if not self.peaks_real.empty:
             self._label_peaks(coords=coords)
-            self._label_peaks_side(v_max=1e50, coords=coords)
+            self._label_peaks_side(v_max=v_max_spb, coords=coords)
             if v_max:
                 self._remove_outliers(v_max=v_max)
 

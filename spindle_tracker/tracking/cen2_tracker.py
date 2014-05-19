@@ -340,7 +340,7 @@ class Cen2Tracker(Tracker):
         n = self.times.size
 
         for i, ((t_stamp, kt), (t_stamp, spb)) in enumerate(ite):
-            
+
             if self.verbose:
                 print_progress(i * 100 / n)
 
@@ -460,7 +460,7 @@ class Cen2Tracker(Tracker):
         x_proj = p.xs('spb', level='main_label').xs('A', level='side')['x_proj'].mean()
         y_proj = p.xs('spb', level='main_label').xs('A', level='side')['y_proj'].mean()
 
-        if x_proj < y_proj:
+        if np.abs(x_proj) < np.abs(y_proj):
             x_tmp = p['x_proj'].copy()
             p['x_proj'] =  p['y_proj'].copy()
             p['y_proj'] =  x_tmp
@@ -536,19 +536,20 @@ class Cen2Tracker(Tracker):
         drawer = ax.plot
 
         gps = peaks.groupby(level=['main_label', 'side']).groups
+        coord = 'x_proj'
 
         # Draw SPB
-        x = peaks.loc[gps[('spb', 'A')]]['x_proj']
+        x = peaks.loc[gps[('spb', 'A')]][coord]
         drawer(times, x, label="SPB A", color=colors[0], **mpl_params)
 
-        x = peaks.loc[gps[('spb', 'B')]]['x_proj']
+        x = peaks.loc[gps[('spb', 'B')]][coord]
         drawer(times, x, label="SPB B", color=colors[1], **mpl_params)
 
         # Draw Kt
-        x = peaks.loc[gps[('kt', 'A')]]['x_proj']
+        x = peaks.loc[gps[('kt', 'A')]][coord]
         drawer(times, x, label="Kt A", color=colors[2], **mpl_params)
 
-        x = peaks.loc[gps[('kt', 'B')]]['x_proj']
+        x = peaks.loc[gps[('kt', 'B')]][coord]
         drawer(times, x, label="Kt B", color=colors[3], **mpl_params)
 
         # Set axis limit

@@ -80,6 +80,9 @@ class Tracker():
                                  base_dir=self.base_dir,
                                  minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
 
+        if self.oio is None:
+            raise IOError("Sample path should be a valid Tiff file or HDF5 file.")
+
         self.load_oio()
 
     @property
@@ -167,6 +170,8 @@ class Tracker():
     def load_oio(self):
         """
         """
+
+
         for key in self.oio.keys():
             key = key.replace('/', '')
             self.stored_data.append(key)

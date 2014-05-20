@@ -21,12 +21,12 @@ def cen2_select(data_path, base_dir, force_metadata=False):
                                        "^.*/1237/cropped/.*.tif$"],
                           'metadata': {'name': 'wt',}
                           },
-                  'klp5/6Δ': {'patterns': ["^.*/.*tcx265/cropped/.*.tif$",
+                  'klp5': {'patterns': ["^.*/.*tcx265/cropped/.*.tif$",
                                           "^.*/1267/cropped/.*.tif$",
                                           "^.*/1266/cropped/.*.tif$"],
                              'metadata': {'name': 'klp5/6$Δ$',}
                              },
-                  'dam1Δ': {'patterns': ["^.*/.*tcx266/cropped/.*.tif$",
+                  'dam1': {'patterns': ["^.*/.*tcx266/cropped/.*.tif$",
                                         "^.*/.*tcx267/cropped/.*.tif$",
                                         "^.*/.*tcx268/cropped/.*.tif$",
                                         "^.*/1277/cropped/.*.tif$"],
@@ -34,7 +34,7 @@ def cen2_select(data_path, base_dir, force_metadata=False):
                         }
                    }
 
-    keys = ['wt', 'klp5/6Δ', 'dam1Δ']
+    keys = ['wt', 'klp5', 'dam1']
     labels = []
     dataset = {}
     all_dataset = []

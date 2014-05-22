@@ -47,7 +47,7 @@ class Cen2Tracker(Tracker):
 
     @property
     def index_anaphase(self):
-        if self.anaphase:
+        if self.anaphase and self.anaphase != -1:
             return self.get_closest_time(self.anaphase, interpolated=False)
         else:
             return None

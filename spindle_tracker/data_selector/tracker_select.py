@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 from sktracker.utils.progress import print_progress
 
-__all__ = ['tracker_select', 'rebuild_dict']
+__all__ = ['tracker_select', 'rebuild_dict', 'merge_dict_of_list']
 
 
 def tracker_select(paths, patterns, tracker_class, tracker_params, progress=False):
@@ -65,3 +65,11 @@ def rebuild_dict(data_all, data):
         log.info("{}/{} trackers are selected".format(len(new_dict[label]), len(values)))
 
     return data_all, new_dict
+
+
+def merge_dict_of_list(dol1, dol2):
+    """
+    """
+    keys = set(dol1).union(dol2)
+    no = []
+    return dict((k, dol1.get(k, no) + dol2.get(k, no)) for k in keys)

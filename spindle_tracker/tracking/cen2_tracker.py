@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import scipy as sp
 import pandas as pd
 import scipy.spatial.distance as dist
 import scipy.cluster.hierarchy as hier
@@ -468,7 +469,7 @@ class Cen2Tracker(Tracker):
 
         return self.peaks_real
 
-    def _interpolate(self, dt=1):
+    def _interpolate(self, dt=1, kind='linear'):
         """
         Interpolate data for x, y, z and x_proj. Then create new
         /peaks_real_interpolated with new times.
@@ -489,7 +490,8 @@ class Cen2Tracker(Tracker):
 
             for dim in p.columns:
                 if dim not in ['id', 't']:
-                    new_p[dim] = np.interp(new_p['t'], p['t'], p[dim])
+                    fc = sp.interpolate.interp1d(p['t'], p[dim], kind=kind)
+                    new_p[dim] = fc(new_p['t'])
 
             new_p['t_stamp'] = np.arange(0, new_p.shape[0])
 

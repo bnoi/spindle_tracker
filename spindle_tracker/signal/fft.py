@@ -7,21 +7,24 @@ import pandas as pd
 __all__ = ["get_fft", "get_fft_downsampled", "filter_signal"]
 
 
-def get_fft(x, dt, hanning_window=False):
+def get_fft(x, dt):
+    """
+    """
     n = len(x)
 
-    if hanning_window:
-        fft_output = np.fft.rfft(x * np.hamming(len(x)))
-    else:
-        fft_output = np.fft.rfft(x)
+    fft_output = np.fft.rfft(x)     # Perform real fft
+    rfreqs = np.fft.rfftfreq(n, dt) # Calculatel frequency bins
+    fft_mag = np.abs(fft_output)    # Take only magnitude of spectrum
 
-    rfreqs = np.fft.rfftfreq(n, d=dt)
-    fft_mag = [np.sqrt(i.real ** 2 + i.imag ** 2) / n for i in fft_output]
+    # Normalize the amplitude by number of bins and multiply by 2
+    # because we removed second half of spectrum above the Nyqist frequency
+    # and energy must be preserved
+    fft_mag = fft_mag * 2 / n
 
     return np.array(fft_mag), np.array(rfreqs)
 
 
-def get_fft_downsampled(x, dt, new_dt, verbose=False, hanning_window=False):
+def get_fft_downsampled(x, dt, new_dt, verbose=False):
     """
     See http://www.dspguide.com/ch9/1.htm
     """
@@ -41,7 +44,7 @@ def get_fft_downsampled(x, dt, new_dt, verbose=False, hanning_window=False):
 
     for i in np.arange(n_segments):
         new_x = x[i::n_jump]
-        _fft_mag, _rfreqs = get_fft(new_x, new_dt, hanning_window=hanning_window)
+        _fft_mag, _rfreqs = get_fft(new_x, new_dt)
         all_fft_mag.append(_fft_mag)
         all_rfreqs.append(_rfreqs)
 
@@ -59,13 +62,10 @@ def get_fft_downsampled(x, dt, new_dt, verbose=False, hanning_window=False):
     return mean_fft_mag, mean_freqs
 
 
-def filter_signal(x, dt, filter_value, hanning_window=False):
+def filter_signal(x, dt, filter_value):
     n = len(x)
 
-    if hanning_window:
-        fft_output = np.fft.rfft(x * np.hanning(x))
-    else:
-        fft_output = np.fft.rfft(x)
+    fft_output = np.fft.rfft(x)
 
     rfreqs = np.fft.rfftfreq(n, d=dt)
 

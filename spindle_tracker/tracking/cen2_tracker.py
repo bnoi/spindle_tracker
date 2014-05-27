@@ -480,7 +480,6 @@ class Cen2Tracker(Tracker):
         log.info("*** Running _interpolate()")
 
         peaks = self.peaks_real
-        dt = self.metadata['TimeIncrement']
         peaks_interp = pd.DataFrame([])
 
         for (label, side), p in peaks.groupby(level=['main_label', 'side']):

@@ -596,3 +596,76 @@ class Cen2Tracker(Tracker):
         plt.tight_layout()
 
         return fig
+
+    def kymo_figure(self):
+        """
+        """
+
+        if self.peaks_real.empty:
+            log.error("peaks_real is empty")
+            return None
+
+        peaks = self.peaks_real_interpolated
+        times = self.times_interpolated
+
+        colors = ["#ff2f00",  # SPB A
+                  "#ff2f00",  # SPB B
+                  "#004bff",  # Kt A
+                  "#009d1c"]  # Kt B
+
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure(figsize=(3.6*5, 5))
+        ax = plt.subplot(111)
+
+        drawer = ax.plot
+
+        gps = peaks.groupby(level=['main_label', 'side']).groups
+        coord = 'x_proj'
+
+        # Draw SPB
+        x = peaks.loc[gps[('spb', 'A')]][coord]
+        drawer(times, x, label="SPB A", color=colors[0], lw=4)
+
+        x = peaks.loc[gps[('spb', 'B')]][coord]
+        drawer(times, x, label="SPB B", color=colors[1], lw=4)
+
+        # Draw Kt
+        x = peaks.loc[gps[('kt', 'A')]][coord]
+        drawer(times, x, label="Kt A", color=colors[2], lw=4)
+
+        x = peaks.loc[gps[('kt', 'B')]][coord]
+        drawer(times, x, label="Kt B", color=colors[3], lw=4)
+
+        # Set axis limit
+        ax.set_xlim(min(times), max(times))
+        ax.set_ylim(-6, 6)
+
+        import matplotlib
+
+        ax.xaxis.set_ticks([])
+        ax.yaxis.set_ticks([])
+
+        majorLocator = matplotlib.ticker.MultipleLocator(60*10)
+        ax.xaxis.set_major_locator(majorLocator)
+        ax.minorticks_off()
+
+        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.xaxis.set_major_formatter(majorFormatter)
+        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.yaxis.set_major_formatter(majorFormatter)
+
+        majorLocator = matplotlib.ticker.MultipleLocator(2)
+        ax.yaxis.set_major_locator(majorLocator)
+
+        if hasattr(self, 'analysis') and 'anaphase_start' in self.analysis.keys():
+            if self.analysis['anaphase_start']:
+                ax.axvline(x=self.analysis['anaphase_start'],
+                           color='black',
+                           alpha=1,
+                           linestyle="--",
+                           label='Anaphase start')
+
+        plt.tight_layout()
+
+        return fig

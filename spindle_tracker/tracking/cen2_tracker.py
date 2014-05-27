@@ -464,8 +464,8 @@ class Cen2Tracker(Tracker):
 
         if np.abs(x_proj) < np.abs(y_proj):
             x_tmp = p['x_proj'].copy()
-            p['x_proj'] =  p['y_proj'].copy()
-            p['y_proj'] =  x_tmp
+            p['x_proj'] = p['y_proj'].copy()
+            p['y_proj'] = x_tmp
 
         return self.peaks_real
 
@@ -483,7 +483,7 @@ class Cen2Tracker(Tracker):
         peaks_interp = pd.DataFrame([])
 
         for (label, side), p in peaks.groupby(level=['main_label', 'side']):
-            new_p = pd.DataFrame(np.arange(0, p['t'].values[-1], dt), columns=['t'])
+            new_p = pd.DataFrame(np.arange(np.round(p['t'].min()) + 1, p['t'].max(), dt), columns=['t'])
             new_p['main_label'] = label
             new_p['side'] = side
 

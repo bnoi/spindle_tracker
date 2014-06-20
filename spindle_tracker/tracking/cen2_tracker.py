@@ -352,7 +352,7 @@ class Cen2Tracker(Tracker):
 
             kt1_dist = np.linalg.norm(spb1 - kt1)
             kt2_dist = np.linalg.norm(spb1 - kt2)
-            print(spb['side'])
+
             if kt1_dist < kt2_dist:
                 kts['side'].loc[np.int(t_stamp)] = spb['side']
             else:

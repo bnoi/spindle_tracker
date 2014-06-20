@@ -119,7 +119,7 @@ class Cen2Tracker(Tracker):
             peaks = self.raw.copy()
 
         z_position = self.metadata['DimensionOrder'].index('Z')
-        z_in_raw = np.unique(peaks['z']).shape[0]
+        z_in_raw = peaks['z'].unique().shape[0]
         if self.metadata['Shape'][z_position] == 1 or z_in_raw == 1:
             log.info('No Z detected, pass Z projection clustering.')
             self.peaks_z = peaks
@@ -607,10 +607,10 @@ class Cen2Tracker(Tracker):
         peaks = self.peaks_real_interpolated
         times = self.times_interpolated
 
-        colors = ["#ff2f00",  # SPB A
-                  "#ff2f00",  # SPB B
-                  "#004bff",  # Kt A
-                  "#009d1c"]  # Kt B
+        colors = ["black",  # SPB A
+                  "black",  # SPB B
+                  "#ff2626",  # Kt A
+                  "#ff2626"]  # Kt B
 
         import matplotlib.pyplot as plt
 
@@ -624,17 +624,17 @@ class Cen2Tracker(Tracker):
 
         # Draw SPB
         x = peaks.loc[gps[('spb', 'A')]][coord]
-        drawer(times, x, label="SPB A", color=colors[0], lw=4)
+        drawer(times, x, label="SPB A", color=colors[0], lw=3)
 
         x = peaks.loc[gps[('spb', 'B')]][coord]
-        drawer(times, x, label="SPB B", color=colors[1], lw=4)
+        drawer(times, x, label="SPB B", color=colors[1], lw=3)
 
         # Draw Kt
         x = peaks.loc[gps[('kt', 'A')]][coord]
-        drawer(times, x, label="Kt A", color=colors[2], lw=4)
+        drawer(times, x, label="Kt A", color=colors[2], lw=3)
 
         x = peaks.loc[gps[('kt', 'B')]][coord]
-        drawer(times, x, label="Kt B", color=colors[3], lw=4)
+        drawer(times, x, label="Kt B", color=colors[3], lw=3)
 
         # Set axis limit
         ax.set_xlim(min(times), max(times))
@@ -654,17 +654,13 @@ class Cen2Tracker(Tracker):
         majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
         ax.yaxis.set_major_formatter(majorFormatter)
 
-        majorLocator = matplotlib.ticker.MultipleLocator(2)
+        majorLocator = matplotlib.ticker.MultipleLocator(4)
         ax.yaxis.set_major_locator(majorLocator)
 
-        if hasattr(self, 'analysis') and 'anaphase_start' in self.analysis.keys():
-            if self.analysis['anaphase_start']:
-                ax.axvline(x=self.analysis['anaphase_start'],
-                           color='black',
-                           alpha=1,
-                           linestyle="--",
-                           label='Anaphase start')
+        for i in ax.spines.values():
+            i.set_linewidth(2)
+            i.set_color('black')
 
-        plt.tight_layout()
+        ax.grid(b=True, which='major', color='#bbbbbb', linestyle='-', alpha=1)
 
         return fig

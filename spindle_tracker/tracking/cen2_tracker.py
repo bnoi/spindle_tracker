@@ -352,11 +352,11 @@ class Cen2Tracker(Tracker):
 
             kt1_dist = np.linalg.norm(spb1 - kt1)
             kt2_dist = np.linalg.norm(spb1 - kt2)
-
+            print(spb['side'])
             if kt1_dist < kt2_dist:
-                kts['side'].loc[t_stamp] = spb['side']
+                kts['side'].loc[np.int(t_stamp)] = spb['side']
             else:
-                kts['side'].loc[t_stamp] = spb['side'][::-1]
+                kts['side'].loc[np.int(t_stamp)] = spb['side'][::-1]
 
         if self.verbose:
             print_progress(-1)
@@ -459,8 +459,8 @@ class Cen2Tracker(Tracker):
 
         # Find wether x_proj or y_proj contain the most informations
         p = self.peaks_real
-        x_proj = p.xs('spb', level='main_label').xs('A', level='side')['x_proj'].mean()
-        y_proj = p.xs('spb', level='main_label').xs('A', level='side')['y_proj'].mean()
+        x_proj = p.xs('spb', level='main_label')['x_proj'].mean()
+        y_proj = p.xs('spb', level='main_label')['y_proj'].mean()
 
         if np.abs(x_proj) < np.abs(y_proj):
             x_tmp = p['x_proj'].copy()

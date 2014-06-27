@@ -538,7 +538,7 @@ class Cen2Tracker(Tracker):
         drawer = ax.plot
 
         gps = peaks.groupby(level=['main_label', 'side']).groups
-        coord = 'y'
+        coord = 'x_proj'
 
         # Draw SPB
         x = peaks.loc[gps[('spb', 'A')]][coord]

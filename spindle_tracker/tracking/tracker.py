@@ -13,6 +13,7 @@ from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
 from sktracker.utils import print_progress
 from sktracker.trajectories import Trajectories
+from sktracker.io import read_roi
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
@@ -296,6 +297,18 @@ class Tracker():
             self.save_oio()
 
         return self.metadata['unique_id']
+
+    def open_roi(self, suffix='.ROI'):
+        """Open ROI file (.zip and .roi)
+        """
+
+        roi_file_base = os.path.splitext(self.full_path)[0] + suffix
+        if os.path.isfile(roi_file_base + '.zip'):
+            return read_roi(roi_file_base + '.zip')
+        elif os.path.isfile(roi_file_base + '.roi'):
+            return read_roi(roi_file_base + '.roi')
+        else:
+            return None
 
     def project(self, ref_idx, var_name='trajs',
                 coords=['x', 'y'],

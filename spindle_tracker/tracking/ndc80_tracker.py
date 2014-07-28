@@ -1,6 +1,7 @@
 import logging
-
 log = logging.getLogger(__name__)
+
+import numpy as np
 
 from sktracker.trajectories import Trajectories
 
@@ -63,15 +64,41 @@ class Ndc80Tracker(Tracker):
 
         return poles_idx
 
-    def project(self, poles_idx, traj_name='trajs_poles', progress=False):
+    def interp(self, traj_name='trajs_gp'):
         """
         """
 
         trajs = getattr(self, traj_name)
-        trajs.project(poles_idx,
-                      keep_first_time=False,
-                      reference=None,
-                      inplace=True,
-                      progress=progress)
 
-        self.save_oio()
+        trajs = Trajectories(trajs.time_interpolate(coords=['x', 'y', 'z', 'I', 'w']))
+        trajs.drop(list(filter(lambda x: x.startswith('v_') or x.startswith('a_'), trajs.columns)),
+                   axis=1, inplace=True)
+
+        self.save(trajs, 'trajs_interp')
+
+    def project(self, poles_idx, traj_name='trajs_interp', progress=False):
+        """
+        """
+
+        trajs = getattr(self, traj_name)
+        trajs = trajs.project(poles_idx,
+                              keep_first_time=False,
+                              reference=None,
+                              inplace=False,
+                              progress=progress)
+
+        self.save(trajs, 'trajs_poles')
+
+    def guess_n_kts(self, traj_name='trajs_poles'):
+        """
+        """
+        trajs = getattr(self, traj_name)
+
+        def guess_n_kts(peaks):
+            peaks['n_kts'] = np.round(peaks['I'] * 8 / peaks['I'].sum()).values
+            return peaks
+
+        trajs = trajs.groupby(level='t_stamp').apply(guess_n_kts)
+
+        setattr(self, traj_name, Trajectories(trajs))
+

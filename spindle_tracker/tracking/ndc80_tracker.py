@@ -101,4 +101,3 @@ class Ndc80Tracker(Tracker):
         trajs = trajs.groupby(level='t_stamp').apply(guess_n_kts)
 
         setattr(self, traj_name, Trajectories(trajs))
-

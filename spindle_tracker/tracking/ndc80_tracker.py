@@ -34,14 +34,14 @@ class Ndc80Tracker(Tracker):
 
         return fig
 
-    def get_spb(self, trajs='trajs', erase=False):
+    def get_spb(self, traj_name='trajs', erase=False):
         """
         """
 
-        trajs = Trajectories(getattr(self, trajs)).copy()
+        trajs = Trajectories(getattr(self, traj_name)).copy()
         poles_idx = list(trajs.get_longest_segments(2))
 
-        if hasattr(self, 'trajs_poles') and not erase:
+        if hasattr(self, 'trajs_poles') and getattr(self, 'trajs_poles') is not None and not erase:
             return poles_idx
 
         if len(poles_idx) < 2:
@@ -61,11 +61,13 @@ class Ndc80Tracker(Tracker):
 
         self.save(trajs.copy(), 'trajs_poles')
 
+        return poles_idx
+
     def project(self, poles_idx, traj_name='trajs_poles', progress=False):
         """
         """
 
-        trajs = Trajectories(getattr(self, traj_name))
+        trajs = getattr(self, traj_name)
         trajs.project(poles_idx,
                       keep_first_time=False,
                       reference=None,

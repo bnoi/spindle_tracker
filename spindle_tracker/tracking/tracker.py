@@ -3,7 +3,6 @@ import os
 
 from dateutil import parser
 
-import numpy as np
 import pandas as pd
 
 from sktracker.io import TiffFile
@@ -11,13 +10,11 @@ from sktracker.io import StackIO
 from sktracker.io import ObjectsIO
 from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
-from sktracker.utils import print_progress
 from sktracker.trajectories import Trajectories
 from sktracker.io import read_roi
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
-from ..utils.geometry import build_transformations_matrix
 
 log = logging.getLogger(__name__)
 
@@ -309,76 +306,6 @@ class Tracker():
             return read_roi(roi_file_base + '.roi')
         else:
             return None
-
-    def project(self, ref_idx, var_name='trajs',
-                coords=['x', 'y'],
-                keep_first_time=False,
-                reference=None):
-        """
-        """
-
-        log.info("*** Running projection")
-
-        trajs = getattr(self, var_name)
-        trajs.sort_index(inplace=True)
-
-        # First we check if both ref_idx are present in ALL t_stamp
-        n_t = trajs.index.get_level_values('t_stamp').unique().shape[0]
-
-        if len(coords) not in (2, 3):
-            mess = "Length of coords {} is {}. Not supported number of dimensions"
-            raise ValueError(mess.format(coords, len(coords)))
-
-        trajs['x_proj'] = np.nan
-
-        ite = trajs.swaplevel("label", "t_stamp").groupby(level='t_stamp')
-        A = None
-        first_time = True
-        for i, (t_stamp, peaks) in enumerate(ite):
-
-            if self.verbose:
-                print_progress(i * 100 / n_t)
-
-            p1 = peaks.loc[ref_idx[0]][coords]
-            p2 = peaks.loc[ref_idx[1]][coords]
-
-            if p1.empty or p2.empty:
-                trajs.loc[t_stamp, 'x_proj'] = np.nan
-            else:
-                if not keep_first_time or (keep_first_time and first_time):
-
-                    if reference is None:
-                        ref = (p1 + p2) / 2
-                        vec = (ref - p1).values[0]
-                    else:
-                        ref = [p1, p2][reference]
-                        vec = (((p1 + p2) / 2) - ref).values[0]
-
-                    A = build_transformations_matrix(ref, vec)
-                    first_time = False
-
-                # Add an extra column if coords has two dimensions
-                if len(coords) == 2:
-                    peaks_values = np.zeros((peaks[coords].shape[0],
-                                            peaks[coords].shape[1] + 1)) + 1
-                    peaks_values[:, :-1] = peaks[coords].values
-                elif len(coords) == 3:
-                    peaks_values = peaks[coords].values
-
-                # Apply the transformation matrix
-                peaks_values = np.dot(peaks_values, A)[:, :-1]
-
-                trajs.loc[t_stamp, 'x_proj'] = peaks_values[:, 0]
-                trajs.loc[t_stamp, 'y_proj'] = peaks_values[:, 1]
-
-        if self.verbose:
-            print_progress(-1)
-
-        setattr(self, var_name, trajs)
-
-        log.info("*** End")
-
-        return getattr(self, var_name)
 
     def show(self, var_name='trajs', marker='o', ls='-'):
         """

@@ -436,38 +436,40 @@ class Cen2Tracker(Tracker):
             self.peaks_real: DataFrame
         """
 
-        peaks = self.peaks_real
-        peaks.reset_index(inplace=True)
+        # TODO
+        pass
+        # peaks = self.peaks_real
+        # peaks.reset_index(inplace=True)
 
-        peaks['label'] = peaks['main_label'] + peaks['side']
-        peaks['label'] = peaks['label'].replace(['spbA', 'spbB'], [0, 1])
+        # peaks['label'] = peaks['main_label'] + peaks['side']
+        # peaks['label'] = peaks['label'].replace(['spbA', 'spbB'], [0, 1])
 
-        peaks.reset_index(inplace=True)
-        peaks.set_index(['t_stamp', 'label'], inplace=True)
-        peaks = peaks.sort_index()
+        # peaks.reset_index(inplace=True)
+        # peaks.set_index(['t_stamp', 'label'], inplace=True)
+        # peaks = peaks.sort_index()
 
-        self.peaks_real = peaks
+        # self.peaks_real = peaks
 
-        super().project([0, 1], 'peaks_real', coords,
-                        keep_first_time=keep_first_time,
-                        reference=reference)
+        # super().project([0, 1], 'peaks_real', coords,
+        #                 keep_first_time=keep_first_time,
+        #                 reference=reference)
 
-        self.peaks_real.reset_index(inplace=True)
-        self.peaks_real.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
-        self.peaks_real.sort_index(inplace=True)
-        self.peaks_real.drop(['label', 'index'], axis=1, inplace=True)
+        # self.peaks_real.reset_index(inplace=True)
+        # self.peaks_real.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
+        # self.peaks_real.sort_index(inplace=True)
+        # self.peaks_real.drop(['label', 'index'], axis=1, inplace=True)
 
-        # Find wether x_proj or y_proj contain the most informations
-        p = self.peaks_real
-        x_proj = p.xs('spb', level='main_label')['x_proj'].mean()
-        y_proj = p.xs('spb', level='main_label')['y_proj'].mean()
+        # # Find wether x_proj or y_proj contain the most informations
+        # p = self.peaks_real
+        # x_proj = p.xs('spb', level='main_label')['x_proj'].mean()
+        # y_proj = p.xs('spb', level='main_label')['y_proj'].mean()
 
-        if np.abs(x_proj) < np.abs(y_proj):
-            x_tmp = p['x_proj'].copy()
-            p['x_proj'] = p['y_proj'].copy()
-            p['y_proj'] = x_tmp
+        # if np.abs(x_proj) < np.abs(y_proj):
+        #     x_tmp = p['x_proj'].copy()
+        #     p['x_proj'] = p['y_proj'].copy()
+        #     p['y_proj'] = x_tmp
 
-        return self.peaks_real
+        # return self.peaks_real
 
     def _interpolate(self, dt=1, kind='linear'):
         """

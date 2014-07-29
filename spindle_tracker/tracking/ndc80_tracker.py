@@ -4,10 +4,12 @@ log = logging.getLogger(__name__)
 
 import numpy as np
 import pandas as pd
+import scipy as sp
 
 from sktracker.trajectories import Trajectories
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.tracker.solver import GapCloseSolver
+from sktracker.utils import print_progress
 
 from ..tracking import Tracker
 
@@ -24,9 +26,15 @@ class Ndc80Tracker(Tracker):
 
         super().__init__(*args, **kwargs)
 
-    def track(self, trajs):
+    def track(self, trajs, n=1, progress=False, erase=False):
         """
         """
+
+        if hasattr(self, 'trajs_gp') and getattr(self, 'trajs_gp') is not None and not erase:
+            log.info('Tracking already done.')
+            return
+
+        log.info('Run tracking')
 
         coords = ['x', 'y']
         max_speed = 0.1
@@ -46,7 +54,7 @@ class Ndc80Tracker(Tracker):
         #solver = ByFrameSolver.for_directed_motion(trajs, **parameters_directed)
         solver = ByFrameSolver.for_brownian_motion(trajs, **parameters_brownian)
 
-        trajs = solver.track(progress_bar=True)
+        trajs = solver.track(progress_bar=progress)
         self.save(trajs.copy(), 'trajs')
 
         trajs = self.trajs.copy()
@@ -60,26 +68,31 @@ class Ndc80Tracker(Tracker):
 
         gc_solver = GapCloseSolver.for_brownian_motion(trajs, **parameters_gap_close)
         trajs = gc_solver.track()
+
+        self.remove_small_segments(trajs, n=n)
         self.save(trajs, 'trajs_gp')
 
-    def remove_small_segments(self, traj_name='trajs_gp', n=1):
+    def remove_small_segments(self, trajs, n=1):
         """Remove segments smaller or equal than "n"
         """
 
-        trajs = getattr(self, traj_name)
-        to_remove = filter(lambda x: len(x[1]) <= 1, trajs.segment_idxs.items())
+        to_remove = filter(lambda x: len(x[1]) <= n, trajs.segment_idxs.items())
         to_remove_idx = [x[1][0] for x in to_remove]
         to_remove_idx = list(itertools.chain(*to_remove_idx))
         trajs.remove_segments(to_remove_idx)
 
         log.info("{} small segments has been deleted.".format(len(to_remove_idx)))
 
-    def interp(self, traj_name='trajs_gp'):
+    def interp(self, traj_name='trajs_gp', erase=False):
         """
         """
 
+        if hasattr(self, 'trajs_interp') and getattr(self, 'trajs_interp') is not None and not erase:
+            log.info('Interpolation already done.')
+            return
+
         log.info('Interpolate trajectories')
-        trajs = getattr(self, traj_name)
+        trajs = getattr(self, traj_name).copy()
 
         trajs = Trajectories(trajs.time_interpolate(coords=['x', 'y', 'z', 'I', 'w']))
         trajs.drop(list(filter(lambda x: x.startswith('v_') or x.startswith('a_'), trajs.columns)),
@@ -87,7 +100,7 @@ class Ndc80Tracker(Tracker):
 
         self.save(trajs, 'trajs_interp')
 
-    def get_spb(self, traj_name='trajs_interp', erase=False):
+    def get_spb(self, traj_name='trajs_interp', progress=False, erase=False):
         """Find pairs of segments on which the mean distance on common timepoints is the bigger.
         """
 
@@ -97,15 +110,24 @@ class Ndc80Tracker(Tracker):
             poleA_id = poleA.index.get_level_values('label')[0]
             poleB = trajs[(trajs.id == 'pole') & (trajs.side == 'B')]
             poleB_id = poleB.index.get_level_values('label')[0]
+
+            log.info("Finding poles already done")
             return (poleA_id, poleB_id)
 
-        log.info("Find which segents are poles")
+        log.info("Finding poles")
 
         trajs = Trajectories(getattr(self, traj_name)).copy()
 
         all_d = []
         ids = []
-        for (id1, seg1), (id2, seg2) in itertools.combinations(trajs.iter_segments, 2):
+        segs_combination = itertools.combinations(trajs.iter_segments, 2)
+        n = len(trajs.segment_idxs)
+        n = sp.misc.factorial(n) / (sp.misc.factorial(n - 2) * sp.misc.factorial(2))
+        for i, ((id1, seg1), (id2, seg2)) in enumerate(segs_combination):
+
+            if progress:
+                print_progress(i * 100 / n)
+
             seg1 = seg1.loc[:, ['x', 'y', 't']].reset_index(drop=True)
             seg2 = seg2.loc[:, ['x', 'y', 't']].reset_index(drop=True)
 
@@ -120,6 +142,9 @@ class Ndc80Tracker(Tracker):
 
                 all_d.append(d_mean)
                 ids.append((id1, id2))
+
+        if progress:
+            print_progress(-1)
 
         max_id = np.argmax(all_d)
         poles_idx = ids[max_id]
@@ -141,21 +166,25 @@ class Ndc80Tracker(Tracker):
 
         return poles_idx
 
-    def project(self, poles_idx, traj_name='trajs_poles', progress=False):
+    def project(self, poles_idx, traj_name='trajs_poles', progress=False, erase=False):
         """
         """
 
+        if hasattr(self, 'trajs_project') and getattr(self, 'trajs_project') is not None and not erase:
+            log.info('Projection already done.')
+            return
+
         log.info('Compute projection along specified segments')
-        trajs = getattr(self, traj_name)
+        trajs = getattr(self, traj_name).copy()
         trajs = trajs.project(poles_idx,
                               keep_first_time=False,
                               reference=None,
                               inplace=False,
                               progress=progress)
 
-        self.save(trajs, 'trajs_poles')
+        self.save(trajs, 'trajs_project')
 
-    def guess_n_kts(self, traj_name='trajs_poles'):
+    def guess_n_kts(self, traj_name='trajs_project'):
         """
         """
         trajs = getattr(self, traj_name)

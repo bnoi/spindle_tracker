@@ -8,14 +8,15 @@ class ImageOverlayWidget(pg.ImageView):
     """
     """
 
-    def __init__(self, image, peaks, scale_factor=1,
-                 cmap='gist_rainbow', parent=None):
+    def __init__(self, image, peaks, alpha=0.5, scale_factor=1,
+                 cmap='hsv', parent=None):
         """
         """
 
         super().__init__(parent=parent, view=pg.PlotItem())
 
         self.cmap = cmap
+        self.alpha = alpha
         self.scale_factor = scale_factor
 
         self.current_rois = []
@@ -41,7 +42,7 @@ class ImageOverlayWidget(pg.ImageView):
         id_labels = np.arange(len(labels))
         id_labels = id_labels / id_labels.max() * 255
         cmap = plt.get_cmap(self.cmap)
-        colors = [cmap(int(l), bytes=True) for l in id_labels]
+        colors = [cmap(int(l), alpha=self.alpha, bytes=True) for l in id_labels]
 
         for t_stamp, peaks in xy_pixels.groupby(level='t_stamp'):
             for (t_stamp, label), peak in peaks.iterrows():
@@ -51,11 +52,13 @@ class ImageOverlayWidget(pg.ImageView):
 
                 roi = pg.CircleROI((peak['y'] - peak['w'] / 2, peak['x'] - peak['w'] / 2),
                                    peak['w'], pen=pen,  movable=False, scaleSnap=False)
+                roi.label = label
+                roi.t_stamp = t_stamp
 
                 if t_stamp not in self.overlay_rois.keys():
                     self.overlay_rois[t_stamp] = []
 
-                self.overlay_rois[t_stamp].append((label, roi))
+                self.overlay_rois[t_stamp].append(roi)
 
     def display_rois(self, ind, time):
         """
@@ -65,6 +68,6 @@ class ImageOverlayWidget(pg.ImageView):
             self.removeItem(roi)
 
         self.current_rois = []
-        for label, roi in self.overlay_rois[int(time)]:
+        for roi in self.overlay_rois[int(time)]:
             self.addItem(roi)
             self.current_rois.append(roi)

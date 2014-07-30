@@ -197,7 +197,7 @@ class Ndc80Tracker(Tracker):
 
         setattr(self, traj_name, Trajectories(trajs))
 
-    def kymo(self, var_name='trajs', marker='o', ls='-'):
+    def kymo(self, var_name='trajs', marker='o', ls='-', ax=None):
         """
         """
 
@@ -205,7 +205,10 @@ class Ndc80Tracker(Tracker):
 
         trajs = Trajectories(getattr(self, var_name))
 
-        fig, ax = plt.subplots(nrows=1)
+        if ax is None:
+            fig, ax = plt.subplots(nrows=1)
+        else:
+            fig = ax.get_figure()
         ax = trajs.show(xaxis='t', yaxis='x_proj',
                         groupby_args={'level': "label"},
                         ax=ax, ls=ls, marker=marker)

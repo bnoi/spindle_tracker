@@ -6,12 +6,16 @@ from pyqtgraph.Point import Point
 from pyqtgraph.Qt import QtCore
 from pyqtgraph.Qt import QtGui
 
-from matplotlib.mlab import inside_poly
-
 
 class DataSelectorViewBox(pg.ViewBox):
     """
     """
+
+    def __init__(self, *args, **kwargs):
+        """
+        """
+        super().__init__(*args, **kwargs)
+        self.old_selection = []
 
     def mouseDragEvent(self, ev):
         """
@@ -39,9 +43,16 @@ class DataSelectorViewBox(pg.ViewBox):
         """
 
         items = self.items_inside_rectangle(rect_box)
-        # self.traj_widget.unselect_all_items()
+
+        for item in self.old_selection:
+            if item not in items:
+                self.traj_widget.unselect_item(item)
+
         for item in items:
-            self.traj_widget.select_item(item)
+            if item not in self.old_selection:
+                self.traj_widget.select_item(item)
+
+        self.old_selection = items
 
     def items_inside_rectangle(self, rect):
         """

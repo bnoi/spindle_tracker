@@ -35,6 +35,23 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.curve_width = 1
         self.scatter_size = 8
 
+        self.setup_ui()
+
+        # Setup trajectories and plot logic
+        self._colors = []
+        self.traj_items = []
+
+        self.pw.showGrid(x=True, y=True)
+        self.pw.setLabel('bottom', self.xaxis)
+        self.pw.setLabel('left', self.yaxis)
+
+        self.update_items()
+        self.install_clicked_hooks()
+
+    def setup_ui(self):
+        """
+        """
+
         self.setLayout(QtGui.QVBoxLayout())
 
         self.area = dockarea.DockArea()
@@ -57,6 +74,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.status = QtGui.QLabel(self)
         self.dock_traj.addWidget(self.status)
 
+        self.pw.scene().sigMouseMoved.connect(self.update_mouse_infos)
+
         # Buttons Dock
         self.dock_buttons.layout.setContentsMargins(5, 5, 5, 5)
         self.but_select_all = QtGui.QPushButton("Select All")
@@ -67,16 +86,32 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.but_select_all.clicked.connect(self.select_all_items)
         self.but_unselect_all.clicked.connect(self.unselect_all_items)
 
-        # Setup trajectories and plot logic
-        self._colors = []
-        self.traj_items = []
+        # Info Panel Dock
+        self.dock_info.setContentsMargins(5, 5, 5, 5)
+        self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)
+        self.selection_text = self.build_text_groupbox('Selected', self.dock_info)
+        self.status_text = self.build_text_groupbox('Message', self.dock_info)
 
-        self.pw.showGrid(x=True, y=True)
-        self.pw.setLabel('bottom', self.xaxis)
-        self.pw.setLabel('left', self.yaxis)
+    # Message management
+    def update_mouse_infos(self, pos):
+        """
+        """
+        pos = self.pw.plotItem.vb.mapDeviceToView(pos)
 
-        self.update_items()
-        self.install_clicked_hooks()
+        mess = ""
+        mess += "x = {x}\ny = {y}\n"
+        # mess += "label = {label}\ntime = {time}\n"
+        # mess += "w = {w}\nI = {I}\n"
+
+        x = np.round(pos.x(), 2)
+        y = np.round(pos.y(), 2)
+
+        args = dict(x=x, y=y, label=None, time=None, w=None, I=None)
+        mess = mess.format(**args)
+
+        self.mouse_text.setText(mess)
+
+    # Items management
 
     def update_items(self):
         """
@@ -136,7 +171,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     def item_clicked(self, item):
         """
         """
-        self.check_control_key()
+        self.check_control_key(ignore_items=[item])
         if not item.is_selected:
             self.select_item(item)
         else:
@@ -184,11 +219,12 @@ class TrajectoriesWidget(QtGui.QWidget):
         for item in self.pw.items():
             self.remove_item(item)
 
-    def unselect_all_items(self):
+    def unselect_all_items(self, ignore_items=[]):
         """
         """
         for item in self.traj_items:
-            self.unselect_item(item)
+            if item not in ignore_items:
+                self.unselect_item(item)
 
     def select_all_items(self):
         """
@@ -196,12 +232,27 @@ class TrajectoriesWidget(QtGui.QWidget):
         for item in self.traj_items:
             self.select_item(item)
 
-    def check_control_key(self):
+    def check_control_key(self, ignore_items=[]):
         """Unselect all previously selected items if CTRL key is not pressed.
         """
         modifiers = QtGui.QApplication.keyboardModifiers()
         if modifiers != QtCore.Qt.ControlModifier:
-            self.unselect_all_items()
+            self.unselect_all_items(ignore_items=ignore_items)
+
+    def item_colors(self, item):
+        """
+        """
+        label = None
+        if isinstance(item, pg.SpotItem):
+            label = item.data()[1]
+        elif isinstance(item, pg.PlotCurveItem):
+            label = item.label
+        else:
+            log.warning("Item {} not handled".format(item))
+            return False
+        return self.colors(label)
+
+    # Colors management
 
     def setup_color_list(self):
         """Setup color gradient for segment labels
@@ -219,15 +270,20 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         return self._colors[label]
 
-    def item_colors(self, item):
+    # Factories
+
+    def build_text_groupbox(self, title="", parent_widget=None):
         """
         """
-        label = None
-        if isinstance(item, pg.SpotItem):
-            label = item.data()[1]
-        elif isinstance(item, pg.PlotCurveItem):
-            label = item.label
-        else:
-            log.warning("Item {} not handled".format(item))
-            return False
-        return self.colors(label)
+        gbox = QtGui.QGroupBox(title)
+        text = QtGui.QTextEdit()
+        text.setReadOnly(True)
+        l = QtGui.QVBoxLayout()
+        l.addWidget(text)
+        l.addStretch(1)
+        gbox.setLayout(l)
+
+        if parent_widget:
+            parent_widget.addWidget(gbox)
+
+        return text

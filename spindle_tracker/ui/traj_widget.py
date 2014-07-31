@@ -18,7 +18,9 @@ class TrajectoriesWidget(QtGui.QWidget):
     """
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
-                 scale_x=1, scale_y=1, parent=None):
+                 scale_x=1, scale_y=1,
+                 column_to_display=['t', 'x', 'y', 'I', 'w'],
+                 parent=None):
         """
         """
         super().__init__(parent=parent)
@@ -31,6 +33,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.yaxis = yaxis
         self.scale_x = scale_x
         self.scale_y = scale_y
+        self.column_to_display = column_to_display
 
         self.curve_width = 1
         self.scatter_size = 8
@@ -135,7 +138,7 @@ class TrajectoriesWidget(QtGui.QWidget):
                 twi = QtGui.QTreeWidgetItem([title])
 
                 peak = self.trajs.loc[t_stamp, label]
-                for l in ['t', 'x', 'y', 'I', 'w']:
+                for l in self.column_to_display:
                     ctwi = QtGui.QTreeWidgetItem(["{} : {}".format(l, peak[l])])
                     twi.addChild(ctwi)
 

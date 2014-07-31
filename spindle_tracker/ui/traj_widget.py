@@ -7,6 +7,7 @@ import pyqtgraph as pg
 import numpy as np
 
 from pyqtgraph.Qt import QtGui
+from pyqtgraph.Qt import QtCore
 
 
 class TrajectoriesWidget(QtGui.QWidget):
@@ -89,7 +90,6 @@ class TrajectoriesWidget(QtGui.QWidget):
     def install_clicked_hooks(self):
         """
         """
-
         for item in self.traj_items:
             if isinstance(item, pg.PlotCurveItem):
                 item.sigClicked.connect(self.item_selected)
@@ -107,6 +107,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     def item_selected(self, item):
         """
         """
+        self.check_control_key()
         if item not in self.selected_items:
             self.selected_items.append(item)
             self.select_item(item)
@@ -149,6 +150,19 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         for item in self.pw.items():
             self.remove_item(item)
+
+    def unselect_all_items(self):
+        """
+        """
+        for item in self.selected_items:
+            self.unselect_item(item)
+
+    def check_control_key(self):
+        """Unselect all previously selected items if CTRL key is not pressed.
+        """
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers != QtCore.Qt.ControlModifier:
+            self.unselect_all_items()
 
     def setup_color_list(self):
         """Setup color gradient for segment labels

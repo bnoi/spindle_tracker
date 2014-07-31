@@ -29,6 +29,7 @@ class DataSelectorViewBox(pg.ViewBox):
 
             if ev.isFinish():
                 self.rbScaleBox.hide()
+                self.traj_widget.update_selection_infos()
             else:
                 rect_box = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
                 rect_box = self.childGroup.mapRectFromParent(rect_box)

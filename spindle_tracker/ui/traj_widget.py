@@ -89,10 +89,17 @@ class TrajectoriesWidget(QtGui.QWidget):
         # Info Panel Dock
         self.dock_info.setContentsMargins(5, 5, 5, 5)
         self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)
-        self.selection_text = self.build_text_groupbox('Selected', self.dock_info)
+        self.selection_box = QtGui.QGroupBox('Selected Items')
+        self.dock_info.addWidget(self.selection_box)
+        self.selection_tree = pg.TreeWidget()
+        self.selection_tree.setColumnCount(1)
+        self.selection_tree.setHeaderLabels(["t_stamp, label"])
+        self.selection_box.setLayout(QtGui.QVBoxLayout())
+        self.selection_box.layout().addWidget(self.selection_tree)
         self.status_text = self.build_text_groupbox('Message', self.dock_info)
 
     # Message management
+
     def update_mouse_infos(self, pos):
         """
         """
@@ -110,6 +117,29 @@ class TrajectoriesWidget(QtGui.QWidget):
         mess = mess.format(**args)
 
         self.mouse_text.setText(mess)
+
+    def update_selection_infos(self):
+        """
+        """
+
+        for item in self.selection_tree.listAllItems():
+            try:
+                self.selection_tree.removeTopLevelItem(item)
+            except:
+                pass
+
+        for item in self.traj_items:
+            if item.is_selected and isinstance(item, pg.SpotItem):
+                t_stamp, label = item.data()
+                title = "{}, {}".format(t_stamp, label)
+                twi = QtGui.QTreeWidgetItem([title])
+
+                peak = self.trajs.loc[t_stamp, label]
+                for l in ['t', 'x', 'y', 'I', 'w']:
+                    ctwi = QtGui.QTreeWidgetItem(["{} : {}".format(l, peak[l])])
+                    twi.addChild(ctwi)
+
+                self.selection_tree.addTopLevelItem(twi)
 
     # Items management
 
@@ -177,6 +207,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         else:
             self.unselect_item(item)
 
+        self.update_selection_infos()
+
     def select_item(self, item):
         """
         """
@@ -219,18 +251,20 @@ class TrajectoriesWidget(QtGui.QWidget):
         for item in self.pw.items():
             self.remove_item(item)
 
-    def unselect_all_items(self, ignore_items=[]):
+    def unselect_all_items(self, event=None, ignore_items=[]):
         """
         """
         for item in self.traj_items:
             if item not in ignore_items:
                 self.unselect_item(item)
+        self.update_selection_infos()
 
     def select_all_items(self):
         """
         """
         for item in self.traj_items:
             self.select_item(item)
+        self.update_selection_infos()
 
     def check_control_key(self, ignore_items=[]):
         """Unselect all previously selected items if CTRL key is not pressed.

@@ -49,7 +49,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.pw.setLabel('left', self.yaxis)
 
         self.update_items()
-        self.install_clicked_hooks()
 
     def setup_ui(self):
         """
@@ -125,11 +124,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         """
 
-        for item in self.selection_tree.listAllItems():
-            try:
-                self.selection_tree.removeTopLevelItem(item)
-            except:
-                pass
+        self.clear_selection_infos()
 
         for item in self.traj_items:
             if item.is_selected and isinstance(item, pg.SpotItem):
@@ -143,6 +138,15 @@ class TrajectoriesWidget(QtGui.QWidget):
                     twi.addChild(ctwi)
 
                 self.selection_tree.addTopLevelItem(twi)
+
+    def clear_selection_infos(self):
+        """
+        """
+        for item in self.selection_tree.listAllItems():
+            try:
+                self.selection_tree.removeTopLevelItem(item)
+            except:
+                pass
 
     # Items management
 
@@ -185,6 +189,9 @@ class TrajectoriesWidget(QtGui.QWidget):
                 self.traj_items.append(point)
 
             self.pw.addItem(points_item)
+
+        self.clear_selection_infos()
+        self.install_clicked_hooks()
 
     def install_clicked_hooks(self):
         """

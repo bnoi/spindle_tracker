@@ -10,6 +10,8 @@ from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
 from pyqtgraph import dockarea
 
+from .viewbox import DataSelectorViewBox
+
 
 class TrajectoriesWidget(QtGui.QWidget):
     """
@@ -46,7 +48,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.area.addDock(self.dock_buttons, 'bottom')
 
         # Trajectory Plot Dock
-        self.pw = pg.PlotWidget()
+        self.vb = DataSelectorViewBox()
+        self.pw = pg.PlotWidget(viewBox=self.vb)
+        self.vb.traj_widget = self
         self.dock_traj.addWidget(self.pw)
         self.dock_traj.layout.setContentsMargins(5, 5, 5, 5)
 

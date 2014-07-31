@@ -8,6 +8,7 @@ import numpy as np
 
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
+from pyqtgraph import dockarea
 
 
 class TrajectoriesWidget(QtGui.QWidget):
@@ -20,6 +21,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         super().__init__(parent=parent)
 
+        if parent is None:
+            self.resize(1000, 500)
+
         self.trajs = trajs
         self.xaxis = xaxis
         self.yaxis = yaxis
@@ -29,26 +33,43 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.curve_width = 1
         self.scatter_size = 8
 
-        self.l = QtGui.QVBoxLayout()
-        self.setLayout(self.l)
+        self.setLayout(QtGui.QVBoxLayout())
 
+        self.area = dockarea.DockArea()
+        self.layout().addWidget(self.area)
+
+        self.dock_traj = dockarea.Dock("Trajectories Plot", size=(3, 12))
+        self.dock_info = dockarea.Dock("Info Panel", size=(1, 12))
+        self.dock_buttons = dockarea.Dock("Buttons", size=(3, 1), hideTitle=True)
+        self.area.addDock(self.dock_traj, 'left')
+        self.area.addDock(self.dock_info, 'right', self.dock_traj)
+        self.area.addDock(self.dock_buttons, 'bottom')
+
+        # Trajectory Plot Dock
         self.pw = pg.PlotWidget()
-        self.l.addWidget(self.pw)
-
-        self.l_status = QtGui.QHBoxLayout()
-        self.l.addLayout(self.l_status)
-        self.l_status.addStretch(1)
+        self.dock_traj.addWidget(self.pw)
+        self.dock_traj.layout.setContentsMargins(5, 5, 5, 5)
 
         self.status = QtGui.QLabel(self)
-        self.l_status.addWidget(self.status)
+        self.dock_traj.addWidget(self.status)
+
+        # Buttons Dock
+        self.dock_buttons.layout.setContentsMargins(5, 5, 5, 5)
+        self.but_select_all = QtGui.QPushButton("Select All")
+        self.but_unselect_all = QtGui.QPushButton("Unselect All")
+        self.dock_buttons.addWidget(self.but_select_all, row=0, col=0)
+        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=1)
+        self.dock_buttons.layout.setColumnStretch(10, 10)
+        self.but_select_all.clicked.connect(self.select_all_items)
+        self.but_unselect_all.clicked.connect(self.unselect_all_items)
+
+        # Setup trajectories and plot logic
+        self._colors = []
+        self.traj_items = []
 
         self.pw.showGrid(x=True, y=True)
         self.pw.setLabel('bottom', self.xaxis)
         self.pw.setLabel('left', self.yaxis)
-
-        self.traj_items = []
-        self.selected_items = []
-        self._colors = []
 
         self.update_items()
         self.install_clicked_hooks()
@@ -74,70 +95,78 @@ class TrajectoriesWidget(QtGui.QWidget):
                                      pen={'color': color, 'width': self.curve_width},
                                      clickable=True)
             curve.label = label
+            curve.is_selected = False
             self.pw.addItem(curve)
             self.traj_items.append(curve)
 
-            points_items = pg.ScatterPlotItem(symbol='o',
-                                              pen={'color': (0, 0, 0, 0)},
-                                              brush=pg.mkBrush(color=color),
-                                              size=self.scatter_size)
+            points_item = pg.ScatterPlotItem(symbol='o',
+                                             pen={'color': (0, 0, 0, 0)},
+                                             brush=pg.mkBrush(color=color),
+                                             size=self.scatter_size)
 
             points = [{'x': xx, 'y': yy, 'data': idx} for idx, xx, yy in zip(index_list, x, y)]
-            points_items.addPoints(points)
-            self.pw.addItem(points_items)
-            self.traj_items.append(points_items)
+            points_item.addPoints(points)
+
+            for point in points_item.points():
+                point.is_selected = False
+                point.parent = points_item
+                self.traj_items.append(point)
+
+            self.pw.addItem(points_item)
 
     def install_clicked_hooks(self):
         """
         """
-        for item in self.traj_items:
+        for item in self.pw.items():
             if isinstance(item, pg.PlotCurveItem):
-                item.sigClicked.connect(self.item_selected)
+                item.sigClicked.connect(self.item_clicked)
             elif isinstance(item, pg.ScatterPlotItem):
                 item.sigClicked.connect(self.points_clicked)
-            else:
-                log.warning("Item {} not handled".format(item))
 
     def points_clicked(self, plot, points):
         """
         """
         for point in points:
-            self.item_selected(point)
+            self.item_clicked(point)
 
-    def item_selected(self, item):
+    def item_clicked(self, item):
         """
         """
         self.check_control_key()
-        if item not in self.selected_items:
-            self.selected_items.append(item)
+        if not item.is_selected:
             self.select_item(item)
         else:
-            self.selected_items.remove(item)
             self.unselect_item(item)
 
     def select_item(self, item):
         """
         """
-        if isinstance(item, pg.SpotItem):
-            item.setPen(width=2, color='r')
-            item.setSize(self.scatter_size * 1.5)
-        elif isinstance(item, pg.PlotCurveItem):
-            color = self.item_colors(item)
-            item.setPen(width=self.curve_width * 2, color=color)
-        else:
-            log.warning("Item {} not handled".format(item))
+        if not item.is_selected:
+            item.is_selected = True
+
+            if isinstance(item, pg.SpotItem):
+                item.setPen(width=2, color='r')
+                item.setSize(self.scatter_size * 1.5)
+            elif isinstance(item, pg.PlotCurveItem):
+                color = self.item_colors(item)
+                item.setPen(width=self.curve_width * 2, color=color)
+            else:
+                log.warning("Item {} not handled".format(item))
 
     def unselect_item(self, item):
         """
         """
-        if isinstance(item, pg.SpotItem):
-            item.setPen(None)
-            item.setSize(self.scatter_size)
-        elif isinstance(item, pg.PlotCurveItem):
-            color = self.item_colors(item)
-            item.setPen(width=self.curve_width, color=color)
-        else:
-            log.warning("Item {} not handled".format(item))
+        if item.is_selected:
+            item.is_selected = False
+
+            if isinstance(item, pg.SpotItem):
+                item.setPen(None)
+                item.setSize(self.scatter_size)
+            elif isinstance(item, pg.PlotCurveItem):
+                color = self.item_colors(item)
+                item.setPen(width=self.curve_width, color=color)
+            else:
+                log.warning("Item {} not handled".format(item))
 
     def remove_item(self, item):
         """
@@ -154,8 +183,14 @@ class TrajectoriesWidget(QtGui.QWidget):
     def unselect_all_items(self):
         """
         """
-        for item in self.selected_items:
+        for item in self.traj_items:
             self.unselect_item(item)
+
+    def select_all_items(self):
+        """
+        """
+        for item in self.traj_items:
+            self.select_item(item)
 
     def check_control_key(self):
         """Unselect all previously selected items if CTRL key is not pressed.

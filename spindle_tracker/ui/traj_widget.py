@@ -20,6 +20,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     def __init__(self, trajs, xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1,
                  column_to_display=['t', 'x', 'y', 'I', 'w'],
+                 add_draggable_line=False,
                  parent=None):
         """
         """
@@ -34,6 +35,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.scale_x = scale_x
         self.scale_y = scale_y
         self.column_to_display = column_to_display
+        self.add_draggable_line = add_draggable_line
+        self.draggable_line = None
 
         self.curve_width = 1
         self.scatter_size = 8
@@ -156,6 +159,10 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         self.remove_items()
         self.setup_color_list()
+
+        if self.add_draggable_line:
+            self.draggable_line = pg.InfiniteLine(angle=90, movable=True)
+            self.pw.addItem(self.draggable_line)
 
         for label, peaks in self.trajs.groupby(level='label'):
 

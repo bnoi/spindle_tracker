@@ -43,17 +43,23 @@ class DataSelectorViewBox(pg.ViewBox):
         """
         """
 
-        items = self.items_inside_rectangle(rect_box)
+        selected_items = self.items_inside_rectangle(rect_box)
 
-        for item in self.old_selection:
-            if item not in items:
+        for item in self.traj_widget.traj_items:
+            if item not in selected_items and item.is_selected:
                 self.traj_widget.unselect_item(item)
-
-        for item in items:
-            if item not in self.old_selection:
+            elif item in selected_items and not item.is_selected:
                 self.traj_widget.select_item(item)
 
-        self.old_selection = items
+        # for item in self.old_selection:
+        #     if item not in items:
+        #         self.traj_widget.unselect_item(item)
+
+        # for item in items:
+        #     if item not in self.old_selection:
+        #         self.traj_widget.select_item(item)
+
+        self.old_selection = selected_items
 
     def items_inside_rectangle(self, rect):
         """

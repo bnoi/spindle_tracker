@@ -32,6 +32,8 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.resize(1000, 500)
 
         self.trajs = trajs
+        self.historic_trajs = []
+        self.historic_trajs.append(trajs)
         self.xaxis = xaxis
         self.yaxis = yaxis
         self.scale_x = scale_x
@@ -45,6 +47,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         self.setup_ui()
         self.setup_menus()
+        self.update_historic_buttons()
 
         # Setup trajectories and plot logic
         self._colors = []
@@ -86,17 +89,27 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         # Buttons Dock
         self.dock_buttons.layout.setContentsMargins(5, 5, 5, 5)
-        self.but_select_all = QtGui.QPushButton("Select All")
-        self.but_unselect_all = QtGui.QPushButton("Unselect All")
-        self.dock_buttons.addWidget(self.but_select_all, row=0, col=0)
-        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=1)
         self.dock_buttons.layout.setColumnStretch(10, 10)
+
+        self.but_undo = QtGui.QPushButton("Undo (0)")
+        self.dock_buttons.addWidget(self.but_undo, row=0, col=0)
+        self.but_undo.clicked.connect(self.undo)
+
+        self.but_redo = QtGui.QPushButton("Redo (0)")
+        self.dock_buttons.addWidget(self.but_redo, row=0, col=1)
+        self.but_redo.clicked.connect(self.redo)
+
+        self.but_select_all = QtGui.QPushButton("Select All")
+        self.dock_buttons.addWidget(self.but_select_all, row=0, col=2)
         self.but_select_all.clicked.connect(self.select_all_items)
+
+        self.but_unselect_all = QtGui.QPushButton("Unselect All")
+        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=3)
         self.but_unselect_all.clicked.connect(self.unselect_all_items)
 
         if not self.parent():
             self.but_quit = QtGui.QPushButton("Quit")
-            self.dock_buttons.addWidget(self.but_quit, row=0, col=3)
+            self.dock_buttons.addWidget(self.but_quit, row=0, col=4)
             self.but_quit.clicked.connect(self.close)
 
         # Info Panel Dock
@@ -273,7 +286,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
             if isinstance(item, pg.SpotItem):
                 item.setPen(width=2, color='r')
-                item.setSize(self.scatter_size * 1.5)
+                #item.setSize(self.scatter_size * 1.5)
             elif isinstance(item, pg.PlotCurveItem):
                 color = self.item_colors(item)
                 item.setPen(width=self.curve_width * 2, color=color)
@@ -288,7 +301,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
             if isinstance(item, pg.SpotItem):
                 item.setPen(None)
-                item.setSize(self.scatter_size)
+                #item.setSize(self.scatter_size)
             elif isinstance(item, pg.PlotCurveItem):
                 color = self.item_colors(item)
                 item.setPen(width=self.curve_width, color=color)
@@ -341,6 +354,53 @@ class TrajectoriesWidget(QtGui.QWidget):
             log.warning("Item {} not handled".format(item))
             return False
         return self.colors(label)
+
+    # Historic management
+
+    def undo(self):
+        """
+        """
+
+        i = self.current_traj_index()
+        self.trajs = self.historic_trajs[i - 1]
+
+        self.update_trajectory()
+        self.update_historic_buttons()
+
+    def redo(self):
+        """
+        """
+        i = self.current_traj_index()
+        self.trajs = self.historic_trajs[i + 1]
+
+        self.update_trajectory()
+        self.update_historic_buttons()
+
+    def update_historic_buttons(self):
+        """
+        """
+
+        i = self.current_traj_index()
+        self.but_undo.setText('Undo ({})'.format(i))
+        self.but_redo.setText('Redo ({})'.format(len(self.historic_trajs) - i - 1))
+
+        if self.historic_trajs[0] is self.trajs:
+            self.but_undo.setDisabled(True)
+        else:
+            self.but_undo.setDisabled(False)
+
+        if self.historic_trajs[-1] is self.trajs:
+            self.but_redo.setDisabled(True)
+        else:
+            self.but_redo.setDisabled(False)
+
+    def current_traj_index(self):
+        """
+        """
+
+        for i, trajs in enumerate(self.historic_trajs):
+            if trajs is self.trajs:
+                return i
 
     # Colors management
 

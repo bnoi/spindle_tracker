@@ -94,6 +94,11 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.but_select_all.clicked.connect(self.select_all_items)
         self.but_unselect_all.clicked.connect(self.unselect_all_items)
 
+        if not self.parent():
+            self.but_quit = QtGui.QPushButton("Quit")
+            self.dock_buttons.addWidget(self.but_quit, row=0, col=3)
+            self.but_quit.clicked.connect(self.close)
+
         # Info Panel Dock
         self.dock_info.setContentsMargins(5, 5, 5, 5)
         self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)

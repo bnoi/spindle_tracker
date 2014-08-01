@@ -9,6 +9,7 @@ import numpy as np
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
 from pyqtgraph import dockarea
+import pyqtgraph.exporters as pgexporters
 
 from .viewbox import DataSelectorViewBox
 
@@ -437,3 +438,19 @@ class TrajectoriesWidget(QtGui.QWidget):
             parent_widget.addWidget(gbox)
 
         return text
+
+    # Exporter
+    def save(self, fname):
+        """
+        """
+        if fname.endswith('.svg'):
+            exporter = pgexporters.SVGExporter(self.pw.plotItem)
+        elif fname.endswith('.png'):
+            exporter = pgexporters.ImageExporter(self.pw.plotItem)
+        elif fname.endswith('.jpg'):
+            exporter = pgexporters.ImageExporter(self.pw.plotItem)
+        elif fname.endswith('.tif'):
+            exporter = pgexporters.ImageExporter(self.pw.plotItem)
+        else:
+            log.error('Wrong filename extension')
+        exporter.export(fname)

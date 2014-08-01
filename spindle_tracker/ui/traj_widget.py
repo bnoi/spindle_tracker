@@ -54,10 +54,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         self._colors = []
         self.traj_items = []
 
-        self.pw.showGrid(x=True, y=True)
-        self.pw.setLabel('bottom', self.xaxis)
-        self.pw.setLabel('left', self.yaxis)
-
         self.update_trajectory()
 
     def setup_ui(self):
@@ -92,25 +88,41 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.dock_buttons.layout.setContentsMargins(5, 5, 5, 5)
         self.dock_buttons.layout.setColumnStretch(10, 10)
 
+        self.cb_xaxis_label = QtGui.QLabel('X axis : ')
+        self.dock_buttons.addWidget(self.cb_xaxis_label, row=0, col=0)
+        self.cb_xaxis = QtGui.QComboBox()
+        for label in self.trajs.columns:
+            self.cb_xaxis.addItem(label)
+        self.dock_buttons.addWidget(self.cb_xaxis, row=0, col=1)
+        self.cb_xaxis.currentIndexChanged.connect(self.set_xaxis)
+
+        self.cb_yaxis_label = QtGui.QLabel('Y axis : ')
+        self.dock_buttons.addWidget(self.cb_yaxis_label, row=0, col=2)
+        self.cb_yaxis = QtGui.QComboBox()
+        for label in self.trajs.columns:
+            self.cb_yaxis.addItem(label)
+        self.dock_buttons.addWidget(self.cb_yaxis, row=0, col=3)
+        self.cb_yaxis.currentIndexChanged.connect(self.set_yaxis)
+
         self.but_undo = QtGui.QPushButton("Undo (0)")
-        self.dock_buttons.addWidget(self.but_undo, row=0, col=0)
+        self.dock_buttons.addWidget(self.but_undo, row=0, col=4)
         self.but_undo.clicked.connect(self.undo)
 
         self.but_redo = QtGui.QPushButton("Redo (0)")
-        self.dock_buttons.addWidget(self.but_redo, row=0, col=1)
+        self.dock_buttons.addWidget(self.but_redo, row=0, col=5)
         self.but_redo.clicked.connect(self.redo)
 
         self.but_select_all = QtGui.QPushButton("Select All")
-        self.dock_buttons.addWidget(self.but_select_all, row=0, col=2)
+        self.dock_buttons.addWidget(self.but_select_all, row=0, col=6)
         self.but_select_all.clicked.connect(self.select_all_items)
 
         self.but_unselect_all = QtGui.QPushButton("Unselect All")
-        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=3)
+        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=7)
         self.but_unselect_all.clicked.connect(self.unselect_all_items)
 
         if not self.parent():
             self.but_quit = QtGui.QPushButton("Quit")
-            self.dock_buttons.addWidget(self.but_quit, row=0, col=4)
+            self.dock_buttons.addWidget(self.but_quit, row=0, col=8)
             self.but_quit.clicked.connect(self.close)
 
         # Info Panel Dock
@@ -249,6 +261,13 @@ class TrajectoriesWidget(QtGui.QWidget):
                 self.traj_items.append(point)
 
             self.pw.addItem(points_item)
+
+        self.pw.showGrid(x=True, y=True)
+        self.pw.setLabel('bottom', self.xaxis)
+        self.pw.setLabel('left', self.yaxis)
+
+        self.cb_xaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.xaxis))
+        self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
 
         self.clear_selection_infos()
         self.install_clicked_hooks()
@@ -455,3 +474,36 @@ class TrajectoriesWidget(QtGui.QWidget):
         else:
             log.error('Wrong filename extension')
         exporter.export(fname)
+
+    # Axes setter
+
+    def set_xaxis(self, ax_name, scale=None):
+        """
+        """
+        if isinstance(ax_name, int):
+            ax_name = self.cb_xaxis.itemText(ax_name)
+
+        if ax_name not in self.trajs.columns:
+            log.error('"{}" is not in Trajectories columns'.format(ax_name))
+            return
+
+        self.xaxis = ax_name
+        if scale:
+            self.scale_x = scale
+        self.update_trajectory()
+
+    def set_yaxis(self, ax_name, scale=None):
+        """
+        """
+        if isinstance(ax_name, int):
+            ax_name = self.cb_yaxis.itemText(ax_name)
+
+        if ax_name not in self.trajs.columns:
+            log.error('"{}" is not in Trajectories columns'.format(ax_name))
+            return
+
+        self.yaxis = ax_name
+        if scale:
+            self.scale_y = scale
+
+        self.update_trajectory()

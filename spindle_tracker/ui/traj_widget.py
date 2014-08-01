@@ -439,7 +439,8 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         return text
 
-    # Exporter
+    # Exporters
+
     def save(self, fname):
         """
         """

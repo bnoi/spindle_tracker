@@ -140,7 +140,10 @@ class Ndc80Tracker(Tracker):
                 d = np.sqrt(vec[:, 0]**2 + vec[:, 1]**2)
                 d_mean = d.mean()
 
-                all_d.append(d_mean)
+                length_ratio = (seg1.shape[0] * seg2.shape[0]) / (seg1.shape[0] + seg2.shape[0])
+                score = d_mean * length_ratio
+
+                all_d.append(score)
                 ids.append((id1, id2))
 
         if progress:

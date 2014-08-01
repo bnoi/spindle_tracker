@@ -42,6 +42,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.scatter_size = 8
 
         self.setup_ui()
+        self.setup_menus()
 
         # Setup trajectories and plot logic
         self._colors = []
@@ -51,7 +52,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.pw.setLabel('bottom', self.xaxis)
         self.pw.setLabel('left', self.yaxis)
 
-        self.update_items()
+        self.update_trajectory()
 
     def setup_ui(self):
         """
@@ -103,6 +104,37 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.selection_box.layout().addWidget(self.selection_tree)
         self.status_text = self.build_text_groupbox('Message', self.dock_info)
 
+    # Menus
+
+    def setup_menus(self):
+        """
+        """
+        self.menu_spots = QtGui.QMenu("Spots")
+        action_add_spot = QtGui.QAction("Add spot", self.menu_spots)
+        action_remove_spot = QtGui.QAction("Remove spot", self.menu_spots)
+        self.menu_spots.addAction(action_add_spot)
+        self.menu_spots.addAction(action_remove_spot)
+        action_add_spot.triggered.connect(lambda x: x)
+        action_remove_spot.triggered.connect(lambda x: x)
+
+        self.menu_trajs = QtGui.QMenu("Trajectories")
+        action_merge_trajs = QtGui.QAction("Merge two trajectories", self.menu_trajs)
+        action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
+        action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
+        action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
+        self.menu_trajs.addAction(action_merge_trajs)
+        self.menu_trajs.addAction(action_remove_traj)
+        self.menu_trajs.addAction(action_cut_traj)
+        self.menu_trajs.addAction(action_duplicate_traj)
+        action_merge_trajs.triggered.connect(lambda x: x)
+        action_remove_traj.triggered.connect(lambda x: x)
+        action_cut_traj.triggered.connect(lambda x: x)
+        action_duplicate_traj.triggered.connect(lambda x: x)
+
+        self.vb.menu.addSeparator()
+        self.vb.menu.addMenu(self.menu_spots)
+        self.vb.menu.addMenu(self.menu_trajs)
+
     # Message management
 
     def update_mouse_infos(self, pos):
@@ -153,7 +185,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     # Items management
 
-    def update_items(self):
+    def update_trajectory(self):
         """
         """
 
@@ -328,7 +360,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         gbox = QtGui.QGroupBox(title)
         text = QtGui.QTextEdit()
-        text.setReadOnly(True)
+        text.setReadOnly(False)
         l = QtGui.QVBoxLayout()
         l.addWidget(text)
         l.addStretch(1)

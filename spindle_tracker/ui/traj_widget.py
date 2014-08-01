@@ -26,6 +26,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         super().__init__(parent=parent)
 
+        self.setWindowTitle("Trajectories plot")
+
         if parent is None:
             self.resize(1000, 500)
 

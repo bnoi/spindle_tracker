@@ -8,12 +8,14 @@ class ImageOverlayWidget(pg.ImageView):
     """
     """
 
-    def __init__(self, image, peaks, alpha=0.5, scale_factor=1,
+    def __init__(self, image, trajs, alpha=0.5, scale_factor=1,
                  cmap='hsv', parent=None):
         """
         """
 
         super().__init__(parent=parent, view=pg.PlotItem())
+
+        self.setWindowTitle("Spots overlay on image")
 
         self.cmap = cmap
         self.alpha = alpha
@@ -22,7 +24,7 @@ class ImageOverlayWidget(pg.ImageView):
         self.current_rois = []
         self.overlay_rois = {}
 
-        self.peaks = peaks
+        self.trajs = trajs
         self.create_rois()
 
         self.im = image
@@ -35,7 +37,7 @@ class ImageOverlayWidget(pg.ImageView):
         """
         """
 
-        xy_pixels = self.peaks.loc[:, ['x', 'y', 'w']] / self.scale_factor
+        xy_pixels = self.trajs.loc[:, ['x', 'y', 'w']] / self.scale_factor
         labels = xy_pixels.index.get_level_values('label').unique().tolist()
 
         # Setup color gradient for segment labels
@@ -51,7 +53,7 @@ class ImageOverlayWidget(pg.ImageView):
                 pen = pg.mkPen(color=color)
 
                 roi = pg.CircleROI((peak['y'] - peak['w'] / 2, peak['x'] - peak['w'] / 2),
-                                   peak['w'], pen=pen,  movable=False, scaleSnap=False)
+                                   peak['w'], pen=pen,  movable=True, scaleSnap=False)
                 roi.label = label
                 roi.t_stamp = t_stamp
 

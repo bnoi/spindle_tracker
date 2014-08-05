@@ -34,6 +34,7 @@ class DataSelectorViewBox(pg.ViewBox):
                 rect_box = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
                 rect_box = self.childGroup.mapRectFromParent(rect_box)
                 self.update_selection(rect_box)
+                self.traj_widget.update_selection_infos()
 
                 self.updateScaleBox(ev.buttonDownPos(), ev.pos())
         else:
@@ -48,7 +49,7 @@ class DataSelectorViewBox(pg.ViewBox):
         for item in self.traj_widget.traj_items:
             if item not in selected_items and item.is_selected:
                 self.traj_widget.unselect_item(item)
-            elif item in selected_items and not item.is_selected:
+            elif item in selected_items and item.is_selected is False:
                 self.traj_widget.select_item(item)
 
         self.old_selection = selected_items

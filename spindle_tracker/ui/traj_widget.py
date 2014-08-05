@@ -128,7 +128,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         # Info Panel Dock
         self.dock_info.setContentsMargins(5, 5, 5, 5)
         self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)
-        self.selection_box = QtGui.QGroupBox('Selected Items')
+        self.selection_box = QtGui.QGroupBox('Selected Items (0)')
         self.dock_info.addWidget(self.selection_box)
         self.selection_tree = pg.TreeWidget()
         self.selection_tree.setColumnCount(1)
@@ -194,8 +194,10 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         self.clear_selection_infos()
 
+        i = 0
         for item in self.traj_items:
             if item.is_selected and isinstance(item, pg.SpotItem):
+                i += 1
                 t_stamp, label = item.data()
                 title = "{}, {}".format(t_stamp, label)
                 twi = QtGui.QTreeWidgetItem([title])
@@ -207,14 +209,12 @@ class TrajectoriesWidget(QtGui.QWidget):
 
                 self.selection_tree.addTopLevelItem(twi)
 
+        self.selection_box.setTitle('Selected Items ({})'.format(i))
+
     def clear_selection_infos(self):
         """
         """
-        for item in self.selection_tree.listAllItems():
-            try:
-                self.selection_tree.removeTopLevelItem(item)
-            except:
-                pass
+        self.selection_tree.clear()
 
     # Items management
 
@@ -301,7 +301,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     def select_item(self, item):
         """
         """
-        if not item.is_selected:
+        if item.is_selected is False:
             item.is_selected = True
 
             if isinstance(item, pg.SpotItem):

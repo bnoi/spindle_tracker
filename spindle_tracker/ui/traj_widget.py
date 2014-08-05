@@ -20,8 +20,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1,
-                 column_to_display=['t', 'x', 'y', 'I', 'w'],
-                 add_draggable_line=False,
+                 column_to_display=None,
                  parent=None):
         """
         """
@@ -50,9 +49,10 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.yaxis = yaxis
         self.scale_x = scale_x
         self.scale_y = scale_y
-        self.column_to_display = column_to_display
-        self.add_draggable_line = add_draggable_line
-        self.draggable_line = None
+        if column_to_display:
+            self.column_to_display = column_to_display
+        else:
+            self.column_to_display = self.trajs.columns.tolist()
 
         self.curve_width = 1
         self.scatter_size = 8
@@ -182,16 +182,19 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.but_quit.clicked.connect(self.close)
 
         # Build info Panel Dock
-        self.dock_info.setContentsMargins(5, 5, 5, 5)
-        self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)
+        self.dock_info.layout.setContentsMargins(5, 5, 5, 5)
+
+        self.mouse_text = QtGui.QLabel()
+        self.dock_info.addWidget(self.mouse_text)
+
         self.selection_box = QtGui.QGroupBox('Selected Items (0)')
         self.dock_info.addWidget(self.selection_box)
+
         self.selection_tree = pg.TreeWidget()
         self.selection_tree.setColumnCount(1)
         self.selection_tree.setHeaderLabels(["t_stamp, label"])
         self.selection_box.setLayout(QtGui.QVBoxLayout())
         self.selection_box.layout().addWidget(self.selection_tree)
-        self.status_text = self.build_text_groupbox('Message', self.dock_info)
 
     # Menus
 
@@ -281,9 +284,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.remove_items()
         self.setup_color_list()
 
-        if self.add_draggable_line:
-            self.draggable_line = pg.InfiniteLine(angle=90, movable=True)
-            self.pw.addItem(self.draggable_line)
+        self.draggable_line = pg.InfiniteLine(angle=90, movable=True)
+        self.pw.addItem(self.draggable_line)
 
         for label, peaks in self.trajs.groupby(level='label'):
 
@@ -328,6 +330,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
 
         self.clear_selection_infos()
+
+        self.pw.autoRange()
 
     def points_clicked(self, plot, points):
         """
@@ -526,24 +530,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         """
         return self._colors[label]
-
-    # Factories
-
-    def build_text_groupbox(self, title="", parent_widget=None):
-        """
-        """
-        gbox = QtGui.QGroupBox(title)
-        text = QtGui.QTextEdit()
-        text.setReadOnly(False)
-        l = QtGui.QVBoxLayout()
-        l.addWidget(text)
-        l.addStretch(1)
-        gbox.setLayout(l)
-
-        if parent_widget:
-            parent_widget.addWidget(gbox)
-
-        return text
 
     # Exporters
 

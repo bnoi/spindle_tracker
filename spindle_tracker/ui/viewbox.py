@@ -45,10 +45,6 @@ class DataSelectorViewBox(pg.ViewBox):
         """
 
         selected_items = self.items_inside_rectangle(rect_box)
-        # for item in selected_items:
-
-        #     if item.is_selected is False:
-        #         self.traj_widget.select_item(item)
 
         for item in self.traj_widget.traj_items:
             if item not in selected_items and item.is_selected is True:

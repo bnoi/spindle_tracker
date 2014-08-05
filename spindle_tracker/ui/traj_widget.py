@@ -32,9 +32,20 @@ class TrajectoriesWidget(QtGui.QWidget):
         if parent is None:
             self.resize(1000, 500)
 
-        self.trajs = trajs
+        if isinstance(trajs, list):
+            self.current_traj_id = 0
+            self.trajs = trajs[self.current_traj_id]
+            self.all_trajs = trajs
+            self.len_trajs = len(trajs)
+        else:
+            self.current_traj_id = None
+            self.trajs = trajs
+            self.all_trajs = None
+            self.len_trajs = len(trajs)
+
         self.historic_trajs = []
-        self.historic_trajs.append(trajs)
+        self.historic_trajs.append(self.trajs)
+
         self.xaxis = xaxis
         self.yaxis = yaxis
         self.scale_x = scale_x
@@ -85,47 +96,92 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.pw.scene().sigMouseMoved.connect(self.update_mouse_infos)
 
         # Buttons Dock
-        self.dock_buttons.layout.setContentsMargins(5, 5, 5, 5)
-        self.dock_buttons.layout.setColumnStretch(10, 10)
+        self.dock_buttons_parent = QtGui.QWidget()
+        self.dock_buttons_parent.setLayout(QtGui.QHBoxLayout())
+        self.dock_buttons.addWidget(self.dock_buttons_parent)
+
+        # Build axis buttons
+
+        self.axis_container = QtGui.QWidget()
+        self.axis_container.setLayout(QtGui.QGridLayout())
 
         self.cb_xaxis_label = QtGui.QLabel('X axis : ')
-        self.dock_buttons.addWidget(self.cb_xaxis_label, row=0, col=0)
+        self.axis_container.layout().addWidget(self.cb_xaxis_label, 0, 0)
         self.cb_xaxis = QtGui.QComboBox()
         for label in self.trajs.columns:
             self.cb_xaxis.addItem(label)
-        self.dock_buttons.addWidget(self.cb_xaxis, row=0, col=1)
+        self.axis_container.layout().addWidget(self.cb_xaxis, 0, 1)
         self.cb_xaxis.currentIndexChanged.connect(self.set_xaxis)
 
         self.cb_yaxis_label = QtGui.QLabel('Y axis : ')
-        self.dock_buttons.addWidget(self.cb_yaxis_label, row=0, col=2)
+        self.axis_container.layout().addWidget(self.cb_yaxis_label, 1, 0)
         self.cb_yaxis = QtGui.QComboBox()
         for label in self.trajs.columns:
             self.cb_yaxis.addItem(label)
-        self.dock_buttons.addWidget(self.cb_yaxis, row=0, col=3)
+        self.axis_container.layout().addWidget(self.cb_yaxis, 1, 1)
         self.cb_yaxis.currentIndexChanged.connect(self.set_yaxis)
 
-        self.but_undo = QtGui.QPushButton("Undo (0)")
-        self.dock_buttons.addWidget(self.but_undo, row=0, col=4)
+        self.dock_buttons_parent.layout().addWidget(self.axis_container)
+
+        # Build undo / redo buttons
+
+        self.history_container = QtGui.QWidget()
+        self.history_container.setLayout(QtGui.QGridLayout())
+
+        self.but_undo = QtGui.QPushButton("Undo < (0)")
+        self.history_container.layout().addWidget(self.but_undo, 0, 0)
         self.but_undo.clicked.connect(self.undo)
 
-        self.but_redo = QtGui.QPushButton("Redo (0)")
-        self.dock_buttons.addWidget(self.but_redo, row=0, col=5)
+        self.but_redo = QtGui.QPushButton("Redo > (0)")
+        self.history_container.layout().addWidget(self.but_redo, 1, 0)
         self.but_redo.clicked.connect(self.redo)
 
+        self.dock_buttons_parent.layout().addWidget(self.history_container)
+
+        # Build select / unselect buttons
+
+        self.selection_container = QtGui.QWidget()
+        self.selection_container.setLayout(QtGui.QGridLayout())
+
         self.but_select_all = QtGui.QPushButton("Select All")
-        self.dock_buttons.addWidget(self.but_select_all, row=0, col=6)
+        self.selection_container.layout().addWidget(self.but_select_all, 0, 0)
         self.but_select_all.clicked.connect(self.select_all_items)
 
         self.but_unselect_all = QtGui.QPushButton("Unselect All")
-        self.dock_buttons.addWidget(self.but_unselect_all, row=0, col=7)
+        self.selection_container.layout().addWidget(self.but_unselect_all, 1, 0)
         self.but_unselect_all.clicked.connect(self.unselect_all_items)
 
+        self.dock_buttons_parent.layout().addWidget(self.selection_container)
+
+        # Build trajs selector
+
+        if self.all_trajs:
+            self.all_trajs_container = QtGui.QWidget()
+            self.all_trajs_container.setLayout(QtGui.QGridLayout())
+
+            self.all_trajs_label = QtGui.QLabel()
+            self.set_all_trajs_label()
+            self.all_trajs_container.layout().addWidget(self.all_trajs_label, 0, 0)
+
+            self.all_trajs_previous = QtGui.QPushButton("Next >")
+            self.all_trajs_container.layout().addWidget(self.all_trajs_previous, 1, 0)
+            self.all_trajs_previous.clicked.connect(self.next_traj)
+
+            self.all_trajs_next = QtGui.QPushButton("Previous <")
+            self.all_trajs_container.layout().addWidget(self.all_trajs_next, 2, 0)
+            self.all_trajs_next.clicked.connect(self.previous_trajs)
+
+            self.dock_buttons_parent.layout().addWidget(self.all_trajs_container)
+
+        # Build Quit button
+
         if not self.parent():
+            self.dock_buttons_parent.layout().addStretch(1)
             self.but_quit = QtGui.QPushButton("Quit")
-            self.dock_buttons.addWidget(self.but_quit, row=0, col=8)
+            self.dock_buttons_parent.layout().addWidget(self.but_quit)
             self.but_quit.clicked.connect(self.close)
 
-        # Info Panel Dock
+        # Build info Panel Dock
         self.dock_info.setContentsMargins(5, 5, 5, 5)
         self.mouse_text = self.build_text_groupbox('Under Mouse', self.dock_info)
         self.selection_box = QtGui.QGroupBox('Selected Items (0)')
@@ -367,6 +423,45 @@ class TrajectoriesWidget(QtGui.QWidget):
             return False
         return self.colors(label)
 
+    # Trajectories selector
+
+    def set_traj(self, i):
+        """
+        """
+
+        if i < 0 or i >= self.len_trajs:
+            return
+
+        self.current_traj_id = i
+        self.trajs = self.all_trajs[self.current_traj_id]
+
+        self.set_all_trajs_label()
+
+        self.historic_trajs = []
+        self.historic_trajs.append(self.trajs)
+        self.update_historic_buttons()
+
+        self._colors = []
+        self.traj_items = []
+
+        self.update_trajectory()
+
+    def next_traj(self):
+        """
+        """
+        self.set_traj(self.current_traj_id + 1)
+
+    def previous_trajs(self):
+        """
+        """
+        self.set_traj(self.current_traj_id - 1)
+
+    def set_all_trajs_label(self):
+        """
+        """
+        m = "Trajs selector : {}/{}"
+        self.all_trajs_label.setText(m.format(self.current_traj_id + 1, self.len_trajs))
+
     # Historic management
 
     def undo(self):
@@ -393,8 +488,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
 
         i = self.current_traj_index()
-        self.but_undo.setText('Undo ({})'.format(i))
-        self.but_redo.setText('Redo ({})'.format(len(self.historic_trajs) - i - 1))
+        self.but_undo.setText('Undo < ({})'.format(i))
+        self.but_redo.setText('Redo > ({})'.format(len(self.historic_trajs) - i - 1))
 
         if self.historic_trajs[0] is self.trajs:
             self.but_undo.setDisabled(True)

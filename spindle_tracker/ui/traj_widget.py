@@ -245,6 +245,7 @@ class TrajectoriesWidget(QtGui.QWidget):
             curve.label = label
             curve.is_selected = False
             self.pw.addItem(curve)
+            curve.sigClicked.connect(self.item_clicked)
             self.traj_items.append(curve)
 
             points_item = pg.ScatterPlotItem(symbol='o',
@@ -260,6 +261,7 @@ class TrajectoriesWidget(QtGui.QWidget):
                 point.parent = points_item
                 self.traj_items.append(point)
 
+            points_item.sigClicked.connect(self.points_clicked)
             self.pw.addItem(points_item)
 
         self.pw.showGrid(x=True, y=True)
@@ -270,16 +272,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
 
         self.clear_selection_infos()
-        self.install_clicked_hooks()
-
-    def install_clicked_hooks(self):
-        """
-        """
-        for item in self.pw.items():
-            if isinstance(item, pg.PlotCurveItem):
-                item.sigClicked.connect(self.item_clicked)
-            elif isinstance(item, pg.ScatterPlotItem):
-                item.sigClicked.connect(self.points_clicked)
 
     def points_clicked(self, plot, points):
         """
@@ -291,7 +283,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         """
         self.check_control_key(ignore_items=[item])
-        if not item.is_selected:
+        if item.is_selected is False:
             self.select_item(item)
         else:
             self.unselect_item(item)
@@ -303,10 +295,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         if item.is_selected is False:
             item.is_selected = True
-
             if isinstance(item, pg.SpotItem):
                 item.setPen(width=2, color='r')
-                #item.setSize(self.scatter_size * 1.5)
+                item.setSize(self.scatter_size * 1.5)
             elif isinstance(item, pg.PlotCurveItem):
                 color = self.item_colors(item)
                 item.setPen(width=self.curve_width * 2, color=color)
@@ -321,7 +312,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
             if isinstance(item, pg.SpotItem):
                 item.setPen(None)
-                #item.setSize(self.scatter_size)
+                item.setSize(self.scatter_size)
             elif isinstance(item, pg.PlotCurveItem):
                 color = self.item_colors(item)
                 item.setPen(width=self.curve_width, color=color)
@@ -337,6 +328,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     def remove_items(self):
         """
         """
+        self.traj_items = []
         for item in self.pw.items():
             self.remove_item(item)
 

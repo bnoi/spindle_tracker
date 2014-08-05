@@ -28,8 +28,8 @@ class DataSelectorViewBox(pg.ViewBox):
         if modifiers == QtCore.Qt.ControlModifier and ev.button() == QtCore.Qt.LeftButton:
 
             if ev.isFinish():
+                # self.traj_widget.update_selection_infos()
                 self.rbScaleBox.hide()
-                self.traj_widget.update_selection_infos()
             else:
                 rect_box = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
                 rect_box = self.childGroup.mapRectFromParent(rect_box)
@@ -45,9 +45,13 @@ class DataSelectorViewBox(pg.ViewBox):
         """
 
         selected_items = self.items_inside_rectangle(rect_box)
+        # for item in selected_items:
+
+        #     if item.is_selected is False:
+        #         self.traj_widget.select_item(item)
 
         for item in self.traj_widget.traj_items:
-            if item not in selected_items and item.is_selected:
+            if item not in selected_items and item.is_selected is True:
                 self.traj_widget.unselect_item(item)
             elif item in selected_items and item.is_selected is False:
                 self.traj_widget.select_item(item)

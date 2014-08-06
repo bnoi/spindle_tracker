@@ -18,6 +18,8 @@ class TrajectoriesWidget(QtGui.QWidget):
     """
     """
 
+    sig_traj_change = QtCore.Signal(int)
+
     def __init__(self, trajs, xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1, parent=None):
         """
@@ -176,15 +178,17 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.axis_container.layout().addWidget(self.cb_xaxis_label, 0, 0)
         self.cb_xaxis = QtGui.QComboBox()
         self.axis_container.layout().addWidget(self.cb_xaxis, 0, 1)
-        self.cb_xaxis.currentIndexChanged.connect(self.set_xaxis)
 
         self.cb_yaxis_label = QtGui.QLabel('Y axis : ')
         self.axis_container.layout().addWidget(self.cb_yaxis_label, 1, 0)
         self.cb_yaxis = QtGui.QComboBox()
         self.axis_container.layout().addWidget(self.cb_yaxis, 1, 1)
-        self.cb_yaxis.currentIndexChanged.connect(self.set_yaxis)
 
         self.setup_axis_buttons_label()
+
+        self.cb_xaxis.currentIndexChanged.connect(self.set_xaxis)
+        self.cb_yaxis.currentIndexChanged.connect(self.set_yaxis)
+
         self.dock_buttons_parent.layout().addWidget(self.axis_container)
 
         # Build undo / redo buttons
@@ -448,6 +452,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.update_historic_buttons()
         self.update_trajectory()
         self.set_all_trajs_label()
+
+        self.sig_traj_change.emit(self.current_traj_id)
 
     def next_traj(self):
         """

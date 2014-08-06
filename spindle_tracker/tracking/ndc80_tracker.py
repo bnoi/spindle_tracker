@@ -19,6 +19,8 @@ class Ndc80Tracker(Tracker):
     MINIMUM_METADATA = ['SizeX', 'SizeY', 'SizeZ',
                         'PhysicalSizeX', 'PhysicalSizeY',
                         'TimeIncrement']
+    ANNOTATIONS = {'state': (0, [0, 1, 2], None),
+                   'anaphase_start': (-1, None, float)}
 
     def __init__(self, *args, **kwargs):
         """

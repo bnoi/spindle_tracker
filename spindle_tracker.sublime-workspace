@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"cb_",
+				"cb_infos"
+			],
+			[
+				"trac",
+				"trackers"
+			],
+			[
+				"sca",
+				"scale_y"
+			],
+			[
+				"tra",
+				"traj_name"
+			],
+			[
 				"mo",
 				"mouse_text"
 			],
@@ -40,10 +56,6 @@
 				"QWidget"
 			],
 			[
-				"sca",
-				"scale_x"
-			],
-			[
 				"x",
 				"xaxis"
 			],
@@ -54,10 +66,6 @@
 			[
 				"but",
 				"but_undo"
-			],
-			[
-				"tra",
-				"traj_items"
 			],
 			[
 				"traj",
@@ -506,14 +514,6 @@
 			[
 				"om",
 				"ome_xml	statement"
-			],
-			[
-				"sli",
-				"slice_y	param"
-			],
-			[
-				"tif",
-				"tif_path	statement"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "spindle_tracker/ui/trajectories_widget.py",
 			"settings":
 			{
-				"buffer_size": 18294,
+				"buffer_size": 18425,
 				"line_ending": "Unix"
 			}
 		},
@@ -531,7 +531,15 @@
 			"file": "spindle_tracker/ui/tracker_widget.py",
 			"settings":
 			{
-				"buffer_size": 670,
+				"buffer_size": 2698,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/TreeWidget.py",
+			"settings":
+			{
+				"buffer_size": 10256,
 				"line_ending": "Unix"
 			}
 		}
@@ -756,9 +764,10 @@
 	},
 	"file_history":
 	[
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/trajectories_widget.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/ScatterPlotWidget.py",
 		"/home/hadim/.config/sublime-text-3/Packages/Default/Default (Linux).sublime-keymap",
 		"/home/hadim/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
-		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/trajectories_widget.py",
 		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking/ndc80_tracker.py",
 		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/tracker_widget.py",
 		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking/tracker.py",
@@ -882,8 +891,7 @@
 		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/defective_attachments.svg",
 		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/ldep_method.svg",
 		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/oscillations_method.svg",
-		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/simus_anaphase.svg",
-		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/test_parameters.svg"
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/simus_anaphase.svg"
 	],
 	"find":
 	{
@@ -902,6 +910,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"sig_traj_change",
+			"sigItemMoved",
+			"set_tr	",
+			"sigItemMoved",
 			"selection_tree",
 			"set_all_trajs_label",
 			"clear_selection_infos",
@@ -1025,11 +1037,7 @@
 			"julou",
 			"guess",
 			"OIOMetadata",
-			"sanitize_dict",
-			"guess_number_dict",
-			"/ 60",
-			"import_array",
-			"METH_VARARGS"
+			"sanitize_dict"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1147,15 +1155,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 18294,
+						"buffer_size": 18425,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								11262,
-								11262
+								14824,
+								14824
 							]
 						],
 						"settings":
@@ -1166,7 +1174,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3536.0,
+						"translation.y": 5480.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -1179,51 +1187,50 @@
 			"sheets":
 			[
 				{
-					"buffer": 0,
-					"file": "spindle_tracker/ui/trajectories_widget.py",
+					"buffer": 1,
+					"file": "spindle_tracker/ui/tracker_widget.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 18294,
+						"buffer_size": 2698,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1656,
-								1656
+								1779,
+								1779
 							]
 						],
 						"settings":
 						{
-							"history_list_is_closing": true,
 							"syntax": "Packages/Python/Python.tmLanguage",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 618.0,
+						"translation.y": 390.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "spindle_tracker/ui/tracker_widget.py",
+					"buffer": 2,
+					"file": "/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/TreeWidget.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 670,
+						"buffer_size": 10256,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								135,
-								135
+								2943,
+								2943
 							]
 						],
 						"settings":
@@ -1233,7 +1240,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 605.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,

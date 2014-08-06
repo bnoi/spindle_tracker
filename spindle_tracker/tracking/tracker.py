@@ -28,6 +28,7 @@ class Tracker():
     HDF5_EXTENSION = "h5"
     TIF_EXTENSION = "tif"
     XML_EXTENSION = "xml"
+    ANNOTATIONS = []
 
     def __init__(self,
                  sample_path,
@@ -82,6 +83,7 @@ class Tracker():
             raise IOError("Sample path should be a valid Tiff file or HDF5 file.")
 
         self.load_oio()
+        self.setup_annotations()
 
     @property
     def verbose(self):
@@ -168,7 +170,6 @@ class Tracker():
     def load_oio(self):
         """
         """
-
 
         for key in self.oio.keys():
             key = key.replace('/', '')
@@ -294,6 +295,23 @@ class Tracker():
             self.save_oio()
 
         return self.metadata['unique_id']
+
+    def setup_annotations(self):
+        """
+        """
+        if 'annotations' not in self.stored_data:
+            annotations = {}
+            self.save(annotations, 'annotations')
+
+        template = self.__class__.ANNOTATIONS
+        save = False
+        for k, (default, choices, value_type) in template.items():
+            if k not in self.annotations.keys():
+                self.annotations[k] = default
+                save = True
+
+        if save:
+            self.save_oio()
 
     def open_roi(self, suffix='.ROI'):
         """Open ROI file (.zip and .roi)

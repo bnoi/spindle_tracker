@@ -19,9 +19,7 @@ class TrajectoriesWidget(QtGui.QWidget):
     """
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
-                 scale_x=1, scale_y=1,
-                 column_to_display=None,
-                 parent=None):
+                 scale_x=1, scale_y=1, parent=None):
         """
         """
         super().__init__(parent=parent)
@@ -32,40 +30,71 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.resize(1000, 500)
 
         if isinstance(trajs, list):
-            self.current_traj_id = 0
-            self.trajs = trajs[self.current_traj_id]
             self.all_trajs = trajs
-            self.len_trajs = len(trajs)
         else:
-            self.current_traj_id = None
-            self.trajs = trajs
-            self.all_trajs = None
-            self.len_trajs = len(trajs)
+            self.all_trajs = [trajs]
 
-        self.historic_trajs = []
-        self.historic_trajs.append(self.trajs)
+        self.trajs = self.all_trajs[0]
+        self.len_trajs = len(self.all_trajs)
+
+        self.curve_width = 1
+        self.scatter_size = 8
 
         self.xaxis = xaxis
         self.yaxis = yaxis
         self.scale_x = scale_x
         self.scale_y = scale_y
-        if column_to_display:
-            self.column_to_display = column_to_display
-        else:
-            self.column_to_display = self.trajs.columns.tolist()
-
-        self.curve_width = 1
-        self.scatter_size = 8
 
         self.setup_ui()
-        self.setup_menus()
-        self.update_historic_buttons()
+        self.set_trajectories(0)
 
-        # Setup trajectories and plot logic
-        self._colors = []
-        self.traj_items = []
+    # Message management
 
-        self.update_trajectory()
+    def update_mouse_infos(self, pos):
+        """
+        """
+        pos = self.pw.plotItem.vb.mapDeviceToView(pos)
+
+        mess = ""
+        mess += "x = {x}\ny = {y}\n"
+        # mess += "label = {label}\ntime = {time}\n"
+        # mess += "w = {w}\nI = {I}\n"
+
+        x = np.round(pos.x(), 2)
+        y = np.round(pos.y(), 2)
+
+        args = dict(x=x, y=y, label=None, time=None, w=None, I=None)
+        mess = mess.format(**args)
+
+        self.mouse_text.setText(mess)
+
+    def update_selection_infos(self):
+        """
+        """
+
+        if not hasattr(self, 'selection_tree'):
+            return
+
+        self.selection_tree.clear()
+
+        i = 0
+        for item in self.traj_items:
+            if item.is_selected and isinstance(item, pg.SpotItem):
+                i += 1
+                t_stamp, label = item.data()
+                title = "{}, {}".format(t_stamp, label)
+                twi = QtGui.QTreeWidgetItem([title])
+
+                peak = self.trajs.loc[t_stamp, label]
+                for l in self.column_to_display:
+                    ctwi = QtGui.QTreeWidgetItem(["{} : {}".format(l, peak[l])])
+                    twi.addChild(ctwi)
+
+                self.selection_tree.addTopLevelItem(twi)
+
+        self.selection_box.setTitle('Selected Items ({})'.format(i))
+
+    # UI methods
 
     def setup_ui(self):
         """
@@ -84,6 +113,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.area.addDock(self.dock_buttons, 'bottom')
 
         # Trajectory Plot Dock
+
         self.vb = DataSelectorViewBox()
         self.pw = pg.PlotWidget(viewBox=self.vb)
         self.vb.traj_widget = self
@@ -95,7 +125,44 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         self.pw.scene().sigMouseMoved.connect(self.update_mouse_infos)
 
-        # Buttons Dock
+        self.setup_buttons()
+        self.setup_menus()
+
+    def setup_menus(self):
+        """
+        """
+        self.menu_spots = QtGui.QMenu("Spots")
+        action_add_spot = QtGui.QAction("Add spot", self.menu_spots)
+        action_remove_spot = QtGui.QAction("Remove spot", self.menu_spots)
+        self.menu_spots.addAction(action_add_spot)
+        self.menu_spots.addAction(action_remove_spot)
+        action_add_spot.triggered.connect(lambda x: x)
+        action_remove_spot.triggered.connect(lambda x: x)
+
+        self.menu_trajs = QtGui.QMenu("Trajectories")
+        action_merge_trajs = QtGui.QAction("Merge two trajectories", self.menu_trajs)
+        action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
+        action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
+        action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
+        self.menu_trajs.addAction(action_merge_trajs)
+        self.menu_trajs.addAction(action_remove_traj)
+        self.menu_trajs.addAction(action_cut_traj)
+        self.menu_trajs.addAction(action_duplicate_traj)
+        action_merge_trajs.triggered.connect(lambda x: x)
+        action_remove_traj.triggered.connect(lambda x: x)
+        action_cut_traj.triggered.connect(lambda x: x)
+        action_duplicate_traj.triggered.connect(lambda x: x)
+
+        self.vb.menu.addSeparator()
+        self.vb.menu.addMenu(self.menu_spots)
+        self.vb.menu.addMenu(self.menu_trajs)
+
+    def setup_buttons(self):
+        """
+        """
+
+        # Build buttons Dock
+
         self.dock_buttons_parent = QtGui.QWidget()
         self.dock_buttons_parent.setLayout(QtGui.QHBoxLayout())
         self.dock_buttons.addWidget(self.dock_buttons_parent)
@@ -108,19 +175,16 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.cb_xaxis_label = QtGui.QLabel('X axis : ')
         self.axis_container.layout().addWidget(self.cb_xaxis_label, 0, 0)
         self.cb_xaxis = QtGui.QComboBox()
-        for label in self.trajs.columns:
-            self.cb_xaxis.addItem(label)
         self.axis_container.layout().addWidget(self.cb_xaxis, 0, 1)
         self.cb_xaxis.currentIndexChanged.connect(self.set_xaxis)
 
         self.cb_yaxis_label = QtGui.QLabel('Y axis : ')
         self.axis_container.layout().addWidget(self.cb_yaxis_label, 1, 0)
         self.cb_yaxis = QtGui.QComboBox()
-        for label in self.trajs.columns:
-            self.cb_yaxis.addItem(label)
         self.axis_container.layout().addWidget(self.cb_yaxis, 1, 1)
         self.cb_yaxis.currentIndexChanged.connect(self.set_yaxis)
 
+        self.setup_axis_buttons_label()
         self.dock_buttons_parent.layout().addWidget(self.axis_container)
 
         # Build undo / redo buttons
@@ -155,12 +219,11 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         # Build trajs selector
 
-        if self.all_trajs:
+        if self.len_trajs > 1:
             self.all_trajs_container = QtGui.QWidget()
             self.all_trajs_container.setLayout(QtGui.QGridLayout())
 
             self.all_trajs_label = QtGui.QLabel()
-            self.set_all_trajs_label()
             self.all_trajs_container.layout().addWidget(self.all_trajs_label, 0, 0)
 
             self.all_trajs_previous = QtGui.QPushButton("Next >")
@@ -196,84 +259,20 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.selection_box.setLayout(QtGui.QVBoxLayout())
         self.selection_box.layout().addWidget(self.selection_tree)
 
-    # Menus
-
-    def setup_menus(self):
-        """
-        """
-        self.menu_spots = QtGui.QMenu("Spots")
-        action_add_spot = QtGui.QAction("Add spot", self.menu_spots)
-        action_remove_spot = QtGui.QAction("Remove spot", self.menu_spots)
-        self.menu_spots.addAction(action_add_spot)
-        self.menu_spots.addAction(action_remove_spot)
-        action_add_spot.triggered.connect(lambda x: x)
-        action_remove_spot.triggered.connect(lambda x: x)
-
-        self.menu_trajs = QtGui.QMenu("Trajectories")
-        action_merge_trajs = QtGui.QAction("Merge two trajectories", self.menu_trajs)
-        action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
-        action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
-        action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
-        self.menu_trajs.addAction(action_merge_trajs)
-        self.menu_trajs.addAction(action_remove_traj)
-        self.menu_trajs.addAction(action_cut_traj)
-        self.menu_trajs.addAction(action_duplicate_traj)
-        action_merge_trajs.triggered.connect(lambda x: x)
-        action_remove_traj.triggered.connect(lambda x: x)
-        action_cut_traj.triggered.connect(lambda x: x)
-        action_duplicate_traj.triggered.connect(lambda x: x)
-
-        self.vb.menu.addSeparator()
-        self.vb.menu.addMenu(self.menu_spots)
-        self.vb.menu.addMenu(self.menu_trajs)
-
-    # Message management
-
-    def update_mouse_infos(self, pos):
-        """
-        """
-        pos = self.pw.plotItem.vb.mapDeviceToView(pos)
-
-        mess = ""
-        mess += "x = {x}\ny = {y}\n"
-        # mess += "label = {label}\ntime = {time}\n"
-        # mess += "w = {w}\nI = {I}\n"
-
-        x = np.round(pos.x(), 2)
-        y = np.round(pos.y(), 2)
-
-        args = dict(x=x, y=y, label=None, time=None, w=None, I=None)
-        mess = mess.format(**args)
-
-        self.mouse_text.setText(mess)
-
-    def update_selection_infos(self):
+    def setup_axis_buttons_label(self):
         """
         """
 
-        self.clear_selection_infos()
+        self.cb_xaxis.clear()
+        for label in self.trajs.columns:
+            self.cb_xaxis.addItem(label)
 
-        i = 0
-        for item in self.traj_items:
-            if item.is_selected and isinstance(item, pg.SpotItem):
-                i += 1
-                t_stamp, label = item.data()
-                title = "{}, {}".format(t_stamp, label)
-                twi = QtGui.QTreeWidgetItem([title])
+        self.cb_yaxis.clear()
+        for label in self.trajs.columns:
+            self.cb_yaxis.addItem(label)
 
-                peak = self.trajs.loc[t_stamp, label]
-                for l in self.column_to_display:
-                    ctwi = QtGui.QTreeWidgetItem(["{} : {}".format(l, peak[l])])
-                    twi.addChild(ctwi)
-
-                self.selection_tree.addTopLevelItem(twi)
-
-        self.selection_box.setTitle('Selected Items ({})'.format(i))
-
-    def clear_selection_infos(self):
-        """
-        """
-        self.selection_tree.clear()
+        self.set_xaxis(self.xaxis)
+        self.set_yaxis(self.yaxis)
 
     # Items management
 
@@ -329,7 +328,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.cb_xaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.xaxis))
         self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
 
-        self.clear_selection_infos()
+        self.update_selection_infos()
 
         self.pw.autoRange()
 
@@ -429,7 +428,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     # Trajectories selector
 
-    def set_traj(self, i):
+    def set_trajectories(self, i):
         """
         """
 
@@ -439,32 +438,33 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.current_traj_id = i
         self.trajs = self.all_trajs[self.current_traj_id]
 
-        self.set_all_trajs_label()
-
+        self.column_to_display = self.trajs.columns.tolist()
         self.historic_trajs = []
         self.historic_trajs.append(self.trajs)
-        self.update_historic_buttons()
 
         self._colors = []
         self.traj_items = []
 
+        self.update_historic_buttons()
         self.update_trajectory()
+        self.set_all_trajs_label()
 
     def next_traj(self):
         """
         """
-        self.set_traj(self.current_traj_id + 1)
+        self.set_trajectories(self.current_traj_id + 1)
 
     def previous_trajs(self):
         """
         """
-        self.set_traj(self.current_traj_id - 1)
+        self.set_trajectories(self.current_traj_id - 1)
 
     def set_all_trajs_label(self):
         """
         """
-        m = "Trajs selector : {}/{}"
-        self.all_trajs_label.setText(m.format(self.current_traj_id + 1, self.len_trajs))
+        if self.len_trajs > 1:
+            m = "Trajs selector : {}/{}"
+            self.all_trajs_label.setText(m.format(self.current_traj_id + 1, self.len_trajs))
 
     # Historic management
 
@@ -563,6 +563,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.xaxis = ax_name
         if scale:
             self.scale_x = scale
+
         self.update_trajectory()
 
     def set_yaxis(self, ax_name, scale=None):

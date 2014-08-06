@@ -1,0 +1,1312 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"mo",
+				"mouse_text"
+			],
+			[
+				"col",
+				"column_to_display"
+			],
+			[
+				"all",
+				"all_trajs"
+			],
+			[
+				"le",
+				"len_trajs"
+			],
+			[
+				"cu",
+				"current_traj_id"
+			],
+			[
+				"c",
+				"current_traj_index"
+			],
+			[
+				"doc",
+				"dock_buttons"
+			],
+			[
+				"Qt",
+				"QtGui"
+			],
+			[
+				"QTW",
+				"QWidget"
+			],
+			[
+				"sca",
+				"scale_x"
+			],
+			[
+				"x",
+				"xaxis"
+			],
+			[
+				"upd",
+				"update_trajectory"
+			],
+			[
+				"but",
+				"but_undo"
+			],
+			[
+				"tra",
+				"traj_items"
+			],
+			[
+				"traj",
+				"traj_widget"
+			],
+			[
+				"sele",
+				"selection_tree"
+			],
+			[
+				"do",
+				"dock_info"
+			],
+			[
+				"d",
+				"dock_info"
+			],
+			[
+				"rec",
+				"rect_box"
+			],
+			[
+				"item",
+				"items_inside"
+			],
+			[
+				"is",
+				"is_selected"
+			],
+			[
+				"poin",
+				"points_items"
+			],
+			[
+				"select",
+				"points_selected"
+			],
+			[
+				"dock",
+				"dock_buttons"
+			],
+			[
+				"un",
+				"unselect_all_items"
+			],
+			[
+				"sel",
+				"selected_items"
+			],
+			[
+				"index",
+				"index_list"
+			],
+			[
+				"set",
+				"setup_color_list"
+			],
+			[
+				"remove_i",
+				"remove_item"
+			],
+			[
+				"cur",
+				"curve_width"
+			],
+			[
+				"get",
+				"get_colors_list"
+			],
+			[
+				"color",
+				"colors"
+			],
+			[
+				"sc",
+				"scale_y"
+			],
+			[
+				"se",
+				"segment_idxs"
+			],
+			[
+				"figu",
+				"figures_list"
+			],
+			[
+				"tran",
+				"transformations"
+			],
+			[
+				"simu",
+				"simu_tmp"
+			],
+			[
+				"sim",
+				"simus_path"
+			],
+			[
+				"si",
+				"simu_full_path"
+			],
+			[
+				"para",
+				"Parallel"
+			],
+			[
+				"sto",
+				"store_prefix"
+			],
+			[
+				"mea",
+				"measures"
+			],
+			[
+				"roi",
+				"roi_file_base"
+			],
+			[
+				"read_roi_",
+				"read_roi_single"
+			],
+			[
+				"rea",
+				"read_roi_zip"
+			],
+			[
+				"re",
+				"read_roi"
+			],
+			[
+				"pro",
+				"property	New Property"
+			],
+			[
+				"tracker",
+				"tracker_params"
+			],
+			[
+				"new",
+				"new_trajs"
+			],
+			[
+				"full",
+				"full_xml_path"
+			],
+			[
+				"ne",
+				"new_path"
+			],
+			[
+				"exe",
+				"except"
+			],
+			[
+				"inter",
+				"interpolation_order"
+			],
+			[
+				"use",
+				"use_t_stamp"
+			],
+			[
+				"start",
+				"start_times"
+			],
+			[
+				"us",
+				"use_t_stamp"
+			],
+			[
+				"gap",
+				"gaps_size"
+			],
+			[
+				"mat",
+				"matches"
+			],
+			[
+				"Po",
+				"PosX1"
+			],
+			[
+				"vec",
+				"vec_t_stamp"
+			],
+			[
+				"pea",
+				"peaks_real_interpolated"
+			],
+			[
+				"in",
+				"interpolated"
+			],
+			[
+				"ex",
+				"except"
+			],
+			[
+				"force",
+				"force_metadata"
+			],
+			[
+				"num",
+				"num_kept"
+			],
+			[
+				"nu",
+				"num_kept"
+			],
+			[
+				"max",
+				"max_radius"
+			],
+			[
+				"_re",
+				"_remove_weakers"
+			],
+			[
+				"times",
+				"times_interpolated"
+			],
+			[
+				"peaks",
+				"peaks_real"
+			],
+			[
+				"has",
+				"has_h5"
+			],
+			[
+				"Physi",
+				"PhysicalSizeX"
+			],
+			[
+				"cor",
+				"corrected_k"
+			],
+			[
+				"sa",
+				"save_oio"
+			],
+			[
+				"ful",
+				"full_tif_path"
+			],
+			[
+				"store",
+				"stored_data"
+			],
+			[
+				"ti",
+				"tif_path"
+			],
+			[
+				"n",
+				"new_path"
+			],
+			[
+				"b",
+				"base_dir"
+			],
+			[
+				"axe",
+				"axes_names"
+			],
+			[
+				"fro",
+				"from_dir"
+			],
+			[
+				"rsy",
+				"rsync_args"
+			],
+			[
+				"mou",
+				"mount_folder"
+			],
+			[
+				"mount",
+				"mount_uuid"
+			],
+			[
+				"r",
+				"rgb"
+			],
+			[
+				"fram",
+				"frames_dir"
+			],
+			[
+				"size",
+				"size_z"
+			],
+			[
+				"real",
+				"real_metadata"
+			],
+			[
+				"xml",
+				"xml_str"
+			],
+			[
+				"ope",
+				"open_tubhiswt_4D_ome_xml"
+			],
+			[
+				"colo",
+				"color_code"
+			],
+			[
+				"lap_solver",
+				"lap_solver_parameters"
+			],
+			[
+				"pos",
+				"post_cost_function"
+			],
+			[
+				"chro",
+				"chrom_colors"
+			],
+			[
+				"for",
+				"force_parameters"
+			],
+			[
+				"cos",
+				"cost_matrice_function"
+			],
+			[
+				"dis",
+				"distance_parameters"
+			],
+			[
+				"cost",
+				"cost_function"
+			],
+			[
+				"distance",
+				"distance_metric"
+			],
+			[
+				"distan",
+				"distance_parameters"
+			],
+			[
+				"axes",
+				"axes_names	statement"
+			],
+			[
+				"clu",
+				"clusters_count	statement"
+			],
+			[
+				"msg",
+				"msg_type"
+			],
+			[
+				"live",
+				"live_output"
+			],
+			[
+				"out",
+				"output_type"
+			],
+			[
+				"chann",
+				"channel_id"
+			],
+			[
+				"ax",
+				"axes_names"
+			],
+			[
+				"pr",
+				"prng	statement"
+			],
+			[
+				"clus",
+				"clusters_count"
+			],
+			[
+				"bads",
+				"bads_peak"
+			],
+			[
+				"la",
+				"labelized	statement"
+			],
+			[
+				"sample",
+				"sample_path	param"
+			],
+			[
+				"has_",
+				"has_tif	function"
+			],
+			[
+				"H",
+				"HDF5_SUFFIX_FILE"
+			],
+			[
+				"slice",
+				"slice_id	statement"
+			],
+			[
+				"peak",
+				"peaks_interp	statement"
+			],
+			[
+				"cropp",
+				"cropped_pages	statement"
+			],
+			[
+				"inde",
+				"index_header	statement"
+			],
+			[
+				"crop",
+				"cropped_files	statement"
+			],
+			[
+				"cr",
+				"cropped_files	statement"
+			],
+			[
+				"di",
+				"dim_id	statement"
+			],
+			[
+				"load",
+				"load_metadata	function"
+			],
+			[
+				"no",
+				"no_match	param"
+			],
+			[
+				"ome",
+				"ome_xml	statement"
+			],
+			[
+				"tf",
+				"tf_name	statement"
+			],
+			[
+				"om",
+				"ome_xml	statement"
+			],
+			[
+				"sli",
+				"slice_y	param"
+			],
+			[
+				"tif",
+				"tif_path	statement"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "trajectories_widget.py",
+			"settings":
+			{
+				"buffer_size": 18526,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tracker_widget.py",
+			"settings":
+			{
+				"buffer_size": 1607,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				"rein",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"xml",
+				"Indent XML"
+			],
+			[
+				"markdo",
+				"Set Syntax: Markdown"
+			],
+			[
+				"python",
+				"Set Syntax: Python"
+			],
+			[
+				"inden",
+				"Indent XML"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"diff",
+				"FileDiffs: Menu"
+			],
+			[
+				"liverelo",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"livereload",
+				"LiveReload: Self test"
+			],
+			[
+				"live",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"",
+				"About"
+			],
+			[
+				"autoin",
+				"Auto indent"
+			],
+			[
+				"auto",
+				"Auto indent"
+			],
+			[
+				"au",
+				"Auto indent"
+			],
+			[
+				"autoi",
+				"Auto indent"
+			],
+			[
+				"lint",
+				"SublimeLinter: Toggle Linter"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"pakage",
+				"Package Control: List Packages"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"instak",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"pep",
+				"Anaconda: Autoformat PEP8 Errors"
+			],
+			[
+				"pep8",
+				"Anaconda: Autoformat PEP8 Errors"
+			],
+			[
+				"livere",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"emmet",
+				"Emmet: Expand Abbreviation"
+			],
+			[
+				"wrap",
+				"HTML: Wrap Selection With Tag"
+			],
+			[
+				"html",
+				"HTML: Wrap Selection With Tag"
+			],
+			[
+				"li",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"dis",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"livel",
+				"LiveReload: Enable/disable plug-ins"
+			],
+			[
+				"in",
+				"Indent XML"
+			],
+			[
+				"indent",
+				"Indent XML"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"json",
+				"Set Syntax: JSON"
+			],
+			[
+				"inde",
+				"Indent XML"
+			],
+			[
+				"java",
+				"Set Syntax: Java"
+			],
+			[
+				"ind",
+				"Indent XML"
+			],
+			[
+				"upgra",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"add",
+				"Package Control: Add Repository"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"linter",
+				"SublimeLinter: Extract Annotations"
+			],
+			[
+				"upg",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"upgr",
+				"Package Control: Upgrade Package"
+			]
+		],
+		"width": 467.0
+	},
+	"console":
+	{
+		"height": 232.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())",
+			"__file__",
+			"reload_settings(view)",
+			"view.settings().get('sublimelinter')",
+			"view.settings()",
+			"view"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui"
+	],
+	"file_history":
+	[
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/tracker_widget.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/trajectories_widget.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker.sublime-project",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking/ndc80_tracker.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking/tracker.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/trajectories.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/__init__.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/PlotWidget.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/traj_widget.py",
+		"/home/hadim/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
+		"/home/hadim/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/dict.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/__init__.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/viewbox.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/tests/test_dict.py",
+		"/home/hadim/Insync/Documents/phd/dev/scikit-tracker/.git/COMMIT_EDITMSG",
+		"/home/hadim/Insync/Documents/phd/dev/scikit-tracker/Makefile",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/multiprocess.py",
+		"/home/hadim/.bash.d/functions.sh",
+		"/home/hadim/.bash_profile",
+		"/home/hadim/local/john/john-dev/doc/INSTALL-UBUNTU",
+		"/home/hadim/local/john/john-dev/odf_encrypted",
+		"/home/hadim/Documents/config/sym_link_config.sh",
+		"/home/hadim/.ssh/config",
+		"/home/hadim/local/john/john-dev/odf.log",
+		"/home/hadim/local/john/john-dev/run/john.conf",
+		"/home/hadim/local/john/john-dev/odf.conf",
+		"/home/hadim/local/john/john-dev/run/john.local.conf",
+		"/home/hadim/tmp/RECOVERED_FILES/file.5899167",
+		"/home/hadim/tmp/RECOVERED_FILES/file.262164",
+		"/home/hadim/local/john/john-dev/run/john.pot",
+		"/home/hadim/local/john/john-dev/run/john.log",
+		"/media/thor/data/ndc80/movies/wt/2013.07.19/260tcx/pp",
+		"/home/hadim/local/john/john-dev/doc/INSTALL",
+		"/home/hadim/local/john/john-dev/README",
+		"/home/hadim/.cache/.fr-c445nL/foo.json",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/exporters/SVGExporter.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/ViewBox/ViewBoxMenu.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/PlotItem/PlotItem.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/ViewBox/ViewBox.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/PlotItem/__init__.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/ScatterPlotItem.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/GraphicsItem.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/GraphicsObject.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/GraphItem.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/ui/image_overlay_widget.py",
+		"/home/hadim/traj_work.md",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/contextMenu.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/GraphicsLayoutWidget.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsWindows.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/GraphicsView.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/GraphicsScene/GraphicsScene.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/PlotWidget.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/TreeWidget.py",
+		"/home/hadim/test.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/linkedViews.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/widgets/TreeWidget.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/transformations.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/__init__.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/ViewBoxFeatures.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/ScatterPlot.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/dockarea/Dock.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/dockarea/DockArea.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/PanningPlot.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/dockarea/Container.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/dockarea.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/ui/display_figures_widget.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/dockarea/DockDrop.py",
+		"/home/hadim/local/python-libs/pyqtgraph/pyqtgraph/graphicsItems/PlotCurveItem.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/MouseSelection.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/tracking/cen2_tracker.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/GraphicsScene.py",
+		"/home/hadim/local/python-libs/pyqtgraph/examples/SpinBox.py",
+		"/home/hadim/pyqtgraph/examples/PlotWidget.py",
+		"/home/hadim/pyqtgraph/examples/ScatterPlot.py",
+		"/home/hadim/pyqtgraph/examples/Plotting.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/colors.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/color_system.py",
+		"/home/hadim/pyqtgraph/examples/ScatterPlotSpeedTest.py",
+		"/home/hadim/pyqtgraph/examples/PlotAutoRange.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/__init__.py",
+		"/home/hadim/pyqtgraph/examples/ScaleBar.py",
+		"/home/hadim/pyqtgraph/examples/ScatterPlotWidget.py",
+		"/home/hadim/pyqtgraph/examples/ROIExamples.py",
+		"/home/hadim/pyqtgraph/examples/ImageView.py",
+		"/home/hadim/pyqtgraph/examples/ImageItem.py",
+		"/home/hadim/pyqtgraph/examples/ROItypes.py",
+		"/home/hadim/pyqtgraph/examples/imageAnalysis.py",
+		"/home/hadim/pyqtgraph/examples/linkedViews.py",
+		"/home/hadim/pyqtgraph/examples/DataSlicing.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/ui/__init__.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/transformation.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/tracker/matrix/matrix.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/draw.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/__init__.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/ui/matplotlib_widget.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/detection/__init__.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/io/__init__.py",
+		"/home/hadim/dd.xml",
+		"/media/thor/data/ndc80/movies/wt/2013.07.31/260tcx/ff.xml",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/tests/test_trajectories.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/tests/test_transformation.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/tracker/cost_function/directed.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/measure_decorators.py",
+		"/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker/utils/geometry.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/__init__.py",
+		"/home/hadim/Documents/config/sublime-text/User/SublimeLinter.sublime-settings",
+		"/home/hadim/Documents/config/sublime-text/User/Preferences.sublime-settings",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/tracker/cost_function/brownian.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/translation.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/trajectories/measures/rotation.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/tracker/cost_function/gap_close.py",
+		"/home/hadim/Documents/config/pip/pip.conf",
+		"/home/hadim/Documents/config/pypirc",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/io/objectsio.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/io/metadataio.py",
+		"/media/thor/data/microscopy_data/HFR-Cdc11-Ase1_delta/14-07-23/movie_1_MMStack.ome.csv",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/sort.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/__init__.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/tests/test_sort.py",
+		"/home/hadim/Documents/phd/dev/scikit-tracker/sktracker/utils/tests/test_color_system.py",
+		"/media/thor/data/microscopy_data/HFR-Cdc11-Ase1_delta/14-07-23/movie_1/t.xml",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/defective_attachments.svg",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/ldep_method.svg",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/oscillations_method.svg",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/simus_anaphase.svg",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/test_parameters.svg",
+		"/home/hadim/Documents/phd/productions/2014.Papers.ldep/supplementaries/spindle_size.svg"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"glyphicon-"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"relo",
+			"mouse_text",
+			"build_text_groupbox",
+			"column_to_display",
+			"add_draggable_line",
+			")\n",
+			"update_historic_buttons",
+			"current_traj_id",
+			"self.trajs",
+			"layout()(",
+			"self.dock_buttons.addWidget",
+			"print",
+			"remove_items",
+			"traj_items",
+			"print",
+			"install_clicked_hooks",
+			"update_trajectory",
+			"is_selected = Fal",
+			"print",
+			"is_selected",
+			"selection_tree",
+			"MinLen = 0",
+			"MinLen = ",
+			"MinLen",
+			"ImageDescription",
+			"tw.",
+			"setExportMode",
+			"export",
+			"exportMethod",
+			"SpotItem",
+			"menu_trajs",
+			"menu_spots",
+			"update_items",
+			"self.pw",
+			"unselect_all_items",
+			"ignore_items",
+			"update_selection_infos",
+			"update_items",
+			"is_selected",
+			"unselect_all_items",
+			"unselect_item",
+			"map",
+			"sigMouseMoved",
+			"inside",
+			"ptsClicked",
+			"is_se",
+			"sele",
+			"select",
+			"itemsnea",
+			"rbScaleBox",
+			"viewbo",
+			"SpotItem",
+			"plotitem",
+			"print",
+			"select_all_items",
+			"layout",
+			"self.l",
+			"sigPlotChanged",
+			"sigClicked",
+			"PlotItem",
+			"data",
+			"self.data",
+			"data",
+			"PlotWidget",
+			"addItem",
+			"remove_small_segments",
+			"progress",
+			"interp",
+			"warnin",
+			"plt",
+			"fig_generator",
+			"self.trajs_poles",
+			")\n",
+			"spbs_idx",
+			"self.verbose",
+			"time_interpolate_",
+			"Mary and al., 2014",
+			"real_",
+			"print",
+			"_label_peaks_side",
+			"v_max_spb",
+			"project",
+			"np.argwhere(time == anaphase - t_shift)[0][0]",
+			"np.argwhere(time == anaphase)[0][0]",
+			"      \"        anaphase = meta.KD.params['t_A']\\n\",\n",
+			"np.arange(0, meta.KD.duration, meta.KD.dt)",
+			"t_step",
+			"anaphase",
+			"_plug_checkpoint",
+			"mus",
+			"delay",
+			"report",
+			"delay",
+			"pdf",
+			", ",
+			"1,2",
+			"1,2*",
+			"\\n\",",
+			" -      \"",
+			"anaphase",
+			"I",
+			"reminder",
+			"julou",
+			"guess",
+			"OIOMetadata",
+			"sanitize_dict",
+			"guess_number_dict",
+			"/ 60",
+			"import_array",
+			"METH_VARARGS",
+			"initreadmagick",
+			"PyString_Size",
+			"astring",
+			"channel_layout",
+			"av_set_string3",
+			"av_find_opt",
+			"labels_figure",
+			"multi_pool_path, \\\"figures\\\"",
+			"_static",
+			"affin",
+			"euler_from_matrix",
+			"df_planes",
+			"merge",
+			"relabel",
+			"print",
+			"full_xml_path",
+			"print_progress",
+			"get_peaks_from_trackmate"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"layout().addWidget(",
+			"self.dock_buttons_parent.layout()",
+			"MinLen = 5",
+			"self.",
+			"self.menu_trajs",
+			"self.menu_spots",
+			"update_trajectory",
+			"trajs",
+			"poles_idx",
+			"progress",
+			"Mary et al. Figure S1",
+			"meta.index_anaphase_before(t_shift)",
+			"meta.index_anaphase",
+			"",
+			"meta.time",
+			"t_shift",
+			"png",
+			"\n",
+			"",
+			"labels",
+			"fig_path",
+			"log.info(\"*** Running",
+			"log.info(\"*** End\")",
+			"colors",
+			"~",
+			"webm",
+			"`",
+			"\"\"\"",
+			"",
+			"\"",
+			"matrix",
+			"cost_function",
+			".pyplot",
+			"",
+			"labels",
+			"<img class=\"w60\" src=\"data/results/pombe.png\" width=\"100%\"/>",
+			"length",
+			"Attachment",
+			"segregate",
+			".*.",
+			"/",
+			"",
+			"sample.analysis.keys()",
+			"",
+			"\"",
+			" self.ns",
+			"",
+			"\n",
+			"\\n",
+			"cols",
+			" ",
+			"<div class=\"detail col-lg-8\">",
+			"<div class=\"detail col-lg-6\">",
+			"glyphicon glyphicon-",
+			"",
+			"glyphicon glyphicon-",
+			"{{ details_url }}",
+			"glyphicon-",
+			"\"",
+			":",
+			"print(\"",
+			"user",
+			"'",
+			"-",
+			"stacks",
+			"frames",
+			"",
+			">\n",
+			"$SYSTEM",
+			"data",
+			"",
+			"\\ ",
+			"logger.",
+			"cen2gfp",
+			"/",
+			"[:, '",
+			"[:, (",
+			"[:, ",
+			":, (",
+			"chromosome_position",
+			"oscill_amplitude",
+			"oscill_period",
+			"oscill_freq",
+			"oscill_amplitude",
+			"oscill_freq",
+			"inter_kt_size",
+			"spindle_size",
+			"spindle_position",
+			"anaphase_end",
+			"anaphase_start"
+		],
+		"reverse": false,
+		"show_context": false,
+		"use_buffer2": false,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "trajectories_widget.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18526,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 1,
+					"file": "tracker_widget.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1607,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 21.0
+	},
+	"input":
+	{
+		"height": 29.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.460575719651,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 145.0
+	},
+	"output.find_results":
+	{
+		"height": 88.0
+	},
+	"output.unsaved_changes":
+	{
+		"height": 255.0
+	},
+	"project": "/home/hadim/Documents/phd/dev/spindle_tracker/spindle_tracker.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"poo",
+				"~/Documents/phd/dev/spindle_tracker/spindle_tracker/analysis/pool.py"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 168.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

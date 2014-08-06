@@ -19,6 +19,8 @@ class TrajectoriesWidget(QtGui.QWidget):
     """
 
     sig_traj_change = QtCore.Signal(int)
+    sig_axis_change = QtCore.Signal(str)
+    sig_update_trajectories = QtCore.Signal()
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1, parent=None):
@@ -280,7 +282,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     # Items management
 
-    def update_trajectory(self):
+    def update_trajectories(self):
         """
         """
 
@@ -335,6 +337,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.update_selection_infos()
 
         self.pw.autoRange()
+
+        self.sig_update_trajectories.emit()
 
     def points_clicked(self, plot, points):
         """
@@ -450,7 +454,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.traj_items = []
 
         self.update_historic_buttons()
-        self.update_trajectory()
+        self.update_trajectories()
         self.set_all_trajs_label()
 
         self.sig_traj_change.emit(self.current_traj_id)
@@ -481,7 +485,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         i = self.current_traj_index()
         self.trajs = self.historic_trajs[i - 1]
 
-        self.update_trajectory()
+        self.update_trajectories()
         self.update_historic_buttons()
 
     def redo(self):
@@ -490,7 +494,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         i = self.current_traj_index()
         self.trajs = self.historic_trajs[i + 1]
 
-        self.update_trajectory()
+        self.update_trajectories()
         self.update_historic_buttons()
 
     def update_historic_buttons(self):
@@ -570,7 +574,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         if scale:
             self.scale_x = scale
 
-        self.update_trajectory()
+        self.update_trajectories()
+        self.sig_axis_change.emit('x')
 
     def set_yaxis(self, ax_name, scale=None):
         """
@@ -586,4 +591,5 @@ class TrajectoriesWidget(QtGui.QWidget):
         if scale:
             self.scale_y = scale
 
-        self.update_trajectory()
+        self.update_trajectories()
+        self.sig_axis_change.emit('y')

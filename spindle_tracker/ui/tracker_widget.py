@@ -38,9 +38,11 @@ class TrackersWidget(QtGui.QWidget):
 
         self.setLayout(QtGui.QVBoxLayout())
 
+        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.layout().addWidget(self.splitter)
+
         self.main = QtGui.QWidget()
         self.main.setLayout(QtGui.QHBoxLayout())
-        self.layout().addWidget(self.main)
 
         self.cb_infos = QtGui.QGroupBox("Informations")
         self.cb_infos.setLayout(QtGui.QVBoxLayout())
@@ -61,6 +63,7 @@ class TrackersWidget(QtGui.QWidget):
             self.but_quit.clicked.connect(self.close)
 
         self.setup_traj_widget()
+        self.splitter.addWidget(self.main)
 
     def setup_traj_widget(self):
         """
@@ -75,10 +78,13 @@ class TrackersWidget(QtGui.QWidget):
                                      scale_y=self.scale_y,
                                      parent=self)
 
-        self.layout().insertWidget(0, self.tw)
+        self.splitter.addWidget(self.tw)
 
         self.tw.sig_traj_change.connect(self.set_tracker)
         self.tw.sig_traj_change.emit(0)
+
+        self.tw.sig_update_trajectories.connect(self.connect_draggable_line)
+        self.connect_draggable_line()
 
     def set_tracker(self, i):
         """
@@ -91,9 +97,12 @@ class TrackersWidget(QtGui.QWidget):
         """
         """
         m = ""
-        m += "Name : {}\n".format(str(self.tracker))
+        m += "<p><b>Name</b> : {}</p>\n".format(str(self.tracker))
 
-        self.infos.setText(m)
+        for k, v in self.tracker.metadata.items():
+            m += "<p><b>{}</b> : {}</p>\n".format(k, v)
+
+        self.infos.setHtml(m)
 
     def update_annotations(self):
         """
@@ -104,18 +113,22 @@ class TrackersWidget(QtGui.QWidget):
             item = self.cb_annot.layout().itemAt(i)
             item.widget().deleteLater()
 
+        self.widgets_annot = {}
+
         template = self.tracker.__class__.ANNOTATIONS
         for key, (default, choices, value_type) in template.items():
             current_value = self.tracker.annotations[key]
 
-            self.build_widget(key, default, choices, value_type, current_value)
+            w = self.build_widget(key, default, choices, value_type, current_value)
+
+            self.widgets_annot[key] = w
 
     def build_widget(self, key, default, choices, value_type, current_value):
         """
         """
 
-        self.w = QtGui.QWidget()
-        self.w.setLayout(QtGui.QVBoxLayout())
+        w = QtGui.QWidget()
+        w.setLayout(QtGui.QVBoxLayout())
 
         title = QtGui.QLabel(key)
 
@@ -123,34 +136,37 @@ class TrackersWidget(QtGui.QWidget):
             box = QtGui.QComboBox()
             for choice in choices:
                 box.addItem(str(choice))
-            box.setCurrentIndex(choices.index(current_value))
-            box.currentIndexChanged.connect(lambda args: self.update_annotation(key, title, args))
+            box.currentIndexChanged.connect(lambda args: self.update_annotation(key, w, args))
         elif choices is None:
             if value_type == int:
                 box = QtGui.QSpinBox()
                 box.setRange(-1e10, 1e10)
-                box.setValue(current_value)
-                box.valueChanged.connect(lambda args: self.update_annotation(key, title, args))
+                box.valueChanged.connect(lambda args: self.update_annotation(key, w, args))
             elif value_type == float:
                 box = QtGui.QDoubleSpinBox()
                 box.setDecimals(3)
                 box.setSingleStep(1)
                 box.setRange(-1e10, 1e10)
-                box.setValue(current_value)
-                box.valueChanged.connect(lambda args: self.update_annotation(key, title, args))
+                box.valueChanged.connect(lambda args: self.update_annotation(key, w, args))
             elif value_type == str:
                 box = QtGui.QlineEdit()
-                box.setValue(current_value)
-                box.editingFinished.connect(lambda args: self.update_annotation(key, title, args))
+                box.editingFinished.connect(lambda args: self.update_annotation(key, w, args))
 
-        self.w.layout().addWidget(title)
-        self.w.layout().addWidget(box)
+        w.layout().addWidget(title)
+        w.layout().addWidget(box)
 
-        self.cb_annot.layout().addWidget(self.w)
+        self.cb_annot.layout().addWidget(w)
 
-    def update_annotation(self, key, widget, args):
+        self.update_annotation(key, w, current_value, anim=False)
+
+        return w
+
+    def update_annotation(self, key, widgets, args, anim=True):
         """
         """
+        title = widgets.children()[1]
+        box = widgets.children()[2]
+
         template = self.tracker.__class__.ANNOTATIONS
         default, choices, value_type = template[key]
 
@@ -158,9 +174,14 @@ class TrackersWidget(QtGui.QWidget):
             self.tracker.annotations[key] = args
         elif choices is None:
             self.tracker.annotations[key] = value_type(args)
+            box.setValue(self.tracker.annotations[key])
 
-        self.animate_annotation_label(widget)
+        if anim:
+            self.animate_annotation_label(title)
         self.tracker.save_oio()
+
+        if key == 'anaphase_start':
+            self.tw.draggable_line.setValue(args)
 
     def animate_annotation_label(self, widget, start=True):
         """
@@ -176,3 +197,15 @@ class TrackersWidget(QtGui.QWidget):
             self.timeoutTimer.start()
         else:
             widget.setStyleSheet("font-weight:normal;")
+
+    def update_anaphase_start(self, line):
+        """
+        """
+        t = self.tw.draggable_line.value()
+        w = self.widgets_annot['anaphase_start']
+        self.update_annotation('anaphase_start', w, t)
+
+    def connect_draggable_line(self):
+        """
+        """
+        self.tw.draggable_line.sigPositionChangeFinished.connect(self.update_anaphase_start)

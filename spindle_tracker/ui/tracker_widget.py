@@ -112,6 +112,7 @@ class TrackersWidget(QtGui.QWidget):
         for i in range(self.cb_annot.layout().count()):
             item = self.cb_annot.layout().itemAt(i)
             item.widget().deleteLater()
+            del item
 
         self.widgets_annot = {}
 
@@ -136,20 +137,24 @@ class TrackersWidget(QtGui.QWidget):
             box = QtGui.QComboBox()
             for choice in choices:
                 box.addItem(str(choice))
+            box.setCurrentIndex(choices.index(current_value))
             box.currentIndexChanged.connect(lambda args: self.update_annotation(key, w, args))
         elif choices is None:
             if value_type == int:
                 box = QtGui.QSpinBox()
                 box.setRange(-1e10, 1e10)
+                box.setValue(current_value)
                 box.valueChanged.connect(lambda args: self.update_annotation(key, w, args))
             elif value_type == float:
                 box = QtGui.QDoubleSpinBox()
                 box.setDecimals(3)
                 box.setSingleStep(1)
                 box.setRange(-1e10, 1e10)
+                box.setValue(current_value)
                 box.valueChanged.connect(lambda args: self.update_annotation(key, w, args))
             elif value_type == str:
                 box = QtGui.QlineEdit()
+                box.setValue(current_value)
                 box.editingFinished.connect(lambda args: self.update_annotation(key, w, args))
 
         w.layout().addWidget(title)
@@ -174,7 +179,6 @@ class TrackersWidget(QtGui.QWidget):
             self.tracker.annotations[key] = args
         elif choices is None:
             self.tracker.annotations[key] = value_type(args)
-            box.setValue(self.tracker.annotations[key])
 
         if anim:
             self.animate_annotation_label(title)
@@ -209,3 +213,4 @@ class TrackersWidget(QtGui.QWidget):
         """
         """
         self.tw.draggable_line.sigPositionChangeFinished.connect(self.update_anaphase_start)
+        self.tw.draggable_line.setValue(self.tracker.annotations['anaphase_start'])

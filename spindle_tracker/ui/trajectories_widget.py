@@ -282,7 +282,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     # Items management
 
-    def update_trajectories(self):
+    def update_trajectories(self, draggable_value=None):
         """
         """
 
@@ -290,6 +290,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.setup_color_list()
 
         self.draggable_line = pg.InfiniteLine(angle=90, movable=True)
+        if draggable_value:
+            self.draggable_line.setValue(draggable_value)
         self.pw.addItem(self.draggable_line)
 
         for label, peaks in self.trajs.groupby(level='label'):

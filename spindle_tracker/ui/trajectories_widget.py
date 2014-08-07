@@ -24,7 +24,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1,
-                 save_hook=None,parent=None):
+                 save_hook=None, parent=None):
         """
         """
         super().__init__(parent=parent)
@@ -139,25 +139,31 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
         """
         self.menu_spots = QtGui.QMenu("Spots")
-        action_add_spot = QtGui.QAction("Add spot", self.menu_spots)
-        action_remove_spot = QtGui.QAction("Remove spot", self.menu_spots)
-        self.menu_spots.addAction(action_add_spot)
+
+        # action_add_spot = QtGui.QAction("Add spot", self.menu_spots)
+        # self.menu_spots.addAction(action_add_spot)
+        # action_add_spot.triggered.connect(lambda x: x)
+
+        action_remove_spot = QtGui.QAction("Remove spots", self.menu_spots)
         self.menu_spots.addAction(action_remove_spot)
-        action_add_spot.triggered.connect(lambda x: x)
         action_remove_spot.triggered.connect(lambda x: x)
 
         self.menu_trajs = QtGui.QMenu("Trajectories")
+
         action_merge_trajs = QtGui.QAction("Merge two trajectories", self.menu_trajs)
-        action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
-        action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
-        action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
         self.menu_trajs.addAction(action_merge_trajs)
-        self.menu_trajs.addAction(action_remove_traj)
-        self.menu_trajs.addAction(action_cut_traj)
-        self.menu_trajs.addAction(action_duplicate_traj)
         action_merge_trajs.triggered.connect(lambda x: x)
+
+        action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
+        self.menu_trajs.addAction(action_remove_traj)
         action_remove_traj.triggered.connect(lambda x: x)
+
+        action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
+        self.menu_trajs.addAction(action_cut_traj)
         action_cut_traj.triggered.connect(lambda x: x)
+
+        action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
+        self.menu_trajs.addAction(action_cut_traj)
         action_duplicate_traj.triggered.connect(lambda x: x)
 
         self.vb.menu.addSeparator()
@@ -299,7 +305,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
 
         self.remove_items()
-        self.setup_color_list()
+        self.label_colors = self.trajs.get_colors()
 
         self.draggable_line = pg.InfiniteLine(angle=90, movable=True)
         if draggable_value:
@@ -308,7 +314,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         for label, peaks in self.trajs.groupby(level='label'):
 
-            color = self.colors(label)
+            color = self.label_colors[label]
 
             coords = peaks.loc[:, [self.xaxis, self.yaxis]].values
             x = coords[:, 0] * self.scale_x
@@ -446,7 +452,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         else:
             log.warning("Item {} not handled".format(item))
             return False
-        return self.colors(label)
+        return self.label_colors[label]
 
     # Trajectories selector
 
@@ -464,7 +470,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.historic_trajs = []
         self.historic_trajs.append(self.trajs)
 
-        self._colors = []
         self.traj_items = []
 
         self.update_historic_buttons()
@@ -536,24 +541,6 @@ class TrajectoriesWidget(QtGui.QWidget):
         for i, trajs in enumerate(self.historic_trajs):
             if trajs is self.trajs:
                 return i
-
-    # Colors management
-
-    def setup_color_list(self):
-        """Setup color gradient for segment labels
-        """
-        labels = self.trajs.index.get_level_values('label').unique().tolist()
-        id_labels = np.arange(len(labels))
-        id_labels = id_labels / id_labels.max() * 255
-        cmap = plt.get_cmap('hsv')
-        cols = [cmap(int(l), alpha=1, bytes=True) for l in id_labels]
-
-        self._colors = dict(zip(labels, cols))
-
-    def colors(self, label):
-        """
-        """
-        return self._colors[label]
 
     # Exporters
 

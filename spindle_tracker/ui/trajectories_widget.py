@@ -23,7 +23,8 @@ class TrajectoriesWidget(QtGui.QWidget):
     sig_update_trajectories = QtCore.Signal()
 
     def __init__(self, trajs, xaxis='t', yaxis='x',
-                 scale_x=1, scale_y=1, parent=None):
+                 scale_x=1, scale_y=1,
+                 save_hook=None,parent=None):
         """
         """
         super().__init__(parent=parent)
@@ -48,6 +49,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.yaxis = yaxis
         self.scale_x = scale_x
         self.scale_y = scale_y
+
+        self.save_hook = save_hook
 
         self.setup_ui()
         self.set_trajectories(0)
@@ -242,10 +245,19 @@ class TrajectoriesWidget(QtGui.QWidget):
 
             self.dock_buttons_parent.layout().addWidget(self.all_trajs_container)
 
+        # Build save button
+
+        if self.save_hook:
+            self.dock_buttons_parent.layout().addStretch(1)
+            self.but_save = QtGui.QPushButton("Save")
+            self.dock_buttons_parent.layout().addWidget(self.but_save)
+            self.but_save.clicked.connect(self.save_hook)
+
         # Build Quit button
 
         if not self.parent():
-            self.dock_buttons_parent.layout().addStretch(1)
+            if not self.save_hook:
+                self.dock_buttons_parent.layout().addStretch(1)
             self.but_quit = QtGui.QPushButton("Quit")
             self.dock_buttons_parent.layout().addWidget(self.but_quit)
             self.but_quit.clicked.connect(self.close)

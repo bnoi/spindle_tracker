@@ -69,7 +69,7 @@ class Ndc80Tracker(Tracker):
                                 'coords': coords}
 
         gc_solver = GapCloseSolver.for_brownian_motion(trajs, **parameters_gap_close)
-        trajs = gc_solver.track()
+        trajs = gc_solver.track(progress_bar=progress)
 
         self.remove_small_segments(trajs, n=n)
         self.save(trajs, 'trajs_gp')

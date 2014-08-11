@@ -55,6 +55,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.setup_ui()
         self.set_trajectories(0)
 
+        self.selection_box.setTitle('')
+
     # Message management
 
     def update_mouse_infos(self, pos):
@@ -115,9 +117,11 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.dock_traj = dockarea.Dock("Trajectories Plot", size=(3, 12))
         self.dock_info = dockarea.Dock("Info Panel", size=(1, 12))
         self.dock_buttons = dockarea.Dock("Buttons", size=(3, 1), hideTitle=True)
+        self.dock_status = dockarea.Dock("Status", size=(3, 0.5), hideTitle=True)
         self.area.addDock(self.dock_traj, 'left')
         self.area.addDock(self.dock_info, 'right', self.dock_traj)
         self.area.addDock(self.dock_buttons, 'bottom')
+        self.area.addDock(self.dock_status, 'bottom')
 
         # Trajectory Plot Dock
 
@@ -127,8 +131,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.dock_traj.addWidget(self.pw)
         self.dock_traj.layout.setContentsMargins(5, 5, 5, 5)
 
+        self.dock_status.layout.setContentsMargins(5, 5, 5, 5)
         self.status = QtGui.QLabel(self)
-        self.dock_traj.addWidget(self.status)
+        self.dock_status.addWidget(self.status)
 
         self.pw.scene().sigMouseMoved.connect(self.update_mouse_infos)
 
@@ -146,25 +151,25 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         action_remove_spot = QtGui.QAction("Remove spots", self.menu_spots)
         self.menu_spots.addAction(action_remove_spot)
-        action_remove_spot.triggered.connect(lambda x: x)
+        action_remove_spot.triggered.connect(self.remove_spots)
 
         self.menu_trajs = QtGui.QMenu("Trajectories")
 
         action_merge_trajs = QtGui.QAction("Merge two trajectories", self.menu_trajs)
         self.menu_trajs.addAction(action_merge_trajs)
-        action_merge_trajs.triggered.connect(lambda x: x)
+        action_merge_trajs.triggered.connect(self.merge_trajs)
 
         action_remove_traj = QtGui.QAction("Remove trajectory", self.menu_trajs)
         self.menu_trajs.addAction(action_remove_traj)
-        action_remove_traj.triggered.connect(lambda x: x)
+        action_remove_traj.triggered.connect(self.remove_traj)
 
         action_cut_traj = QtGui.QAction("Cut trajectory", self.menu_trajs)
         self.menu_trajs.addAction(action_cut_traj)
-        action_cut_traj.triggered.connect(lambda x: x)
+        action_cut_traj.triggered.connect(self.cut_traj)
 
         action_duplicate_traj = QtGui.QAction("Duplicate trajectory", self.menu_trajs)
-        self.menu_trajs.addAction(action_cut_traj)
-        action_duplicate_traj.triggered.connect(lambda x: x)
+        self.menu_trajs.addAction(action_duplicate_traj)
+        action_duplicate_traj.triggered.connect(self.duplicate_traj)
 
         self.vb.menu.addSeparator()
         self.vb.menu.addMenu(self.menu_spots)
@@ -426,6 +431,7 @@ class TrajectoriesWidget(QtGui.QWidget):
             if item not in ignore_items:
                 self.unselect_item(item)
         self.update_selection_infos()
+        self.status.setText("Al items unselected")
 
     def select_all_items(self):
         """
@@ -433,6 +439,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         for item in self.traj_items:
             self.select_item(item)
         self.update_selection_infos()
+        self.status.setText("{} items selected".format(len(self.traj_items)))
 
     def check_control_key(self, ignore_items=[]):
         """Unselect all previously selected items if CTRL key is not pressed.
@@ -453,6 +460,11 @@ class TrajectoriesWidget(QtGui.QWidget):
             log.warning("Item {} not handled".format(item))
             return False
         return self.label_colors[label]
+
+    def get_selected_items(self):
+        """
+        """
+        return list(filter(lambda x: x.is_selected, self.traj_items))
 
     # Trajectories selector
 
@@ -494,6 +506,106 @@ class TrajectoriesWidget(QtGui.QWidget):
         if self.len_trajs > 1:
             m = "Trajs selector : {}/{}"
             self.all_trajs_label.setText(m.format(self.current_traj_id + 1, self.len_trajs))
+
+    # Trajectories modifications
+
+    def remove_spots(self, obj):
+        """
+        """
+        items = self.get_selected_items()
+
+        spots = [item.data() for item in items]
+
+        if len(spots) == 0:
+            self.status.setText('No spots selected')
+            return
+
+        self.trajs = self.trajs.copy()
+        self.trajs.remove_spots(spots, inplace=True)
+
+        self.historic_trajs.append(self.trajs)
+        self.update_trajectories()
+        self.update_historic_buttons()
+
+        self.status.setText('{} spots have been removed'.format(len(spots)))
+
+    def merge_trajs(self, obj):
+        """
+        """
+        items = self.get_selected_items()
+
+        spots = [item.data() for item in items]
+        spots = np.array(spots)
+        labels = np.unique(spots[:, 1])
+
+        if len(labels) <= 1:
+            self.status.setText("You need to select at least two spots from "
+                                "two different labels")
+            return
+
+        self.trajs = self.trajs.copy()
+        self.trajs.merge_segments(labels, inplace=True)
+
+        self.historic_trajs.append(self.trajs)
+        self.update_trajectories()
+        self.update_historic_buttons()
+
+    def remove_traj(self, obj):
+        """
+        """
+        items = self.get_selected_items()
+
+        spots = [item.data() for item in items]
+        spots = np.array(spots)
+        labels = np.unique(spots[:, 1])
+
+        if len(labels) == 0:
+            self.status.setText("You need to select at least one spot")
+            return
+
+        self.trajs = self.trajs.copy()
+        self.trajs.remove_segments(labels, inplace=True)
+
+        self.historic_trajs.append(self.trajs)
+        self.update_trajectories()
+        self.update_historic_buttons()
+
+    def cut_traj(self, obj):
+        """
+        """
+        items = self.get_selected_items()
+
+        spots = [item.data() for item in items]
+
+        if len(spots) != 1:
+            self.status.setText("You need to select only one spot")
+            return
+
+        self.trajs = self.trajs.copy()
+        self.trajs.cut_segments(spots[0], inplace=True)
+
+        self.historic_trajs.append(self.trajs)
+        self.update_trajectories()
+        self.update_historic_buttons()
+
+    def duplicate_traj(self, obj):
+        """
+        """
+        items = self.get_selected_items()
+
+        spots = [item.data() for item in items]
+        spots = np.array(spots)
+        labels = np.unique(spots[:, 1])
+
+        if len(labels) != 1:
+            self.status.setText("You need to select spots(s) from only one trajectory")
+            return
+
+        self.trajs = self.trajs.duplicate_segments(labels[0])
+
+        self.historic_trajs.append(self.trajs)
+        self.update_trajectories()
+        self.update_historic_buttons()
 
     # Historic management
 
@@ -556,8 +668,11 @@ class TrajectoriesWidget(QtGui.QWidget):
         elif fname.endswith('.tif'):
             exporter = pgexporters.ImageExporter(self.pw.plotItem)
         else:
-            log.error('Wrong filename extension')
+            self.status.setText('Wrong filename extension')
+            return False
+
         exporter.export(fname)
+        self.status.setText('View saved at {}'.format(fname))
 
     # Axes setter
 
@@ -568,7 +683,7 @@ class TrajectoriesWidget(QtGui.QWidget):
             ax_name = self.cb_xaxis.itemText(ax_name)
 
         if ax_name not in self.trajs.columns:
-            log.error('"{}" is not in Trajectories columns'.format(ax_name))
+            self.status.setText('"{}" is not in Trajectories columns'.format(ax_name))
             return
 
         self.xaxis = ax_name
@@ -585,7 +700,7 @@ class TrajectoriesWidget(QtGui.QWidget):
             ax_name = self.cb_yaxis.itemText(ax_name)
 
         if ax_name not in self.trajs.columns:
-            log.error('"{}" is not in Trajectories columns'.format(ax_name))
+            self.status.setText('"{}" is not in Trajectories columns'.format(ax_name))
             return
 
         self.yaxis = ax_name

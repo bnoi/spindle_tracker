@@ -39,6 +39,8 @@ class TrajectoriesWidget(QtGui.QWidget):
         else:
             self.all_trajs = [trajs]
 
+        self.all_trajs_historic = [[] for _ in self.all_trajs]
+
         self.trajs = self.all_trajs[0]
         self.len_trajs = len(self.all_trajs)
 
@@ -476,10 +478,10 @@ class TrajectoriesWidget(QtGui.QWidget):
             return
 
         self.current_traj_id = i
+        self.column_to_display = self.trajs.columns.tolist()
         self.trajs = self.all_trajs[self.current_traj_id]
 
-        self.column_to_display = self.trajs.columns.tolist()
-        self.historic_trajs = []
+        self.historic_trajs = self.all_trajs_historic[self.current_traj_id]
         self.historic_trajs.append(self.trajs)
 
         self.traj_items = []

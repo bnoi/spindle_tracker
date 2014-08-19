@@ -40,10 +40,12 @@ class Ndc80Tracker(Tracker):
         """
         """
 
-        if hasattr(self, 'trajs_gp') and getattr(self, 'trajs_gp') is not None and not erase:
+        if hasattr(self, 'trajs_gap_close') and getattr(self, 'trajs_gap_close') is not None and \
+           not erase:
             log.info('Tracking already done.')
             return
 
+        self.save(trajs.copy(), 'trajs')
         log.info('Run tracking')
 
         parameters_brownian = {'max_speed': max_speed,
@@ -98,19 +100,14 @@ class Ndc80Tracker(Tracker):
 
         self.save(trajs, 'trajs_interp')
 
-    def get_spb(self, traj_name='trajs_interp', progress=False, erase=False):
+    def find_poles(self, traj_name='trajs_interp', progress=False, erase=False):
         """Find pairs of segments on which the mean distance on common timepoints is the bigger.
         """
 
-        if hasattr(self, 'trajs_poles') and getattr(self, 'trajs_poles') is not None and not erase:
-            trajs = getattr(self, 'trajs_poles')
-            poleA = trajs[(trajs.id == 'pole') & (trajs.side == 'A')]
-            poleA_id = poleA.index.get_level_values('label')[0]
-            poleB = trajs[(trajs.id == 'pole') & (trajs.side == 'B')]
-            poleB_id = poleB.index.get_level_values('label')[0]
-
-            log.info("Finding poles already done")
-            return (poleA_id, poleB_id)
+        if hasattr(self, 'annotations') and 'poles_index' in self.annotations.keys() and not erase:
+            self.poles_index = self.annotations['poles_index']
+            log.info("Poles already found : {}".format(self.poles_index))
+            return self.poles_index
 
         log.info("Finding poles")
 
@@ -148,7 +145,7 @@ class Ndc80Tracker(Tracker):
             print_progress(-1)
 
         max_id = np.argmax(all_d)
-        poles_idx = ids[max_id]
+        poles_index = ids[max_id]
 
         # Label trajs correctly
         trajs['id'] = None
@@ -156,7 +153,7 @@ class Ndc80Tracker(Tracker):
         trajs = trajs.swaplevel("label", "t_stamp")
         trajs.sort_index(inplace=True)
 
-        for i, l in zip(poles_idx, ['A', 'B']):
+        for i, l in zip(poles_index, ['A', 'B']):
             trajs.loc[i, 'id'] = 'pole'
             trajs.loc[i, 'side'] = l
 
@@ -165,19 +162,28 @@ class Ndc80Tracker(Tracker):
 
         self.save(trajs, 'trajs_poles')
 
-        return poles_idx
+        self.poles_index = poles_index
+        self.annotations['poles_index'] = self.poles_index
+        log.info("Poles are {}".format(self.poles_index))
 
-    def project(self, poles_idx, traj_name='trajs_poles', progress=False, erase=False):
+        return np.sort(poles_index)
+
+    def project(self, traj_name='trajs_poles', progress=False, erase=False):
         """
         """
 
-        if hasattr(self, 'trajs_project') and getattr(self, 'trajs_project') is not None and not erase:
+        if hasattr(self, 'trajs_project') and getattr(self, 'trajs_project') is not None and \
+           not erase:
             log.info('Projection already done.')
+            return
+
+        if not hasattr(self, 'poles_index'):
+            log.error("self.poles_index is missing, please run find_poles() first.")
             return
 
         log.info('Compute projection along specified segments')
         trajs = getattr(self, traj_name).copy()
-        trajs = trajs.project(poles_idx,
+        trajs = trajs.project(self.poles_index,
                               keep_first_time=False,
                               reference=None,
                               inplace=False,
@@ -198,7 +204,7 @@ class Ndc80Tracker(Tracker):
 
         setattr(self, traj_name, Trajectories(trajs))
 
-    def kymo(self, var_name='trajs', marker='o', ls='-', ax=None):
+    def kymo(self, var_name, marker='o', ls='-', ax=None):
         """
         """
 

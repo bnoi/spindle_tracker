@@ -28,7 +28,15 @@ class Ndc80Tracker(Tracker):
 
         super().__init__(*args, **kwargs)
 
-    def track(self, trajs, n=1, progress=False, erase=False):
+    def track(self, trajs,
+              max_speed,
+              death_birth_factor,
+              maximum_gap,
+              gap_close_factor,
+              min_segment_size,
+              coords=['x', 'y', 'z'],
+              progress=False,
+              erase=False):
         """
         """
 
@@ -38,41 +46,28 @@ class Ndc80Tracker(Tracker):
 
         log.info('Run tracking')
 
-        coords = ['x', 'y']
-        max_speed = 0.1
-        penalty = 1.05
-
         parameters_brownian = {'max_speed': max_speed,
                                'coords': coords,
-                               'penalty': penalty}
+                               'penalty': death_birth_factor}
 
-        parameters_directed = {'max_speed': max_speed,
-                               'past_traj_time': 10,
-                               'smooth_factor': 0,
-                               'interpolation_order': 1,
-                               'coords': coords,
-                               'penalty': penalty}
-
-        #solver = ByFrameSolver.for_directed_motion(trajs, **parameters_directed)
         solver = ByFrameSolver.for_brownian_motion(trajs, **parameters_brownian)
-
         trajs = solver.track(progress_bar=progress)
-        self.save(trajs.copy(), 'trajs')
 
-        trajs = self.trajs.copy()
-        maximum_gap = 50
+        self.save(trajs.copy(), 'trajs_by_frame')
+
+        trajs = self.trajs_by_frame.copy()
 
         parameters_gap_close = {'max_speed': max_speed,
                                 'maximum_gap': maximum_gap,
                                 'use_t_stamp': False,
-                                'link_percentile': 99,
+                                'link_percentile': gap_close_factor,
                                 'coords': coords}
 
         gc_solver = GapCloseSolver.for_brownian_motion(trajs, **parameters_gap_close)
         trajs = gc_solver.track(progress_bar=progress)
 
-        self.remove_small_segments(trajs, n=n)
-        self.save(trajs, 'trajs_gp')
+        self.remove_small_segments(trajs, n=min_segment_size)
+        self.save(trajs, 'trajs_gap_close')
 
     def remove_small_segments(self, trajs, n=1):
         """Remove segments smaller or equal than "n"
@@ -85,11 +80,12 @@ class Ndc80Tracker(Tracker):
 
         log.info("{} small segments has been deleted.".format(len(to_remove_idx)))
 
-    def interp(self, traj_name='trajs_gp', erase=False):
+    def interpolate(self, traj_name='trajs_gap_close', erase=False):
         """
         """
 
-        if hasattr(self, 'trajs_interp') and getattr(self, 'trajs_interp') is not None and not erase:
+        if hasattr(self, 'trajs_interp') and getattr(self, 'trajs_interp') is not None \
+           and not erase:
             log.info('Interpolation already done.')
             return
 

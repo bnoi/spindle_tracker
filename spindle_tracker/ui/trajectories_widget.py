@@ -1,8 +1,6 @@
 import logging
 log = logging.getLogger(__name__)
 
-import matplotlib.pyplot as plt
-
 import pyqtgraph as pg
 import numpy as np
 

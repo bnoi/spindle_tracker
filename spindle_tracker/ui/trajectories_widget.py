@@ -371,8 +371,6 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         self.update_selection_infos()
 
-        self.pw.autoRange()
-
         self.sig_update_trajectories.emit()
 
     def points_clicked(self, plot, points):

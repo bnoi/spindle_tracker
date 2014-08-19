@@ -22,7 +22,8 @@ class TrajectoriesWidget(QtGui.QWidget):
     sig_axis_change = QtCore.Signal(str)
     sig_update_trajectories = QtCore.Signal()
 
-    def __init__(self, trajs, xaxis='t', yaxis='x',
+    def __init__(self, trajs, names=None,
+                 xaxis='t', yaxis='x',
                  scale_x=1, scale_y=1,
                  save_hook=None, parent=None):
         """
@@ -36,12 +37,21 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         if isinstance(trajs, list):
             self.all_trajs = trajs
+            if names:
+                self.names = names
+            else:
+                self.names = ["Trajectory n°{}".format(i + 1) for i in range(len(self.all_trajs))]
         else:
             self.all_trajs = [trajs]
+            if names:
+                self.names = [names]
+            else:
+                self.names = ["Trajectory n°1"]
 
         self.all_trajs_historic = [[] for _ in self.all_trajs]
 
         self.trajs = self.all_trajs[0]
+        self.name = self.names[0]
         self.len_trajs = len(self.all_trajs)
 
         self.curve_width = 1
@@ -480,6 +490,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.current_traj_id = i
         self.column_to_display = self.trajs.columns.tolist()
         self.trajs = self.all_trajs[self.current_traj_id]
+        self.name = self.names[self.current_traj_id]
 
         self.historic_trajs = self.all_trajs_historic[self.current_traj_id]
         self.historic_trajs.append(self.trajs)
@@ -489,6 +500,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.update_historic_buttons()
         self.update_trajectories()
         self.set_all_trajs_label()
+        self.status.setText(self.name)
 
         self.sig_traj_change.emit(self.current_traj_id)
 

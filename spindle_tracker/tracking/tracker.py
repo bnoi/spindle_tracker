@@ -28,7 +28,7 @@ class Tracker():
     HDF5_EXTENSION = "h5"
     TIF_EXTENSION = "tif"
     XML_EXTENSION = "xml"
-    ANNOTATIONS = []
+    ANNOTATIONS = {}
 
     def __init__(self,
                  sample_path,

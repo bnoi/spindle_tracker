@@ -247,7 +247,8 @@ class Tracker():
 
         self.st = StackIO(image_path=self.tif_path,
                           base_dir=self.base_dir,
-                          json_discovery=False)
+                          json_discovery=False,
+                          metadata=self.metadata)
 
         data_iterator = self.st.image_iterator(channel_index=channel,
                                                z_projection=z_projection)

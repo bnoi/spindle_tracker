@@ -35,7 +35,8 @@ class Tracker():
                  base_dir,
                  verbose=True,
                  force_metadata=False,
-                 json_discovery=True):
+                 json_discovery=True,
+                 clean_store=False):
         """
         Parameters:
         -----------
@@ -64,7 +65,8 @@ class Tracker():
             try:
                 self.oio = ObjectsIO.from_h5(self.h5_path,
                                              base_dir=self.base_dir,
-                                             minimum_metadata_keys=self.__class__.MINIMUM_METADATA)
+                                             minimum_metadata_keys=self.__class__.MINIMUM_METADATA,
+                                             clean_store=clean_store)
             except ValueError as e:
                 log.error(e)
 
@@ -171,10 +173,7 @@ class Tracker():
         """
         """
 
-        for key in self.oio.keys():
-            key = key.replace('/', '')
-            self.stored_data.append(key)
-            obj = self.oio[key]
+        for key, obj in self.oio.get_all_items():
             if isinstance(obj, pd.DataFrame):
                 setattr(self, key, Trajectories(obj))
             else:

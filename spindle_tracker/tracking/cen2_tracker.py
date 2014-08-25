@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.utils import print_progress
+from sktracker.trajectories import Trajectories
 
 from ..tracking import Tracker
 
@@ -436,40 +437,33 @@ class Cen2Tracker(Tracker):
             self.peaks_real: DataFrame
         """
 
-        # TODO
-        pass
-        # peaks = self.peaks_real
-        # peaks.reset_index(inplace=True)
+        log.info("*** Running project()")
 
-        # peaks['label'] = peaks['main_label'] + peaks['side']
-        # peaks['label'] = peaks['label'].replace(['spbA', 'spbB'], [0, 1])
+        progress = True
+        peaks = self.peaks_real
 
-        # peaks.reset_index(inplace=True)
-        # peaks.set_index(['t_stamp', 'label'], inplace=True)
-        # peaks = peaks.sort_index()
+        peaks = peaks.reset_index(level=["main_label", "side"])
+        peaks['label'] = np.nan
 
-        # self.peaks_real = peaks
+        peaks.loc[:, 'label'][(peaks['main_label'] == 'kt') & (peaks['side'] == 'A')] = 0
+        peaks.loc[:, 'label'][(peaks['main_label'] == 'kt') & (peaks['side'] == 'B')] = 1
+        peaks.loc[:, 'label'][(peaks['main_label'] == 'spb') & (peaks['side'] == 'A')] = 2
+        peaks.loc[:, 'label'][(peaks['main_label'] == 'spb') & (peaks['side'] == 'B')] = 3
 
-        # super().project([0, 1], 'peaks_real', coords,
-        #                 keep_first_time=keep_first_time,
-        #                 reference=reference)
+        peaks = peaks.set_index('label', append=True)
 
-        # self.peaks_real.reset_index(inplace=True)
-        # self.peaks_real.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
-        # self.peaks_real.sort_index(inplace=True)
-        # self.peaks_real.drop(['label', 'index'], axis=1, inplace=True)
+        peaks = Trajectories(peaks)
 
-        # # Find wether x_proj or y_proj contain the most informations
-        # p = self.peaks_real
-        # x_proj = p.xs('spb', level='main_label')['x_proj'].mean()
-        # y_proj = p.xs('spb', level='main_label')['y_proj'].mean()
+        peaks = peaks.project([2, 3],
+                              keep_first_time=False,
+                              reference=None,
+                              inplace=False,
+                              progress=progress)
 
-        # if np.abs(x_proj) < np.abs(y_proj):
-        #     x_tmp = p['x_proj'].copy()
-        #     p['x_proj'] = p['y_proj'].copy()
-        #     p['y_proj'] = x_tmp
+        peaks = peaks.reset_index(level='label').set_index(['main_label', 'side'], append=True)
+        self.peaks_real = peaks
 
-        # return self.peaks_real
+        log.info("*** End")
 
     def _interpolate(self, dt=1, kind='linear'):
         """
@@ -485,7 +479,8 @@ class Cen2Tracker(Tracker):
         peaks_interp = pd.DataFrame([])
 
         for (label, side), p in peaks.groupby(level=['main_label', 'side']):
-            new_p = pd.DataFrame(np.arange(np.round(p['t'].min()) + 1, p['t'].max(), dt), columns=['t'])
+            new_p = pd.DataFrame(np.arange(np.round(p['t'].min()) + 1, p['t'].max(), dt),
+                                 columns=['t'])
             new_p['main_label'] = label
             new_p['side'] = side
 

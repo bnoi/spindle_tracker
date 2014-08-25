@@ -20,13 +20,14 @@ class Cen2Tracker(Tracker):
     MINIMUM_METADATA = ['SizeX', 'SizeY', 'SizeZ',
                         'PhysicalSizeX', 'PhysicalSizeY',
                         'TimeIncrement']
+    ANNOTATIONS = {'state': (0, [0, 1, 2], None),
+                   'anaphase_start': (-1, None, float)}
 
     def __init__(self, *args, **kwargs):
         """
         """
 
         super().__init__(*args, **kwargs)
-        self._enable_annotations()
 
     @property
     def times(self):
@@ -81,14 +82,6 @@ class Cen2Tracker(Tracker):
             peaks = self.peaks_real
 
         return peaks.loc[vec_t_stamp, 't'].unique()
-
-    def _enable_annotations(self):
-        """
-        """
-
-        if not hasattr(self, 'annotations'):
-            annotations = {'kymo': 0, 'anaphase': -1}
-            self.save(annotations, 'annotations')
 
     """
     Tracking methods

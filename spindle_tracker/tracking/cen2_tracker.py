@@ -87,8 +87,8 @@ class Cen2Tracker(Tracker):
         """
 
         if not hasattr(self, 'annotations'):
-            self.annotations = {'kymo': 0, 'anaphase': -1}
-        self.stored_data.append('annotations')
+            annotations = {'kymo': 0, 'anaphase': -1}
+            self.save(annotations, 'annotations')
 
     """
     Tracking methods
@@ -146,9 +146,9 @@ class Cen2Tracker(Tracker):
                 for p in pos.iterrows():
                     clusters_count.append(0)
 
-        self.peaks_z = peaks.drop(bads)
-        self.peaks_z['clusters_count'] = clusters_count
-        self.stored_data.append('peaks_z')
+        peaks_z = peaks.drop(bads)
+        peaks_z['clusters_count'] = clusters_count
+        self.save(peaks_z, 'peaks_z')
 
         log.info("*** End")
 
@@ -174,8 +174,8 @@ class Cen2Tracker(Tracker):
         if hasattr(self, 'peaks_real') and isinstance(self.peaks_real, pd.DataFrame) and not erase:
             return self.peaks_real
 
-        self.peaks_real = self.peaks_z.copy()
-        self.stored_data.append('peaks_real')
+        peaks_real = self.peaks_z.copy()
+        self.save(peaks_real, 'peaks_real')
 
         self._remove_weakers(num_kept=num_kept, max_radius=max_radius)
         self._remove_uncomplete_timepoints(num_kept=num_kept)
@@ -230,7 +230,6 @@ class Cen2Tracker(Tracker):
         log.info('Total removed: {} / {} peaks'.format(len(bads), len(peaks)))
 
         self.peaks_real = peaks.drop(bads)
-        self.stored_data.append('peaks_real')
 
         log.info("*** End")
 
@@ -261,8 +260,6 @@ class Cen2Tracker(Tracker):
         log.info('{} / {} uncomplete timepoints removed'.format(removed_t, n_unique_peaks))
 
         log.info("*** End")
-
-        return self.peaks_real
 
     def _label_peaks(self, coords=['x', 'y']):
         """
@@ -302,9 +299,7 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-        return self.peaks_real
-
-    def _label_peaks_side(self, v_max=1e50, coords=['x', 'y']):
+    def _label_peaks_side(self, v_max=np.inf, coords=['x', 'y']):
         """
         Label side for every couple peaks. Side is 'A' or 'B'.
 
@@ -316,11 +311,15 @@ class Cen2Tracker(Tracker):
         log.info("*** Running _label_peaks_side()")
 
         peaks = self.peaks_real
+        if 'side' in peaks.columns:
+            peaks = peaks.reset_index('side').drop('side', axis=1)
 
         # Split peaks
         peaks = peaks.swaplevel("main_label", "t_stamp")
         spbs = peaks.loc['spb']
         kts = peaks.loc['kt']
+        kts['side'] = np.nan
+        spbs['side'] = np.nan
 
         # Track SPBs
         spbs['label'] = range(spbs.shape[0])
@@ -330,37 +329,8 @@ class Cen2Tracker(Tracker):
         spbs = solver.track(progress_bar=True)
 
         spbs.reset_index(level='label', inplace=True)
-        spbs['label'][spbs.label == 0] = 'A'
-        spbs['label'][spbs.label == 1] = 'B'
-
-        spbs.rename(columns={'label': 'side'}, inplace=True)
-
-        # Track KTs
-        kts['side'] = np.nan
-        kts = kts.sort_index()
-
-        ite = zip(kts.groupby(level='t_stamp'), spbs.groupby(level='t_stamp'))
-        n = self.times.size
-
-        for i, ((t_stamp, kt), (t_stamp, spb)) in enumerate(ite):
-
-            if self.verbose:
-                print_progress(i * 100 / n)
-
-            spb1 = spb.iloc[0][coords]
-            kt1 = kt.iloc[0][coords]
-            kt2 = kt.iloc[1][coords]
-
-            kt1_dist = np.linalg.norm(spb1 - kt1)
-            kt2_dist = np.linalg.norm(spb1 - kt2)
-
-            if kt1_dist < kt2_dist:
-                kts['side'].loc[np.int(t_stamp)] = spb['side']
-            else:
-                kts['side'].loc[np.int(t_stamp)] = spb['side'][::-1]
-
-        if self.verbose:
-            print_progress(-1)
+        spbs.loc[:, 'side'][spbs.label == 0] = 'A'
+        spbs.loc[:, 'side'][spbs.label == 1] = 'B'
 
         # Prepare to merge
         spbs['main_label'] = 'spb'
@@ -368,13 +338,32 @@ class Cen2Tracker(Tracker):
 
         # Do the merge
         peaks = pd.concat([kts, spbs]).sort_index()
+
+        def label_kts(p):
+
+            spb1 = p[(p['main_label'] == 'spb') & (p['side'] == 'A')]
+
+            kt1 = p[(p['main_label'] == 'kt')].iloc[0]
+            kt2 = p[(p['main_label'] == 'kt')].iloc[1]
+
+            kt1_dist = np.linalg.norm(spb1[coords] - kt1[coords])
+            kt2_dist = np.linalg.norm(spb1[coords] - kt2[coords])
+
+            if kt1_dist < kt2_dist:
+                p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['A', 'B']
+                p.loc[:, 'label'][(p['main_label'] == 'kt')] = [2, 3]
+            else:
+                p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['B', 'A']
+                p.loc[:, 'label'][(p['main_label'] == 'kt')] = [3, 2]
+
+            return p
+
+        peaks = peaks.groupby(level='t_stamp').apply(label_kts)
         peaks.set_index(['main_label', 'side'], append=True, inplace=True)
 
         self.peaks_real = peaks
 
         log.info("*** End")
-
-        return self.peaks_real
 
     def _remove_outliers(self, v_max):
         """
@@ -496,8 +485,7 @@ class Cen2Tracker(Tracker):
         peaks_interp.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
         peaks_interp.sort(inplace=True)
 
-        self.stored_data.append('peaks_real_interpolated')
-        self.peaks_real_interpolated = peaks_interp
+        self.save(peaks_interp, 'peaks_real_interpolated')
 
         log.info("*** End")
 
@@ -553,7 +541,9 @@ class Cen2Tracker(Tracker):
 
         # Set axis limit
         ax.set_xlim(min(times), max(times))
-        ax.set_ylim(-6, 6)
+        m = np.abs(peaks['x_proj'].max())
+        ax.set_ylim(-m, m)
+        ax.set_ylim(-2, 2)
 
         fontsize = 22
 

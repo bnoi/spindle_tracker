@@ -190,7 +190,7 @@ class Tracker():
 
         log.info("Data has been correctly saved to {}".format(self.h5_path))
 
-    def save(self, value, name):
+    def save(self, value, name=None):
         """Save an attribute to HDF5.
         """
         setattr(self, name, value)

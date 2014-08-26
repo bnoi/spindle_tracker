@@ -210,16 +210,21 @@ class Cen2Tracker(Tracker):
             bads.extend(bads_radius_index)
             n_bads_radius += len(bads_radius_index)
 
-            # Select n peaks by intensity
+            # Select n peaks by intensity or quality
             if pos.shape[0] >= num_kept:
-                bads_intensity_index = pos.sort('I').iloc[:-num_kept].index.values
+                if 'q' in pos.columns:
+                    bads_intensity_index = pos.sort('q').iloc[:-num_kept].index.values
+                else:
+                    bads_intensity_index = pos.sort('I').iloc[:-num_kept].index.values
                 bads.extend(bads_intensity_index)
                 n_bads_intensity += len(bads_intensity_index)
 
         bads = list(set(bads))
 
-        mess = '{} peaks removed for weak intensity and {} peaks removed for too large radius'
-        log.info(mess.format(n_bads_intensity, n_bads_radius))
+        mess = '{} peaks removed for weak intensity/quality.'
+        log.info(mess.format(n_bads_intensity))
+        mess = '{} peaks removed for too large radius'
+        log.info(mess.format(n_bads_radius))
         log.info('Total removed: {} / {} peaks'.format(len(bads), len(peaks)))
 
         self.peaks_real = peaks.drop(bads)

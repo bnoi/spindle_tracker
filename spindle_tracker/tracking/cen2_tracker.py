@@ -167,6 +167,7 @@ class Cen2Tracker(Tracker):
         if hasattr(self, 'peaks_real') and isinstance(self.peaks_real, pd.DataFrame) and not erase:
             return self.peaks_real
 
+        self.peaks_real = None
         peaks_real = self.peaks_z.copy()
         self.save(peaks_real, 'peaks_real')
 
@@ -427,7 +428,7 @@ class Cen2Tracker(Tracker):
         log.info("*** Running project()")
 
         progress = True
-        peaks = self.peaks_real
+        peaks = self.peaks_real.copy()
 
         peaks = peaks.reset_index(level=["main_label", "side"])
         peaks['label'] = np.nan

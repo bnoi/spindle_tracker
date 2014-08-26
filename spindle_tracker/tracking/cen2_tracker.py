@@ -542,7 +542,7 @@ class Cen2Tracker(Tracker):
         ax.set_xlim(min(times), max(times))
         m = np.abs(peaks['x_proj'].max())
         ax.set_ylim(-m, m)
-        ax.set_ylim(-2, 2)
+        # ax.set_ylim(-2, 2)
 
         fontsize = 22
 

@@ -394,7 +394,7 @@ class Cen2Tracker(Tracker):
             while not out:
 
                 v, t = get_speed(peaks)
-                v_above_treshold = np.argwhere(v > 0.05)
+                v_above_treshold = np.argwhere(v > v_max)
 
                 if len(v_above_treshold) > 0:
                     idx = v_above_treshold[0]

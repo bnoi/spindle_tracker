@@ -149,7 +149,7 @@ class Cen2Tracker(Tracker):
               v_max,
               num_kept,
               max_radius,
-              v_max_spb=1e50,
+              v_max_spb=np.inf,
               coords=['x', 'y'],
               erase=False,
               reference=None,

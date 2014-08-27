@@ -87,6 +87,21 @@ class Cen2Tracker(Tracker):
     Tracking methods
     """
 
+    def load_peaks(self, use_trackmate=True):
+        """
+        """
+
+        if use_trackmate:
+            self.get_peaks_from_trackmate()
+
+        if hasattr(self, 'raw_trackmate') and use_trackmate:
+            log.info("Use TrackMate to import detected peaks")
+            peaks = self.raw_trackmate.copy()
+        else:
+            peaks = self.raw.copy()
+
+        self.save(peaks, 'peaks')
+
     def find_z(self, treshold=0.1, erase=False, use_trackmate=True):
         """
         Find peaks with same x and y coordinate (with a cluster algorithm).
@@ -103,26 +118,19 @@ class Cen2Tracker(Tracker):
         if hasattr(self, "peaks_z") and isinstance(self.peaks_z, pd.DataFrame) and not erase:
             return self.peaks_z
 
-        if use_trackmate:
-            self.get_peaks_from_trackmate()
-
-        if hasattr(self, 'raw_trackmate') and use_trackmate:
-            log.info("Use TrackMate to import detected peaks")
-            peaks = self.raw_trackmate.copy()
-        else:
-            peaks = self.raw.copy()
-
         z_position = self.metadata['DimensionOrder'].index('Z')
         z_in_raw = peaks['z'].unique().shape[0]
         if self.metadata['Shape'][z_position] == 1 or z_in_raw == 1:
             log.info('No Z detected, pass Z projection clustering.')
-            self.peaks_z = peaks
+            self.peaks_z = self.peaks.copy()
             return
 
         log.info("*** Running find_z()")
 
         bads = []
         clusters_count = []
+
+        peaks = self.peaks
 
         for t, pos in peaks.groupby('t'):
             if pos.shape[0] > 1:
@@ -164,11 +172,16 @@ class Cen2Tracker(Tracker):
                (x_proj in /peaks_real)
         """
 
-        if hasattr(self, 'peaks_real') and isinstance(self.peaks_real, pd.DataFrame) and not erase:
+        if hasattr(self, 'peaks_real') and isinstance(self.peaks_real, pd.DataFrame) and \
+           not erase:
             return self.peaks_real
 
-        self.peaks_real = None
-        peaks_real = self.peaks_z.copy()
+        if hasattr(self, 'peaks_z'):
+            log.info("Using 'peaks_z'")
+            peaks_real = self.peaks_z.copy()
+        else:
+            peaks_real = self.peaks.copy()
+
         self.save(peaks_real, 'peaks_real')
 
         self._remove_weakers(num_kept=num_kept, max_radius=max_radius)

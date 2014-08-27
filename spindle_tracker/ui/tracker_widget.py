@@ -208,6 +208,7 @@ class TrackersWidget(QtGui.QWidget):
         t = self.tw.draggable_line.value()
         w = self.widgets_annot['anaphase_start']
         self.update_annotation('anaphase_start', w, t)
+        w.children()[2].setValue(t)
 
     def connect_draggable_line(self):
         """

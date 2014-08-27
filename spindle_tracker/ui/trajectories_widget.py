@@ -13,7 +13,8 @@ from .viewbox import DataSelectorViewBox
 
 
 class TrajectoriesWidget(QtGui.QWidget):
-    """
+    """Warning: this code works but is pretty ugly and probably plenty of max depth recursion. It
+    needs a big refactoring and rewrite.
     """
 
     sig_traj_change = QtCore.Signal(int)
@@ -315,7 +316,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     # Items management
 
-    def update_trajectories(self, draggable_value=None):
+    def update_trajectories(self, draggable_value=None, no_axis_update=False):
         """
         """
 
@@ -327,6 +328,7 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.draggable_line.setValue(draggable_value)
         self.pw.addItem(self.draggable_line)
 
+        self.trajs.sort_index(inplace=True)
         for label, peaks in self.trajs.groupby(level='label'):
 
             color = self.label_colors[label]
@@ -366,8 +368,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.pw.setLabel('bottom', self.xaxis)
         self.pw.setLabel('left', self.yaxis)
 
-        self.cb_xaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.xaxis))
-        self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
+        if no_axis_update:
+            self.cb_xaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.xaxis))
+            self.cb_yaxis.setCurrentIndex(self.trajs.columns.tolist().index(self.yaxis))
 
         self.update_selection_infos()
 
@@ -700,7 +703,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         if scale:
             self.scale_x = scale
 
-        self.update_trajectories()
+        self.update_trajectories(no_axis_update=True)
         self.sig_axis_change.emit('x')
 
     def set_yaxis(self, ax_name, scale=None):
@@ -717,5 +720,5 @@ class TrajectoriesWidget(QtGui.QWidget):
         if scale:
             self.scale_y = scale
 
-        self.update_trajectories()
+        self.update_trajectories(no_axis_update=True)
         self.sig_axis_change.emit('y')

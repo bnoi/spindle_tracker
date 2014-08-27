@@ -172,19 +172,19 @@ class Tracker():
     def load_oio(self):
         """
         """
-
         for key, obj in self.oio.get_all_items():
             if isinstance(obj, pd.DataFrame):
                 setattr(self, key, Trajectories(obj))
             else:
                 setattr(self, key, obj)
+
+            self.stored_data.append(key)
             log.info("Correctly loaded '{}'".format(key))
 
     def save_oio(self):
         """
         """
         for key in self.stored_data:
-            key = key.replace('/', '')
             self.oio[key] = getattr(self, key)
             log.info("Correctly saved '{}'".format(key))
 

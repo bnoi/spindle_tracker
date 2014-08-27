@@ -70,6 +70,8 @@ class ImageOverlayWidget(pg.ImageView):
             self.removeItem(roi)
 
         self.current_rois = []
-        for roi in self.overlay_rois[int(time)]:
-            self.addItem(roi)
-            self.current_rois.append(roi)
+
+        if int(time) in self.overlay_rois.keys():
+            for roi in self.overlay_rois[int(time)]:
+                self.addItem(roi)
+                self.current_rois.append(roi)

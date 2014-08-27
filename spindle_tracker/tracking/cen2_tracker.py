@@ -44,7 +44,7 @@ class Cen2Tracker(Tracker):
     @property
     def anaphase(self):
         try:
-            return self.annotations['anaphase']
+            return self.annotations['anaphase_start']
         except:
             return None
 

@@ -329,7 +329,11 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.pw.addItem(self.draggable_line)
 
         self.trajs.sort_index(inplace=True)
-        for label, peaks in self.trajs.groupby(level='label'):
+        if 'label' in self.trajs.columns:
+            gp = self.trajs.groupby(by='label')
+        else:
+            gp = self.trajs.groupby(level='label')
+        for label, peaks in gp:
 
             color = self.label_colors[label]
 

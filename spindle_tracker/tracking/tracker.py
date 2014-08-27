@@ -186,7 +186,6 @@ class Tracker():
         """
         for key in self.stored_data:
             self.oio[key] = getattr(self, key)
-            log.info("Correctly saved '{}'".format(key))
 
         log.info("Data has been correctly saved to {}".format(self.h5_path))
 

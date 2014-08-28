@@ -36,7 +36,7 @@ class Tracker():
                  verbose=True,
                  force_metadata=False,
                  json_discovery=True,
-                 clean_store=False):
+                 clean_store=True):
         """
         Parameters:
         -----------

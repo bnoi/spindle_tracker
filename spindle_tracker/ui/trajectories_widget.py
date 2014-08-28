@@ -164,6 +164,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         action_remove_spot = QtGui.QAction("Remove spots", self.menu_spots)
         self.menu_spots.addAction(action_remove_spot)
+        action_remove_spot.setShortcut("Del")
         action_remove_spot.triggered.connect(self.remove_spots)
 
         self.menu_trajs = QtGui.QMenu("Trajectories")

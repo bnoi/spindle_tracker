@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.utils import print_progress
+from sktracker.utils import progress_apply
 from sktracker.trajectories import Trajectories
 
 from ..tracking import Tracker
@@ -372,7 +373,7 @@ class Cen2Tracker(Tracker):
 
             return p
 
-        peaks = peaks.groupby(level='t_stamp').apply(label_kts)
+        peaks = progress_apply(peaks.groupby(level='t_stamp'), label_kts)
         peaks.set_index(['main_label', 'side'], append=True, inplace=True)
 
         self.peaks_real = peaks

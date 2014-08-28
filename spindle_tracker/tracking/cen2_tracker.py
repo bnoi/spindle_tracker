@@ -197,7 +197,7 @@ class Cen2Tracker(Tracker):
                          reference=reference,
                          keep_first_time=keep_first_time)
 
-            self._interpolate()
+            self.interpolate()
 
             self.peaks_real.sort_index(inplace=True)
         else:
@@ -323,8 +323,10 @@ class Cen2Tracker(Tracker):
         log.info("*** Running _label_peaks_side()")
 
         peaks = self.peaks_real
+        if 'side' in peaks.index.names:
+            peaks = peaks.reset_index('side')
         if 'side' in peaks.columns:
-            peaks = peaks.reset_index('side').drop('side', axis=1)
+            peaks = peaks.drop('side', axis=1)
 
         # Split peaks
         peaks = peaks.swaplevel("main_label", "t_stamp")
@@ -466,7 +468,7 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-    def _interpolate(self, dt=1, kind='linear'):
+    def interpolate(self, dt=1, kind='linear'):
         """
         Interpolate data for x, y, z and x_proj. Then create new
         /peaks_real_interpolated with new times.
@@ -474,7 +476,7 @@ class Cen2Tracker(Tracker):
         TODO: use sktracker.trajectories.Trajectories.interpolate()
         """
 
-        log.info("*** Running _interpolate()")
+        log.info("*** Running interpolate()")
 
         peaks = self.peaks_real
         peaks_interp = pd.DataFrame([])

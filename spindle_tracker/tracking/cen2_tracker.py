@@ -51,15 +51,21 @@ class Cen2Tracker(Tracker):
 
     @property
     def index_anaphase(self):
-        if self.anaphase and self.anaphase != -1:
-            return self.get_closest_time(self.anaphase, interpolated=False)
+        if self.anaphase:
+            if self.anaphase != -1:
+                return self.get_closest_time(self.anaphase, interpolated=False)
+            else:
+                return -1
         else:
             return None
 
     @property
     def index_anaphase_interpolated(self):
         if self.anaphase:
-            return self.get_closest_time(self.anaphase, interpolated=True)
+            if self.anaphase != -1:
+                return self.get_closest_time(self.anaphase, interpolated=True)
+            else:
+                return -1
         else:
             return None
 
@@ -525,10 +531,7 @@ class Cen2Tracker(Tracker):
             peaks = self.peaks_real
             times = self.times
 
-        colors = ["#A25540",  # SPB A
-                  "#95BD55",  # SPB B
-                  "#7F9C9A",  # Kt A
-                  "#9E5EAB"]  # Kt B
+        colors = list(Trajectories(peaks).get_colors().values())
 
         import matplotlib.pyplot as plt
 

@@ -475,40 +475,49 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-    def interpolate(self, dt=1, kind='linear'):
+    def interpolate(self, sampling=1, s=0, k=3,):
         """
-        Interpolate data for x, y, z and x_proj. Then create new
+        Interpolate columns. Then create new
         /peaks_real_interpolated with new times.
-
-        TODO: use sktracker.trajectories.Trajectories.interpolate()
         """
 
         log.info("*** Running interpolate()")
 
-        peaks = self.peaks_real
-        peaks_interp = pd.DataFrame([])
+        trajs = self.peaks_real.set_level_label(inplace=False)
+        coords = list(trajs.columns)
+        coords.remove('main_label')
+        coords.remove('side')
+        trajs = trajs.time_interpolate(sampling=sampling,
+                                       s=s,
+                                       k=k,
+                                       coords=coords,
+                                       keep_speed=False,
+                                       keep_acceleration=False)
 
-        for (label, side), p in peaks.groupby(level=['main_label', 'side']):
-            new_p = pd.DataFrame(np.arange(np.round(p['t'].min()) + 1, p['t'].max(), dt),
-                                 columns=['t'])
-            new_p['main_label'] = label
-            new_p['side'] = side
+        trajs = self.set_main_label(trajs)
 
-            for dim in p.columns:
-                if dim not in ['id', 't']:
-                    fc = sp.interpolate.interp1d(p['t'], p[dim], kind=kind)
-                    new_p[dim] = fc(new_p['t'])
-
-            new_p['t_stamp'] = np.arange(0, new_p.shape[0])
-
-            peaks_interp = peaks_interp.append(new_p)
-
-        peaks_interp.set_index(['t_stamp', 'main_label', 'side'], inplace=True)
-        peaks_interp.sort(inplace=True)
-
-        self.save(peaks_interp, 'peaks_real_interpolated')
+        self.save(trajs, 'peaks_real_interpolated')
 
         log.info("*** End")
+
+    def set_main_label(self, trajs):
+        """
+        """
+
+        trajs.reset_index('label', inplace=True)
+        trajs['main_label'] = None
+        trajs['side'] = None
+        trajs.sort('label', inplace=True)
+
+        trajs.loc[:, 'main_label'][(trajs['label'] == 0) | (trajs['label'] == 1)] = 'kt'
+        trajs.loc[:, 'main_label'][(trajs['label'] == 2) | (trajs['label'] == 3)] = 'spb'
+        trajs.loc[:, 'side'][(trajs['label'] == 0) | (trajs['label'] == 2)] = 'A'
+        trajs.loc[:, 'side'][(trajs['label'] == 1) | (trajs['label'] == 3)] = 'B'
+
+        trajs.set_index(['main_label', 'side'], append=True, inplace=True)
+        trajs.sort_index(inplace=True)
+
+        return trajs
 
     """
     Plot and visu methods

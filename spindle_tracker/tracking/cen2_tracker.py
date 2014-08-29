@@ -475,7 +475,7 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-    def interpolate(self, sampling=1, s=0, k=3,):
+    def interpolate(self, sampling=1, s=0, k=1):
         """
         Interpolate columns. Then create new
         /peaks_real_interpolated with new times.

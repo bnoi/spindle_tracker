@@ -192,7 +192,7 @@ class Cen2Tracker(Tracker):
         self.save(peaks_real, 'peaks_real')
 
         self._remove_weakers(num_kept=num_kept, max_radius=max_radius)
-        self._remove_uncomplete_timepoints(num_kept=num_kept)
+        self.remove_uncomplete_timepoints(num_kept=num_kept)
 
         if not self.peaks_real.empty:
             self._label_peaks(coords=coords)
@@ -252,11 +252,11 @@ class Cen2Tracker(Tracker):
 
         log.info("*** End")
 
-    def _remove_uncomplete_timepoints(self, num_kept=4):
+    def remove_uncomplete_timepoints(self, num_kept=4):
         """
         """
 
-        log.info("*** Running _remove_uncomplete_timepoints()")
+        log.info("*** Running remove_uncomplete_timepoints()")
 
         peaks = self.peaks_real.copy()
         bads = []

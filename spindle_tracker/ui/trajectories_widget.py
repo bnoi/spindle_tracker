@@ -55,6 +55,9 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.name = self.names[0]
         self.len_trajs = len(self.all_trajs)
 
+        if 'label' not in self.trajs.index.names:
+            self.trajs.set_level_label()
+
         self.curve_width = 1
         self.scatter_size = 8
 
@@ -307,7 +310,7 @@ class TrajectoriesWidget(QtGui.QWidget):
         """
 
         self.cb_xaxis.clear()
-        for label in self.trajs.columns:
+        for label in self.trajs.columns.tolist():
             self.cb_xaxis.addItem(label)
 
         self.cb_yaxis.clear()
@@ -331,13 +334,9 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.draggable_line.setValue(draggable_value)
         self.pw.addItem(self.draggable_line)
 
-        self.trajs = self.trajs.set_level_label(inplace=False)
-
         self.trajs.sort_index(inplace=True)
-        if 'label' in self.trajs.columns:
-            gp = self.trajs.groupby(by='label')
-        else:
-            gp = self.trajs.groupby(level='label')
+        gp = self.trajs.groupby(level='label')
+
         for label, peaks in gp:
 
             color = self.label_colors[label]
@@ -353,6 +352,7 @@ class TrajectoriesWidget(QtGui.QWidget):
                                      clickable=True)
             curve.label = label
             curve.is_selected = False
+
             self.pw.addItem(curve)
             curve.sigClicked.connect(self.item_clicked)
             self.traj_items.append(curve)
@@ -506,6 +506,10 @@ class TrajectoriesWidget(QtGui.QWidget):
         self.traj_items = []
 
         self.update_historic_buttons()
+
+        if 'label' not in self.trajs.index.names:
+            self.trajs.set_level_label()
+
         self.update_trajectories()
         self.set_all_trajs_label()
         self.status.setText(self.name)
@@ -704,8 +708,11 @@ class TrajectoriesWidget(QtGui.QWidget):
         if isinstance(ax_name, int):
             ax_name = self.cb_xaxis.itemText(ax_name)
 
-        if ax_name not in self.trajs.columns:
+        if ax_name not in list(self.trajs.columns):
             self.status.setText('"{}" is not in Trajectories columns'.format(ax_name))
+            return
+
+        if self.trajs[ax_name].dtype.kind not in ['i', 'f']:
             return
 
         self.xaxis = ax_name
@@ -723,6 +730,9 @@ class TrajectoriesWidget(QtGui.QWidget):
 
         if ax_name not in self.trajs.columns:
             self.status.setText('"{}" is not in Trajectories columns'.format(ax_name))
+            return
+
+        if self.trajs[ax_name].dtype.kind not in ['i', 'f']:
             return
 
         self.yaxis = ax_name

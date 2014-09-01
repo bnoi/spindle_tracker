@@ -331,6 +331,8 @@ class TrajectoriesWidget(QtGui.QWidget):
             self.draggable_line.setValue(draggable_value)
         self.pw.addItem(self.draggable_line)
 
+        self.trajs = self.trajs.set_level_label(inplace=False)
+
         self.trajs.sort_index(inplace=True)
         if 'label' in self.trajs.columns:
             gp = self.trajs.groupby(by='label')

@@ -452,6 +452,9 @@ class Cen2Tracker(Tracker):
         progress = True
         peaks = self.peaks_real.copy()
 
+        if 'main_label' not in peaks.index.names:
+            peaks = peaks.unset_level_label(["main_label", "side"], inplace=False)
+
         peaks = peaks.reset_index(level=["main_label", "side"])
         peaks['label'] = np.nan
 

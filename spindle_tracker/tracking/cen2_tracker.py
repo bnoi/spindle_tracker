@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import scipy as sp
 import pandas as pd
 import scipy.spatial.distance as dist
 import scipy.cluster.hierarchy as hier
@@ -126,7 +125,7 @@ class Cen2Tracker(Tracker):
             return self.peaks_z
 
         z_position = self.metadata['DimensionOrder'].index('Z')
-        z_in_raw = peaks['z'].unique().shape[0]
+        z_in_raw = self.peaks['z'].unique().shape[0]
         if self.metadata['Shape'][z_position] == 1 or z_in_raw == 1:
             log.info('No Z detected, pass Z projection clustering.')
             self.peaks_z = self.peaks.copy()
@@ -293,24 +292,19 @@ class Cen2Tracker(Tracker):
 
         peaks = self.peaks_real
 
-        peaks.reset_index('label', inplace=True)
-        del peaks['label']
+        if 'label' in peaks.index.names:
+            peaks.reset_index('label', inplace=True)
 
         peaks['main_label'] = 'kt'
 
-        n = self.times.size
-        for i, (t_stamp, p) in enumerate(peaks.groupby(level='t_stamp')):
+        def get_spb(x):
+            d = dist.squareform(dist.pdist(x[coords]))
+            idxs = np.unravel_index(d.argmax(), d.shape)
+            x.loc[:, 'main_label'].iloc[list(idxs)] = "spb"
+            return x
 
-            if self.verbose:
-                print_progress(i * 100 / n)
-
-            d = dist.squareform(dist.pdist(p[coords]))
-            i, j = np.unravel_index(d.argmax(), d.shape)
-
-            peaks['main_label'].loc[t_stamp].iloc[[i, j]] = 'spb'
-
-        if self.verbose:
-            print_progress(-1)
+        gp = peaks.groupby(level='t_stamp')
+        peaks = progress_apply(gp, get_spb)
 
         peaks.set_index(['main_label'], append=True, inplace=True)
 
@@ -331,56 +325,69 @@ class Cen2Tracker(Tracker):
 
         peaks = self.peaks_real
         if 'side' in peaks.index.names:
-            peaks = peaks.reset_index('side')
+            peaks.reset_index('side', inplace=True)
         if 'side' in peaks.columns:
-            peaks = peaks.drop('side', axis=1)
+            peaks.drop('side', axis=1, inplace=True)
 
         # Split peaks
-        peaks = peaks.swaplevel("main_label", "t_stamp")
-        spbs = peaks.loc['spb']
-        kts = peaks.loc['kt']
-        kts['side'] = np.nan
-        spbs['side'] = np.nan
+        idx = pd.IndexSlice
+        peaks.sortlevel(inplace=True)
+        spbs = peaks.loc[idx[:, 'spb'], :]
+        kts = peaks.loc[idx[:, 'kt'], :]
+
+        kts.loc[:, 'side'] = np.nan
+        spbs.loc[:, 'side'] = np.nan
 
         # Track SPBs
-        spbs['label'] = range(spbs.shape[0])
+        spbs.loc[:, 'label'] = range(spbs.shape[0])
         spbs.set_index('label', append=True, inplace=True)
 
+        spbs.reset_index("main_label", inplace=True)
         solver = ByFrameSolver.for_brownian_motion(spbs, max_speed=v_max, coords=coords)
         spbs = solver.track(progress_bar=True)
 
-        spbs.reset_index(level='label', inplace=True)
-        spbs.loc[:, 'side'][spbs.label == 0] = 'A'
-        spbs.loc[:, 'side'][spbs.label == 1] = 'B'
+        idx = pd.IndexSlice
+        spbs.sortlevel(inplace=True)
+        spbs.loc[idx[:, 0], 'side'] = 'A'
+        spbs.loc[idx[:, 1], 'side'] = 'B'
 
-        # Prepare to merge
-        spbs['main_label'] = 'spb'
-        kts['main_label'] = 'kt'
+        spbs.reset_index(level='label', inplace=True)
 
         # Do the merge
+        spbs.set_index("main_label", append=True, inplace=True)
         peaks = pd.concat([kts, spbs]).sort_index()
 
         def label_kts(p):
 
-            spb1 = p[(p['main_label'] == 'spb') & (p['side'] == 'A')]
+            idx = pd.IndexSlice
+            spb1 = p[p['side'] == 'A'].loc[idx[:, 'spb'], :]
+            # spb1 = p[(p['main_label'] == 'spb') & (p['side'] == 'A')]
 
-            kt1 = p[(p['main_label'] == 'kt')].iloc[0]
-            kt2 = p[(p['main_label'] == 'kt')].iloc[1]
+            kt1 = p.loc[idx[:, 'kt'], :].iloc[0]
+            kt2 = p.loc[idx[:, 'kt'], :].iloc[1]
+            # kt1 = p[(p['main_label'] == 'kt')].iloc[0]
+            # kt2 = p[(p['main_label'] == 'kt')].iloc[1]
 
             kt1_dist = np.linalg.norm(spb1[coords] - kt1[coords])
             kt2_dist = np.linalg.norm(spb1[coords] - kt2[coords])
 
             if kt1_dist < kt2_dist:
-                p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['A', 'B']
-                p.loc[:, 'label'][(p['main_label'] == 'kt')] = [2, 3]
+                p.loc[idx[:, 'kt'], 'side'] = np.array(['A', 'B'])
+                p.loc[idx[:, 'kt'], 'label'] = np.array([2, 3])
+
+                # p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['A', 'B']
+                # p.loc[:, 'label'][(p['main_label'] == 'kt')] = [2, 3]
             else:
-                p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['B', 'A']
-                p.loc[:, 'label'][(p['main_label'] == 'kt')] = [3, 2]
+                p.loc[idx[:, 'kt'], 'side'] = np.array(['B', 'A'])
+                p.loc[idx[:, 'kt'], 'label'] = np.array([3, 2])
+
+                # p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['B', 'A']
+                # p.loc[:, 'label'][(p['main_label'] == 'kt')] = [3, 2]
 
             return p
 
         peaks = progress_apply(peaks.groupby(level='t_stamp'), label_kts)
-        peaks.set_index(['main_label', 'side'], append=True, inplace=True)
+        peaks.set_index('side', append=True, inplace=True)
 
         self.peaks_real = peaks
 
@@ -450,22 +457,18 @@ class Cen2Tracker(Tracker):
         log.info("*** Running project()")
 
         progress = True
-        peaks = self.peaks_real.copy()
+        peaks = Trajectories(self.peaks_real)
 
-        if 'main_label' not in peaks.index.names:
-            peaks = peaks.unset_level_label(["main_label", "side"], inplace=False)
-
-        peaks = peaks.reset_index(level=["main_label", "side"])
         peaks['label'] = np.nan
 
-        peaks.loc[:, 'label'][(peaks['main_label'] == 'kt') & (peaks['side'] == 'A')] = 0
-        peaks.loc[:, 'label'][(peaks['main_label'] == 'kt') & (peaks['side'] == 'B')] = 1
-        peaks.loc[:, 'label'][(peaks['main_label'] == 'spb') & (peaks['side'] == 'A')] = 2
-        peaks.loc[:, 'label'][(peaks['main_label'] == 'spb') & (peaks['side'] == 'B')] = 3
+        idx = pd.IndexSlice
+        peaks.sortlevel(inplace=True)
+        peaks.loc[idx[:, 'kt', 'A'], 'label'] = 0
+        peaks.loc[idx[:, 'kt', 'B'], 'label'] = 1
+        peaks.loc[idx[:, 'spb', 'A'], 'label'] = 2
+        peaks.loc[idx[:, 'spb', 'B'], 'label'] = 3
 
-        peaks = peaks.set_index('label', append=True)
-
-        peaks = Trajectories(peaks)
+        peaks.set_level_label(inplace=True)
 
         peaks = peaks.project([2, 3],
                               keep_first_time=False,
@@ -507,15 +510,15 @@ class Cen2Tracker(Tracker):
         """
         """
 
-        trajs.reset_index('label', inplace=True)
         trajs['main_label'] = None
         trajs['side'] = None
-        trajs.sort('label', inplace=True)
 
-        trajs.loc[:, 'main_label'][(trajs['label'] == 0) | (trajs['label'] == 1)] = 'kt'
-        trajs.loc[:, 'main_label'][(trajs['label'] == 2) | (trajs['label'] == 3)] = 'spb'
-        trajs.loc[:, 'side'][(trajs['label'] == 0) | (trajs['label'] == 2)] = 'A'
-        trajs.loc[:, 'side'][(trajs['label'] == 1) | (trajs['label'] == 3)] = 'B'
+        idx = pd.IndexSlice
+        trajs.sortlevel(inplace=True)
+        trajs.loc[idx[:, [0, 1]], 'main_label'] = 'kt'
+        trajs.loc[idx[:, [2, 3]], 'main_label'] = 'spb'
+        trajs.loc[idx[:, [0, 2]], 'side'] = 'A'
+        trajs.loc[idx[:, [1, 3]], 'side'] = 'B'
 
         trajs.set_index(['main_label', 'side'], append=True, inplace=True)
         trajs.sort_index(inplace=True)

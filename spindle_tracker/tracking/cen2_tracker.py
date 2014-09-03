@@ -483,7 +483,7 @@ class Cen2Tracker(Tracker):
                               inplace=False,
                               progress=progress)
 
-        peaks = peaks.reset_index(level='label').set_index(['main_label', 'side'], append=True)
+        peaks.unset_level_label(['main_label', 'side'], inplace=True)
         self.peaks_real = peaks
 
         log.info("*** End")
@@ -496,7 +496,7 @@ class Cen2Tracker(Tracker):
 
         log.info("*** Running interpolate()")
 
-        trajs = self.peaks_real.set_level_label(inplace=False)
+        trajs = self.peaks_real.set_level_label(inplace=False).copy()
         coords = list(trajs.columns)
         coords.remove('main_label')
         coords.remove('side')

@@ -339,10 +339,11 @@ class Cen2Tracker(Tracker):
         spbs.loc[:, 'side'] = np.nan
 
         # Track SPBs
-        spbs.loc[:, 'label'] = range(spbs.shape[0])
+        spbs.loc[:, 'label'] = np.arange(spbs.shape[0])
         spbs.set_index('label', append=True, inplace=True)
 
         spbs.reset_index("main_label", inplace=True)
+
         solver = ByFrameSolver.for_brownian_motion(spbs, max_speed=v_max, coords=coords)
         spbs = solver.track(progress_bar=True)
 

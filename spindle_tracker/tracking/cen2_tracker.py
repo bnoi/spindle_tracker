@@ -206,6 +206,12 @@ class Cen2Tracker(Tracker):
             self.interpolate()
 
             self.peaks_real.sort_index(inplace=True)
+
+            if 'label' in self.peaks_real.index.names:
+                self.peaks_real.unset_level_label(['main_label', 'side'], inplace=True)
+            if 'label' in self.peaks_real_interpolated.index.names:
+                self.peaks_real_interpolated.unset_level_label(['main_label', 'side'], inplace=True)
+
         else:
             log.error("peaks_real is empty")
 
@@ -503,6 +509,9 @@ class Cen2Tracker(Tracker):
 
         trajs = self.set_main_label(trajs)
 
+        if 'label' in trajs.index.names:
+            trajs.unset_level_label(['main_label', 'side'], inplace=True)
+
         self.save(trajs, 'peaks_real_interpolated')
 
         log.info("*** End")
@@ -521,6 +530,7 @@ class Cen2Tracker(Tracker):
         trajs.loc[idx[:, [0, 2]], 'side'] = 'A'
         trajs.loc[idx[:, [1, 3]], 'side'] = 'B'
 
+        trajs.reset_index('label', inplace=True)
         trajs.set_index(['main_label', 'side'], append=True, inplace=True)
         trajs.sort_index(inplace=True)
 

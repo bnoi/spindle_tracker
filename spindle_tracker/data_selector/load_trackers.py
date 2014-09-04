@@ -4,14 +4,11 @@ import logging
 
 log = logging.getLogger(__name__)
 
-
-from ..tracking import Cen2Tracker
-
 from sktracker.utils.sort import natural_keys
 from sktracker.utils import print_progress
 
 
-def tracker_load(base_dir, movies_path, patterns, trackers=True):
+def tracker_load(base_dir, movies_path, patterns, tracker_class=None, tracker_params={}):
     """
     """
 
@@ -27,7 +24,7 @@ def tracker_load(base_dir, movies_path, patterns, trackers=True):
                 fnames.append(fname)
     fnames = sorted(fnames, key=natural_keys)
 
-    if not trackers:
+    if not tracker_class:
 
         # Split by mutant groups
         gp = [(label, list(filter(lambda x: re.search(p, str(x)), fnames))) for label, p in patterns]
@@ -38,12 +35,10 @@ def tracker_load(base_dir, movies_path, patterns, trackers=True):
     log.info("Load {}".format(data_path))
 
     # Load trackers
-    tracker_params = dict(base_dir=base_dir, verbose=False,
-                          force_metadata=False, json_discovery=True)
     trackers = []
     for i, fname in enumerate(fnames):
         print_progress(i * 100 / len(fnames))
-        tracker = Cen2Tracker(fname, **tracker_params)
+        tracker = tracker_class(fname, **tracker_params)
         trackers.append(tracker)
     print_progress(-1)
 

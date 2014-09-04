@@ -106,7 +106,7 @@ class Ndc80Tracker(Tracker):
 
         if hasattr(self, 'annotations') and 'poles_index' in self.annotations.keys() and not erase:
             self.poles_index = self.annotations['poles_index']
-            log.info("Poles already found : {}".format(self.poles_index))
+            # log.info("Poles already found : {}".format(self.poles_index))
             return self.poles_index
 
         log.info("Finding poles")
@@ -167,6 +167,13 @@ class Ndc80Tracker(Tracker):
         log.info("Poles are {}".format(self.poles_index))
 
         return np.sort(poles_index)
+
+    def find_kts(self):
+        """Kts are all spots excluded both labeled as poles.
+        """
+
+        poles = self.find_poles()
+        return np.delete(self.trajs.labels, poles)
 
     def project(self, traj_name='trajs_poles', progress=False, erase=False):
         """

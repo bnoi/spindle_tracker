@@ -8,7 +8,6 @@ import scipy.cluster.hierarchy as hier
 log = logging.getLogger(__name__)
 
 from sktracker.tracker.solver import ByFrameSolver
-from sktracker.utils import print_progress
 from sktracker.utils import progress_apply
 from sktracker.trajectories import Trajectories
 
@@ -207,10 +206,8 @@ class Cen2Tracker(Tracker):
 
             self.peaks_real.sort_index(inplace=True)
 
-            if 'label' in self.peaks_real.index.names:
-                self.peaks_real.unset_level_label(['main_label', 'side'], inplace=True)
-            if 'label' in self.peaks_real_interpolated.index.names:
-                self.peaks_real_interpolated.unset_level_label(['main_label', 'side'], inplace=True)
+            self.unswitch_to_label(self.peaks_real)
+            self.unswitch_to_label(self.peaks_real_interpolated)
 
         else:
             log.error("peaks_real is empty")
@@ -368,12 +365,9 @@ class Cen2Tracker(Tracker):
 
             idx = pd.IndexSlice
             spb1 = p[p['side'] == 'A'].loc[idx[:, 'spb'], :]
-            # spb1 = p[(p['main_label'] == 'spb') & (p['side'] == 'A')]
 
             kt1 = p.loc[idx[:, 'kt'], :].iloc[0]
             kt2 = p.loc[idx[:, 'kt'], :].iloc[1]
-            # kt1 = p[(p['main_label'] == 'kt')].iloc[0]
-            # kt2 = p[(p['main_label'] == 'kt')].iloc[1]
 
             kt1_dist = np.linalg.norm(spb1[coords] - kt1[coords])
             kt2_dist = np.linalg.norm(spb1[coords] - kt2[coords])
@@ -382,14 +376,9 @@ class Cen2Tracker(Tracker):
                 p.loc[idx[:, 'kt'], 'side'] = np.array(['A', 'B'])
                 p.loc[idx[:, 'kt'], 'label'] = np.array([2, 3])
 
-                # p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['A', 'B']
-                # p.loc[:, 'label'][(p['main_label'] == 'kt')] = [2, 3]
             else:
                 p.loc[idx[:, 'kt'], 'side'] = np.array(['B', 'A'])
                 p.loc[idx[:, 'kt'], 'label'] = np.array([3, 2])
-
-                # p.loc[:, 'side'][(p['main_label'] == 'kt')] = ['B', 'A']
-                # p.loc[:, 'label'][(p['main_label'] == 'kt')] = [3, 2]
 
             return p
 
@@ -466,16 +455,7 @@ class Cen2Tracker(Tracker):
         progress = True
         peaks = Trajectories(self.peaks_real)
 
-        peaks['label'] = np.nan
-
-        idx = pd.IndexSlice
-        peaks.sortlevel(inplace=True)
-        peaks.loc[idx[:, 'kt', 'A'], 'label'] = 0
-        peaks.loc[idx[:, 'kt', 'B'], 'label'] = 1
-        peaks.loc[idx[:, 'spb', 'A'], 'label'] = 2
-        peaks.loc[idx[:, 'spb', 'B'], 'label'] = 3
-
-        peaks.set_level_label(inplace=True)
+        self.switch_to_label(peaks)
 
         peaks = peaks.project([2, 3],
                               keep_first_time=False,
@@ -483,7 +463,7 @@ class Cen2Tracker(Tracker):
                               inplace=False,
                               progress=progress)
 
-        peaks.unset_level_label(['main_label', 'side'], inplace=True)
+        self.unswitch_to_label(peaks)
         self.peaks_real = peaks
 
         log.info("*** End")
@@ -496,10 +476,13 @@ class Cen2Tracker(Tracker):
 
         log.info("*** Running interpolate()")
 
-        trajs = self.peaks_real.set_level_label(inplace=False).copy()
+        trajs = self.peaks_real.copy()
+        self.switch_to_label(trajs)
+
         coords = list(trajs.columns)
         coords.remove('main_label')
         coords.remove('side')
+
         trajs = trajs.time_interpolate(sampling=sampling,
                                        s=s,
                                        k=k,
@@ -507,34 +490,48 @@ class Cen2Tracker(Tracker):
                                        keep_speed=False,
                                        keep_acceleration=False)
 
-        trajs = self.set_main_label(trajs)
-
-        if 'label' in trajs.index.names:
-            trajs.unset_level_label(['main_label', 'side'], inplace=True)
+        self.unswitch_to_label(trajs)
 
         self.save(trajs, 'peaks_real_interpolated')
 
         log.info("*** End")
 
-    def set_main_label(self, trajs):
+    def switch_to_label(self, peaks):
         """
         """
 
-        trajs['main_label'] = None
-        trajs['side'] = None
+        if 'label' not in peaks.index.names:
 
-        idx = pd.IndexSlice
-        trajs.sortlevel(inplace=True)
-        trajs.loc[idx[:, [0, 1]], 'main_label'] = 'kt'
-        trajs.loc[idx[:, [2, 3]], 'main_label'] = 'spb'
-        trajs.loc[idx[:, [0, 2]], 'side'] = 'A'
-        trajs.loc[idx[:, [1, 3]], 'side'] = 'B'
+            peaks['label'] = np.nan
 
-        trajs.reset_index('label', inplace=True)
-        trajs.set_index(['main_label', 'side'], append=True, inplace=True)
-        trajs.sort_index(inplace=True)
+            idx = pd.IndexSlice
+            peaks.sortlevel(inplace=True)
+            peaks.loc[idx[:, 'kt', 'A'], 'label'] = 0
+            peaks.loc[idx[:, 'kt', 'B'], 'label'] = 1
+            peaks.loc[idx[:, 'spb', 'A'], 'label'] = 2
+            peaks.loc[idx[:, 'spb', 'B'], 'label'] = 3
 
-        return trajs
+            peaks.set_level_label(inplace=True)
+
+    def unswitch_to_label(self, trajs):
+        """
+        """
+
+        if 'label' in trajs.index.names:
+
+            trajs['main_label'] = None
+            trajs['side'] = None
+
+            idx = pd.IndexSlice
+            trajs.sortlevel(inplace=True)
+            trajs.loc[idx[:, [0, 1]], 'main_label'] = 'kt'
+            trajs.loc[idx[:, [2, 3]], 'main_label'] = 'spb'
+            trajs.loc[idx[:, [0, 2]], 'side'] = 'A'
+            trajs.loc[idx[:, [1, 3]], 'side'] = 'B'
+
+            trajs.reset_index('label', inplace=True)
+            trajs.set_index(['main_label', 'side'], append=True, inplace=True)
+            trajs.sort_index(inplace=True)
 
     """
     Plot and visu methods

@@ -1,9 +1,13 @@
 import itertools
 
 import scipy as sp
+import numpy as np
 
 
-def print_stats(data):
+def print_stats(data,  abs=False):
+
+    if abs:
+        data = np.abs(data)
 
     groups = data.groupby(level=0)
     mean = groups.mean()

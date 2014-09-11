@@ -21,10 +21,13 @@ def print_stats(data, abs=False):
     print("Std : {}".format(std.values.T))
     print("SEM : {}".format(sem.values.T))
 
-    for label1, label2 in itertools.combinations(data.index.unique(), 2):
-        print("Kolmogorov-Smirnov test : {} - {}".format(label1, label2))
-        d1 = data.loc[label1].values.T
-        d2 = data.loc[label2].values.T
-        ks_value, p_value = sp.stats.ks_2samp(d1, d2)
-        print("\tKS value = {}".format(ks_value))
-        print("\tp-value = {:.2e}".format(p_value))
+    try:
+        for label1, label2 in itertools.combinations(data.index.unique(), 2):
+            print("Kolmogorov-Smirnov test : {} - {}".format(label1, label2))
+            d1 = data.loc[label1].values.T
+            d2 = data.loc[label2].values.T
+            ks_value, p_value = sp.stats.ks_2samp(d1, d2)
+            print("\tKS value = {}".format(ks_value))
+            print("\tp-value = {:.2e}".format(p_value))
+    except:
+        pass

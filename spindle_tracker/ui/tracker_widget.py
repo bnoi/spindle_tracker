@@ -4,7 +4,7 @@ log = logging.getLogger(__name__)
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
 
-from . import TrajectoriesWidget
+from sktracker.ui import TrajectoriesWidget
 
 
 class TrackersWidget(QtGui.QWidget):

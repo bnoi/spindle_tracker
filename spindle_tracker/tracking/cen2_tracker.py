@@ -37,6 +37,14 @@ class Cen2Tracker(Tracker):
         return self.peaks_real_interpolated['t'].unique().astype('float')
 
     @property
+    def times_metaphase(self):
+        return self.get_peaks_metaphase()['t'].unique().astype('float')
+
+    @property
+    def times_interpolated_metaphase(self):
+        return self.get_peaks_interpolated_metaphase()['t'].unique().astype('float')
+
+    @property
     def frames(self):
         return self.peaks_z['t'].unique().astype('float')
 
@@ -87,6 +95,55 @@ class Cen2Tracker(Tracker):
             peaks = self.peaks_real
 
         return peaks.loc[vec_t_stamp, 't'].unique()
+
+    def get_peaks_interpolated_metaphase(self):
+        """
+        """
+        index_anaphase = self.index_anaphase_interpolated
+
+        if index_anaphase is not None and index_anaphase > 0:
+            peaks = self.peaks_real_interpolated.loc[:index_anaphase]
+        else:
+            peaks = self.peaks_real_interpolated
+
+        return peaks
+
+    def get_peaks_metaphase(self):
+        """
+        """
+        index_anaphase = self.index_anaphase
+
+        if index_anaphase is not None and index_anaphase > 0:
+            peaks = self.peaks_real.loc[:index_anaphase]
+        else:
+            peaks = self.peaks_real
+
+        return peaks
+
+    def get_peaks_interpolated_anaphase(self):
+        """
+        """
+        index_anaphase = self.index_anaphase_interpolated
+
+        if index_anaphase is not None and index_anaphase > 0:
+            peaks = self.peaks_real_interpolated.loc[:index_anaphase]
+        else:
+            peaks = self.peaks_real_interpolated
+
+        return peaks
+
+    def get_peaks_anaphase(self):
+        """
+        """
+        index_anaphase = self.index_anaphase
+
+        if index_anaphase is not None and index_anaphase > 0:
+            peak = self.peaks_real.loc[index_anaphase:]
+        else:
+            peaks = None
+
+        return peaks
+
 
     """
     Tracking methods

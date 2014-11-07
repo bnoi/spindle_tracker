@@ -83,8 +83,9 @@ class Cen2Tracker(Tracker):
         else:
             peaks = self.peaks_real
 
-        i = int(np.argmin(np.abs(self.anaphase - peaks['t'].unique())))
+        i = int(np.argmin(np.abs(t - peaks['t'].unique())))
         return peaks.index.get_level_values('t_stamp').unique()[i]
+
 
     def get_time_from_stamp(self, vec_t_stamp, interpolated=False):
         """

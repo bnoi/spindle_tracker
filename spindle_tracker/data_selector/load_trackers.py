@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import logging
 
@@ -38,7 +39,12 @@ def tracker_load(base_dir, movies_path, patterns, tracker_class=None, tracker_pa
     trackers = []
     for i, fname in enumerate(fnames):
         print_progress(i * 100 / len(fnames))
-        tracker = tracker_class(fname, **tracker_params)
+        try:
+            tracker = tracker_class(fname, **tracker_params)
+        except:
+            _, err, _ = sys.exc_info()
+            print('Error with {}'.format(fname))
+            print(err)
         trackers.append(tracker)
     print_progress(-1)
 

@@ -16,7 +16,8 @@ from ..tracking import Tracker
 
 class BeginMitosisTracker(Tracker):
 
-    ANNOTATIONS = {'start_mitosis': (-1, None, float)}
+    ANNOTATIONS = {'start_mitosis': (-1, None, float),
+                   'state': (0, [0, 1, 2], None)}
 
     def __init__(self, *args, **kwargs):
         """

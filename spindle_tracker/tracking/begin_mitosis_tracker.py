@@ -16,6 +16,17 @@ from ..tracking import Tracker
 
 class BeginMitosisTracker(Tracker):
 
+    ANNOTATIONS = {'start_mitosis': (-1, None, float)}
+
+    def __init__(self, *args, **kwargs):
+        """
+        """
+
+        super().__init__(*args, **kwargs)
+
+        if hasattr(self, 'line_size'):
+            self.line_size = pd.Series(self.line_size)
+
     def track_poles(self, force=False):
         """
         """
@@ -73,6 +84,7 @@ class BeginMitosisTracker(Tracker):
 
                 line_profiles[t_stamp] = lp
                 line_size[t_stamp] = scipy.spatial.distance.cdist(np.atleast_2d(p1.values), np.atleast_2d(p2.values))[0, 0]
+                line_size[t_stamp] *= self.metadata['PhysicalSizeX']
 
             line_profiles = pd.DataFrame.from_dict(line_profiles, orient='index')
             line_size = pd.Series(line_size)

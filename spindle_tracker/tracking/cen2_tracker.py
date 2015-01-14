@@ -45,6 +45,14 @@ class Cen2Tracker(Tracker):
         return self.get_peaks_interpolated_metaphase()['t'].unique().astype('float')
 
     @property
+    def times_anaphase(self):
+        return self.get_peaks_anaphase()['t'].unique().astype('float')
+
+    @property
+    def times_interpolated_anaphase(self):
+        return self.get_peaks_interpolated_anaphase()['t'].unique().astype('float')
+
+    @property
     def frames(self):
         return self.peaks_z['t'].unique().astype('float')
 
@@ -100,51 +108,48 @@ class Cen2Tracker(Tracker):
     def get_peaks_interpolated_metaphase(self):
         """
         """
-        index_anaphase = self.index_anaphase_interpolated
-
-        if index_anaphase is not None and index_anaphase > 0:
-            peaks = self.peaks_real_interpolated.loc[:index_anaphase]
-        else:
-            peaks = self.peaks_real_interpolated
-
-        return peaks
+        return self.get_peaks(step='metaphase', interpolated=True)
 
     def get_peaks_metaphase(self):
         """
         """
-        index_anaphase = self.index_anaphase
-
-        if index_anaphase is not None and index_anaphase > 0:
-            peaks = self.peaks_real.loc[:index_anaphase]
-        else:
-            peaks = self.peaks_real
-
-        return peaks
+        return self.get_peaks(step='metaphase', interpolated=False)
 
     def get_peaks_interpolated_anaphase(self):
         """
         """
-        index_anaphase = self.index_anaphase_interpolated
-
-        if index_anaphase is not None and index_anaphase > 0:
-            peaks = self.peaks_real_interpolated.loc[:index_anaphase]
-        else:
-            peaks = self.peaks_real_interpolated
-
-        return peaks
+        return self.get_peaks(step='anaphase', interpolated=True)
 
     def get_peaks_anaphase(self):
         """
         """
-        index_anaphase = self.index_anaphase
+        return self.get_peaks(step='anaphase', interpolated=False)
+
+    def get_peaks(self, step, interpolated=False):
+        """step can be 'metaphase' or 'anaphase'
+        """
+
+        if interpolated:
+            index_anaphase = self.index_anaphase_interpolated
+        else:
+            index_anaphase = self.index_anaphase
 
         if index_anaphase is not None and index_anaphase > 0:
-            peak = self.peaks_real.loc[index_anaphase:]
+            if interpolated and step == 'metaphase':
+                peaks = self.peaks_real_interpolated.loc[:index_anaphase]
+            elif interpolated and step == 'anaphase':
+                peaks = self.peaks_real_interpolated.loc[index_anaphase:]
+            elif not interpolated and step == 'metaphase':
+                peaks = self.peaks_real_interpolated.loc[:index_anaphase]
+            elif not interpolated and step == 'anaphase':
+                peaks = self.peaks_real_interpolated.loc[index_anaphase:]
+            else:
+                raise Exception('Error in get_peaks()')
+
         else:
             peaks = None
 
         return peaks
-
 
     """
     Tracking methods

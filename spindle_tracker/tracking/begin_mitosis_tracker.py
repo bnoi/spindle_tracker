@@ -1,3 +1,4 @@
+import gc
 import logging
 
 log = logging.getLogger(__name__)
@@ -68,6 +69,11 @@ class BeginMitosisTracker(Tracker):
             gfp_im = im.take(id_ndc80, axis=id_c)
             gfp_im = gfp_im / np.median(gfp_im)
 
+            del im
+            gc.collect()
+
+            gfp_im = (gfp_im - gfp_im.min()) / (gfp_im.max() - gfp_im.min())
+
             lw_pixel = lw / md['PhysicalSizeX']
 
             line_profiles = {}
@@ -87,9 +93,12 @@ class BeginMitosisTracker(Tracker):
                 line_size[t_stamp] = scipy.spatial.distance.cdist(np.atleast_2d(p1.values), np.atleast_2d(p2.values))[0, 0]
                 line_size[t_stamp] *= self.metadata['PhysicalSizeX']
 
+            del gfp_im
+            del tf
+
+            gc.collect()
+
             line_profiles = pd.DataFrame.from_dict(line_profiles, orient='index')
             line_size = pd.Series(line_size)
             self.save(line_profiles, 'line_profiles')
             self.save(line_size, 'line_size')
-
-

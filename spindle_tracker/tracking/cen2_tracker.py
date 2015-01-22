@@ -810,12 +810,11 @@ class Cen2Tracker(Tracker):
 
         if use_interpolate:
             peaks = self.peaks_real_interpolated
-            print(1)
             times = self.times_interpolated
         else:
             peaks = self.peaks_real
             times = self.times
-            print(0)
+            
             
         import matplotlib.pyplot as plt
         
@@ -878,14 +877,14 @@ class Cen2Tracker(Tracker):
 
         
         # kt with coloc
-        if (peaks.xs('A', level='side').xs('kt', level='main_label').xs(1, level='is'+suffix)) != 0):
+        if len(peaks.xs('A', level='side').xs('kt', level='main_label').index.get_level_values('is'+suffix).unique()) > 1:
             x = peaks.loc[gps_kt[('kt', 'A', 1)]][coord]
             times = peaks.loc[gps_kt[('kt', 'A', 1)]]['t']
             I = peaks.loc[gps_kt[('kt', 'A', 1)]][suffix +'_I']
             marker_size = ((I/minI)**6)*30
             drawer_s(times, x, label="coloc " + suffix, color='#f00a0a', s= marker_size, zorder=2, **mpl_params_s)
         
-        if (len(peaks.xs('B', level='side').xs('kt', level='main_label').xs(1, level='is'+suffix)) != 0):
+        if  len(peaks.xs('B', level='side').xs('kt', level='main_label').index.get_level_values('is'+suffix).unique()) > 1:
             x = peaks.loc[gps_kt[('kt', 'B', 1)]][coord]
             times = peaks.loc[gps_kt[('kt', 'B', 1)]]['t']
             I = peaks.loc[gps_kt[('kt', 'B', 1)]][suffix + '_I']

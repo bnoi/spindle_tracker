@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.utils import progress_apply
 from sktracker.trajectories import Trajectories
-
+from sktracker.io.trackmate import trackmate_peak_import
 from ..tracking import Tracker
 
 
@@ -601,6 +602,39 @@ class Cen2Tracker(Tracker):
             trajs.set_index(['main_label', 'side'], append=True, inplace=True)
             trajs.sort_index(inplace=True)
 
+    def get_marker(self, base_dir, suffix, d_th, dmax):
+        """
+        """
+        #find trackmate XML file of the marker
+        marker_xml_file = self.has_xml(self, suffix=suffix)
+        marker_trackmate = trackmate_peak_import(os.path.join(self.base_dir, marker_xml_file))
+
+        self.peaks_real[suffix + '_d'] = 0
+        self.peaks_real[suffix + '_I'] = 0
+        self.peaks_real[suffix + '_w'] = 0
+        
+        #fill peaks_real with marker dots properties when marker dots are colocalized with cen2
+        for t_stamp, p in self.peaks_real.groupby(level=['t_stamp']):
+            dA = dmax
+            dB = dmax
+            if t_stamp in marker_trackmate.index.get_level_values('t_stamp'):
+                for i in range(len(marker_trackmate.loc[t_stamp]['x'])):
+                    d1 = np.sqrt(((marker_trackmate.loc[t_stamp]['x'].values[i]- p.xs('A', level='side').xs('kt', level='main_label')['x'].loc[t_stamp]))**2 + ((marker_trackmate.loc[t_stamp]['y'].values[i]- p.xs('A', level='side').xs('kt', level='main_label')['y'].loc[t_stamp]))**2)
+                    if ((d1 < d_th) & (d1 < dA)):
+                        dA = d1
+                        self.peaks_real.loc[(t_stamp, 'kt', 'A'), suffix +'_d'] = d1
+                        self.peaks_real.loc[(t_stamp, 'kt', 'A'), suffix + '_I'] = marker_trackmate.loc[t_stamp]['I'].values[i]
+                        self.peaks_real.loc[(t_stamp, 'kt', 'A'), suffix + '_w'] = marker_trackmate.loc[t_stamp]['w'].values[i]
+                    d2 = np.sqrt(((marker_trackmate.loc[t_stamp]['x'].values[i]- p.xs('B', level='side').xs('kt', level='main_label')['x'].loc[t_stamp]))**2 + ((marker_trackmate.loc[t_stamp]['y'].values[i]- p.xs('B', level='side').xs('kt', level='main_label')['y'].loc[t_stamp]))**2)
+                    if ((d2 < d_th) & (d2 < dB)):
+                        self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_d'] = d2
+                        self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_I'] = marker_trackmate.loc[t_stamp]['I'].values[i]
+                        self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_w'] = marker_trackmate.loc[t_stamp]['w'].values[i]
+        
+        self.save_oio()
+
+        return self.peaks_real
+
     """
     Plot and visu methods
     """
@@ -760,3 +794,139 @@ class Cen2Tracker(Tracker):
         ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=1, lw=1)
 
         return fig
+        
+        
+    def kymo_coloc (self, suffix, use_interpolate=False, time_in_minutes=False):
+        """
+        """
+        
+        mpl_params_s = {'marker': 'o'}
+        mpl_params = {'ls': '-'} 
+        minI = self.peaks_real[suffix + '_I'].loc[self.peaks_real[suffix +'_I'] != 0].min()
+        
+        if self.peaks_real.empty:
+            log.error("peaks_real is empty")
+            #return None
+
+        if use_interpolate:
+            peaks = self.peaks_real_interpolated
+            print(1)
+            times = self.times_interpolated
+        else:
+            peaks = self.peaks_real
+            times = self.times
+            print(0)
+            
+        import matplotlib.pyplot as plt
+        
+        fig = plt.figure(figsize=(12, 7))
+        ax = plt.subplot(111)
+        drawer_s = ax.scatter
+        drawer = ax.plot
+
+        #peaks['is'+ suffix] = peaks[suffix + '_I']
+        #peaks['is'+ suffix].loc[peaks['is'+ suffix]!=0] = 1
+
+        gps = peaks.groupby(level=['main_label', 'side']).groups
+        coord = 'x_proj'
+
+        # Set axis limit
+        ax.set_xlim(min(times), max(times))
+        m = np.abs(peaks['x_proj'].max())
+        ax.set_ylim(-m-0.2, m+0.2)
+
+
+        # Draw SPBs and kts
+   
+        x = peaks.loc[gps[('spb', 'A')]][coord]
+        drawer(times, x,  color='#8e8f99', **mpl_params)
+
+        x = peaks.loc[gps[('spb', 'B')]][coord]
+        drawer(times, x, label="SPBs", color='#8e8f99', **mpl_params)
+
+        x = peaks.loc[gps[('kt', 'A')]][coord]
+        drawer(times, x,  color='#a2a7ff', zorder=1, **mpl_params)
+
+        x = peaks.loc[gps[('kt', 'B')]][coord]
+        drawer(times, x, label="Kts", color='#a2a7ff', zorder=1 ,**mpl_params)
+
+        #scatter SPB
+        x = peaks.loc[gps[('spb', 'B')]][coord]
+        drawer_s(times, x, color='#8e8f99', s = 40, **mpl_params_s)
+
+        x = peaks.loc[gps[('spb', 'A')]][coord]
+        drawer_s(times, x, color='#8e8f99', **mpl_params_s)
+        
+        
+        #Get coloc indexs
+         
+        peaks['is'+ suffix] = peaks[suffix + '_I']
+        peaks['is'+ suffix].loc[peaks['is'+ suffix]!=0] = 1
+ 
+        peaks = peaks.set_index(['is'+ suffix], append = True, inplace = False)
+
+        gps_kt = peaks.groupby(level=['main_label', 'side', 'is'+suffix]).groups
+        
+        #kt no coloc
+        x = peaks.loc[gps_kt[('kt', 'A', 0)]][coord]
+        times = peaks.loc[gps_kt[('kt', 'A', 0)]]['t']
+        drawer_s(times, x, label="no " + suffix, color='#a2a7ff', **mpl_params_s)
+
+        x = peaks.loc[gps_kt[('kt', 'B', 0)]][coord]
+        times = peaks.loc[gps_kt[('kt', 'B', 0)]]['t']
+        drawer_s(times, x, color='#a2a7ff', **mpl_params_s)
+
+        
+        # kt with coloc
+        if (peaks.xs('A', level='side').xs('kt', level='main_label').xs(1, level='is'+suffix)) != 0):
+            x = peaks.loc[gps_kt[('kt', 'A', 1)]][coord]
+            times = peaks.loc[gps_kt[('kt', 'A', 1)]]['t']
+            I = peaks.loc[gps_kt[('kt', 'A', 1)]][suffix +'_I']
+            marker_size = ((I/minI)**6)*30
+            drawer_s(times, x, label="coloc " + suffix, color='#f00a0a', s= marker_size, zorder=2, **mpl_params_s)
+        
+        if (len(peaks.xs('B', level='side').xs('kt', level='main_label').xs(1, level='is'+suffix)) != 0):
+            x = peaks.loc[gps_kt[('kt', 'B', 1)]][coord]
+            times = peaks.loc[gps_kt[('kt', 'B', 1)]]['t']
+            I = peaks.loc[gps_kt[('kt', 'B', 1)]][suffix + '_I']
+            marker_size = ((I/minI)**6)*30
+            drawer_s(times, x, color='#f00a0a',  s= marker_size, zorder=2, **mpl_params_s)
+        
+
+        fontsize = 22
+
+        if time_in_minutes:
+            majorLocator = matplotlib.ticker.MultipleLocator(60)
+            minorLocator = matplotlib.ticker.MultipleLocator(60)
+            ax.xaxis.set_major_locator(majorLocator)
+            ax.xaxis.set_minor_locator(minorLocator)
+
+            majorFormatter = matplotlib.ticker.FuncFormatter(
+                lambda x, y: "%.0f" % (x / 60.))
+            ax.xaxis.set_major_formatter(majorFormatter)
+
+            ax.set_xlabel('Time (mn)', fontsize=fontsize)
+
+        else:
+            ax.set_xlabel('Time (seconds)', fontsize=fontsize)
+
+        ax.set_title("Kymograph like plot", fontsize=fontsize)
+        ax.set_ylabel('Distance (µm)', fontsize=fontsize)
+
+        if hasattr(self, 'analysis') and 'anaphase_start' in self.analysis.keys():
+            if self.analysis['anaphase_start']:
+                ax.axvline(x=self.analysis['anaphase_start'],
+                           color='black',
+                           alpha=1,
+                           linestyle="--",
+                           label='Anaphase start')
+
+        leg = ax.legend(loc='best', fancybox=True)
+        leg.get_frame().set_alpha(0.5)
+        
+        
+        plt.grid(True)
+        plt.tight_layout()
+        
+        return fig
+       

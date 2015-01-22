@@ -102,3 +102,48 @@ class BeginMitosisTracker(Tracker):
             line_size = pd.Series(line_size)
             self.save(line_profiles, 'line_profiles')
             self.save(line_size, 'line_size')
+
+    def get_figure(self, figsize=(13, 8)):
+        """
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import LineCollection
+
+        fig, ax = plt.subplots(figsize=(13, 8))
+
+        pole_1 = self.poles.loc[pd.IndexSlice[:, 0], ]
+        pole_2 = self.poles.loc[pd.IndexSlice[:, 1], ]
+        ax.plot(pole_1['t'], pole_1 ['x_proj'], c='black', marker='o')
+        ax.plot(pole_2['t'], pole_2['x_proj'], c='black', marker='o')
+
+        precision = 1000
+        linewidth = 6
+        alpha = 1
+        norm = plt.Normalize(0.0, 1.0)
+        cmap = plt.get_cmap('Reds')
+        #cmap.set_gamma(2)
+
+        for t_stamp, p in self.poles.groupby(level='t_stamp'):
+            lp = self.line_profiles.loc[t_stamp]
+
+            p1 = p.iloc[0][['x_proj']].values[0]
+            p2 = p.iloc[1][['x_proj']].values[0]
+
+            x = np.repeat(p['t'].unique()[0], precision)
+            y = np.linspace(p1, p2, num=precision)
+
+            # Get color vector according to line profile
+            lp = lp.dropna().values
+            lp = (lp - lp.min()) / (lp.max() - lp.min())
+            x_lp = np.arange(0, len(lp))
+            new_x_lp = np.linspace(0, len(lp) - 1, precision)
+            z = np.interp(new_x_lp, x_lp, lp)
+
+            # Make segments
+            points = np.array([x, y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments, array=z, cmap=cmap, norm=norm, linewidth=linewidth, alpha=alpha)
+            ax.add_collection(lc)
+
+        return fig

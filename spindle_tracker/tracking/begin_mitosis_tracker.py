@@ -109,7 +109,7 @@ class BeginMitosisTracker(Tracker):
         import matplotlib.pyplot as plt
         from matplotlib.collections import LineCollection
 
-        fig, ax = plt.subplots(figsize=(13, 8))
+        fig, ax = plt.subplots(figsize=figsize)
 
         pole_1 = self.poles.loc[pd.IndexSlice[:, 0], ]
         pole_2 = self.poles.loc[pd.IndexSlice[:, 1], ]

@@ -12,6 +12,7 @@ from sktracker.detection import peak_detector
 from sktracker.io.trackmate import trackmate_peak_import
 from sktracker.trajectories import Trajectories
 from sktracker.io import read_roi
+from sktracker.io import OMEModel
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
@@ -203,6 +204,16 @@ class Tracker():
             return TiffFile(self.full_tif_path, multifile=multifile)
         else:
             raise IOError("Tif path does not exist.")
+
+    def get_ome(self):
+        """
+        """
+        tf = self.get_tif()
+        if tf.is_ome:
+            xml_metadata = tf[0].tags['image_description'].value.decode(errors='ignore')
+            ome = OMEModel(xml_metadata)
+        else:
+            return None
 
     def __repr__(self):
         """

@@ -212,6 +212,7 @@ class Tracker():
         if tf.is_ome:
             xml_metadata = tf[0].tags['image_description'].value.decode(errors='ignore')
             ome = OMEModel(xml_metadata)
+            return ome
         else:
             return None
 

@@ -68,7 +68,7 @@ class BeginMitosisTracker(Tracker):
             try:
                 id_ndc80 = md['Channels'].index('GFP')
             except:
-                id_ndc80 = md['Channels'].index(0)
+                id_ndc80 = 0
             gfp_im = im.take(id_ndc80, axis=id_c)
             gfp_im = gfp_im / np.median(gfp_im)
 

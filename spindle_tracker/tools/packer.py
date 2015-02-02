@@ -153,7 +153,7 @@ sort_heuristics = {
     "maxheight": lambda r1, r2: cmp(r2[1].size[1], r1[1].size[1]),
 }
 
-def pack_images(imagelist, padding, sort, maxdim, dstfilename):
+def pack_images(imagelist, dstfilename, padding=2, sort="maxarea"):
     """pack the images in image list in to a pow2 PNg file
     @param imagelist iterable of tuples (image name, image)
     @param padding padding to be applied to all sides of the image
@@ -195,8 +195,6 @@ def pack_images(imagelist, padding, sort, maxdim, dstfilename):
         except ValueError:
             if targetdim_x == targetdim_y:
                 targetdim_x = targetdim_x * 2
-                #if targetdim_x > maxdim:
-                #    raise Exception("Too many textures to pack in to max texture size %dx%d\n" % (maxdim, maxdim))
             else:
                 targetdim_y = targetdim_x
 
@@ -206,6 +204,6 @@ def pack_images(imagelist, padding, sort, maxdim, dstfilename):
         image.paste(img, (uv.x1, uv.y1))
 
     # image.show()
-    image.save(dstfilename, "PNG")
+    image.save(dstfilename)
 
     return placement

@@ -202,10 +202,11 @@ class BeginMitosisTracker(Tracker):
 
         ax.set_xlim(times[0], times[-1])
         ax.set_xticks(np.arange(-1, 8, 1))
+        ax.set_yticks(np.arange(-0.8, 0.8, 0.4))
 
         nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        ax.xaxis.set_major_formatter(nullform)
-        ax.yaxis.set_major_formatter(nullform)
+        #ax.xaxis.set_major_formatter(nullform)
+        #ax.yaxis.set_major_formatter(nullform)
 
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
@@ -214,7 +215,7 @@ class BeginMitosisTracker(Tracker):
             i.set_linewidth(2)
             i.set_color('black')
 
-        #ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
 
         plt.tight_layout()
         return fig

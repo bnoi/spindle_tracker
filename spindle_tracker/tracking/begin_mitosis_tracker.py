@@ -151,7 +151,7 @@ class BeginMitosisTracker(Tracker):
 
         return fig
 
-    def get_figure_publi(self, figsize, t):
+    def get_figure_publi(self, figsize, tmin, tmax):
         """
         """
         import matplotlib
@@ -160,7 +160,8 @@ class BeginMitosisTracker(Tracker):
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        poles = self.poles[self.poles['t'] < t]
+        poles = self.poles[self.poles['t'] < tmax]
+        poles = poles[self.poles['t'] > tmin]
         poles['t'] = poles['t'] - self.poles.loc[self.annotations['start_mitosis'], 't'].iloc[0]
         poles['t'] = poles['t'] / 60
 
@@ -200,13 +201,13 @@ class BeginMitosisTracker(Tracker):
             lc = LineCollection(segments, array=z, cmap=cmap, norm=norm, linewidth=linewidth, alpha=alpha)
             ax.add_collection(lc)
 
+        ax.set_xticks(np.arange(-8, 8, 2))
         ax.set_xlim(times[0], times[-1])
-        ax.set_xticks(np.arange(-1, 8, 1))
         ax.set_yticks(np.arange(-0.8, 0.8, 0.4))
 
         nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        #ax.xaxis.set_major_formatter(nullform)
-        #ax.yaxis.set_major_formatter(nullform)
+        ax.xaxis.set_major_formatter(nullform)
+        ax.yaxis.set_major_formatter(nullform)
 
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
@@ -215,7 +216,7 @@ class BeginMitosisTracker(Tracker):
             i.set_linewidth(2)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.4)
 
         plt.tight_layout()
         return fig

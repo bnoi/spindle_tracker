@@ -150,3 +150,71 @@ class BeginMitosisTracker(Tracker):
             ax.add_collection(lc)
 
         return fig
+
+    def get_figure_publi(self, figsize, t):
+        """
+        """
+        import matplotlib
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import LineCollection
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        poles = self.poles[self.poles['t'] < t]
+        poles['t'] = poles['t'] - self.poles.loc[self.annotations['start_mitosis'], 't'].iloc[0]
+        poles['t'] = poles['t'] / 60
+
+        pole_1 = poles.loc[pd.IndexSlice[:, 0], ]
+        pole_2 = poles.loc[pd.IndexSlice[:, 1], ]
+
+        times = pole_1['t'].values
+        ax.plot(times, pole_1 ['x_proj'], c='black', marker='o')
+        ax.plot(times, pole_2['x_proj'], c='black', marker='o')
+
+        precision = 1000
+        linewidth = 6
+        alpha = 1
+        norm = plt.Normalize(0.0, 1.0)
+        cmap = plt.get_cmap('Reds')
+
+        for t_stamp, p in poles.groupby(level='t_stamp'):
+            lp = self.line_profiles.loc[t_stamp]
+
+            p1 = p.iloc[0][['x_proj']].values[0]
+            p2 = p.iloc[1][['x_proj']].values[0]
+
+            x = np.repeat(p['t'].unique()[0], precision)
+            y = np.linspace(p1, p2, num=precision)
+
+            # Get color vector according to line profile
+            lp = lp.dropna().values
+            lp = (lp - lp.min()) / (lp.max() - lp.min())
+            x_lp = np.arange(0, len(lp))
+            new_x_lp = np.linspace(0, len(lp) - 1, precision)
+            z = np.interp(new_x_lp, x_lp, lp)
+
+            # Make segments
+            points = np.array([x, y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments, array=z, cmap=cmap, norm=norm, linewidth=linewidth, alpha=alpha)
+            ax.add_collection(lc)
+
+        ax.set_xlim(times[0], times[-1])
+        ax.set_xticks(np.arange(-1, 8, 1))
+
+        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.xaxis.set_major_formatter(nullform)
+        ax.yaxis.set_major_formatter(nullform)
+
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+
+        for i in ax.spines.values():
+            i.set_linewidth(2)
+            i.set_color('black')
+
+        #ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+
+        plt.tight_layout()
+        return fig

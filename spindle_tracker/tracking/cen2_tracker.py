@@ -612,7 +612,7 @@ class Cen2Tracker(Tracker):
         self.peaks_real[suffix + '_d'] = 0
         self.peaks_real[suffix + '_I'] = 0
         self.peaks_real[suffix + '_w'] = 0
-        
+
         #fill peaks_real with marker dots properties when marker dots are colocalized with cen2
         for t_stamp, p in self.peaks_real.groupby(level=['t_stamp']):
             dA = dmax
@@ -630,7 +630,7 @@ class Cen2Tracker(Tracker):
                         self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_d'] = d2
                         self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_I'] = marker_trackmate.loc[t_stamp]['I'].values[i]
                         self.peaks_real.loc[(t_stamp, 'kt', 'B'), suffix + '_w'] = marker_trackmate.loc[t_stamp]['w'].values[i]
-        
+
         self.save_oio()
 
         return self.peaks_real
@@ -794,16 +794,16 @@ class Cen2Tracker(Tracker):
         ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=1, lw=1)
 
         return fig
-        
-        
+
+
     def kymo_coloc (self, suffix, use_interpolate=False, time_in_minutes=False):
         """
         """
-        
+
         mpl_params_s = {'marker': 'o'}
-        mpl_params = {'ls': '-'} 
+        mpl_params = {'ls': '-'}
         minI = self.peaks_real[suffix + '_I'].loc[self.peaks_real[suffix +'_I'] != 0].min()
-        
+
         if self.peaks_real.empty:
             log.error("peaks_real is empty")
             #return None
@@ -814,10 +814,10 @@ class Cen2Tracker(Tracker):
         else:
             peaks = self.peaks_real
             times = self.times
-            
-            
+
+
         import matplotlib.pyplot as plt
-        
+
         fig = plt.figure(figsize=(12, 7))
         ax = plt.subplot(111)
         drawer_s = ax.scatter
@@ -836,7 +836,7 @@ class Cen2Tracker(Tracker):
 
 
         # Draw SPBs and kts
-   
+
         x = peaks.loc[gps[('spb', 'A')]][coord]
         drawer(times, x,  color='#8e8f99', **mpl_params)
 
@@ -855,17 +855,17 @@ class Cen2Tracker(Tracker):
 
         x = peaks.loc[gps[('spb', 'A')]][coord]
         drawer_s(times, x, color='#8e8f99', **mpl_params_s)
-        
-        
+
+
         #Get coloc indexs
-         
+
         peaks['is'+ suffix] = peaks[suffix + '_I']
         peaks['is'+ suffix].loc[peaks['is'+ suffix]!=0] = 1
- 
+
         peaks = peaks.set_index(['is'+ suffix], append = True, inplace = False)
 
         gps_kt = peaks.groupby(level=['main_label', 'side', 'is'+suffix]).groups
-        
+
         #kt no coloc
         x = peaks.loc[gps_kt[('kt', 'A', 0)]][coord]
         times = peaks.loc[gps_kt[('kt', 'A', 0)]]['t']
@@ -875,7 +875,7 @@ class Cen2Tracker(Tracker):
         times = peaks.loc[gps_kt[('kt', 'B', 0)]]['t']
         drawer_s(times, x, color='#a2a7ff', **mpl_params_s)
 
-        
+
         # kt with coloc
         if len(peaks.xs('A', level='side').xs('kt', level='main_label').index.get_level_values('is'+suffix).unique()) > 1:
             x = peaks.loc[gps_kt[('kt', 'A', 1)]][coord]
@@ -883,14 +883,14 @@ class Cen2Tracker(Tracker):
             I = peaks.loc[gps_kt[('kt', 'A', 1)]][suffix +'_I']
             marker_size = ((I/minI)**6)*30
             drawer_s(times, x, label="coloc " + suffix, color='#f00a0a', s= marker_size, zorder=2, **mpl_params_s)
-        
+
         if  len(peaks.xs('B', level='side').xs('kt', level='main_label').index.get_level_values('is'+suffix).unique()) > 1:
             x = peaks.loc[gps_kt[('kt', 'B', 1)]][coord]
             times = peaks.loc[gps_kt[('kt', 'B', 1)]]['t']
             I = peaks.loc[gps_kt[('kt', 'B', 1)]][suffix + '_I']
             marker_size = ((I/minI)**6)*30
             drawer_s(times, x, color='#f00a0a',  s= marker_size, zorder=2, **mpl_params_s)
-        
+
 
         fontsize = 22
 
@@ -922,10 +922,55 @@ class Cen2Tracker(Tracker):
 
         leg = ax.legend(loc='best', fancybox=True)
         leg.get_frame().set_alpha(0.5)
-        
-        
+
+
         plt.grid(True)
         plt.tight_layout()
-        
+
         return fig
-       
+
+    def kymo_hfr(self, figsize=(12, 6)):
+        """
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib
+
+        peaks = self.peaks_real_interpolated
+        idx = pd.IndexSlice
+
+        times = self.times_interpolated / 60
+        spbA = peaks.loc[idx[:, 'spb', 'A'], :]
+        spbB = peaks.loc[idx[:, 'spb', 'B'], :]
+        ktA = peaks.loc[idx[:, 'kt', 'A'], :]
+        ktB = peaks.loc[idx[:, 'kt', 'B'], :]
+        kts_traj = (ktA['x_proj'].values + ktB['x_proj'].values) / 2
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        kwargs = {'lw': 2}
+        ax.plot(times, spbA['x_proj'], color='black', **kwargs)
+        ax.plot(times, spbB['x_proj'], color='black', **kwargs)
+        ax.plot(times, ktA['x_proj'], color='#ff2626', **kwargs)
+        ax.plot(times, ktB['x_proj'], color='#ff2626', **kwargs)
+        ax.plot(times, kts_traj, color='#00a0ff', **kwargs)
+
+        ax.set_yticks(np.arange(-2, 3, 1))
+
+        ax.set_xlim(0, times[-1])
+        ax.set_xticks(np.arange(0, times[-1], 1))
+
+        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.xaxis.set_major_formatter(nullform)
+        ax.yaxis.set_major_formatter(nullform)
+
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+
+        for i in ax.spines.values():
+            i.set_linewidth(2)
+            i.set_color('black')
+
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.set_axisbelow(True)
+
+        return fig

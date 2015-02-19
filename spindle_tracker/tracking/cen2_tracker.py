@@ -938,7 +938,7 @@ class Cen2Tracker(Tracker):
         peaks = self.peaks_real_interpolated
         idx = pd.IndexSlice
 
-        times = self.times_interpolated / 60
+        times = self.times_interpolated #/ 60
         spbA = peaks.loc[idx[:, 'spb', 'A'], :]
         spbB = peaks.loc[idx[:, 'spb', 'B'], :]
         ktA = peaks.loc[idx[:, 'kt', 'A'], :]
@@ -957,7 +957,7 @@ class Cen2Tracker(Tracker):
         ax.set_yticks(np.arange(-2, 3, 1))
 
         ax.set_xlim(0, times[-1])
-        ax.set_xticks(np.arange(0, times[-1], 1))
+        ax.set_xticks(np.arange(0, times[-1], 50))
 
         nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
         ax.xaxis.set_major_formatter(nullform)

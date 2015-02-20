@@ -16,6 +16,7 @@ from sktracker.io import OMEModel
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
+from .. import movies
 
 log = logging.getLogger(__name__)
 
@@ -354,3 +355,10 @@ class Tracker():
                          ax=ax2, ls=ls, marker=marker)
 
         return fig
+
+    def generate_movies(self, ext='.mov', spf=10, annotate='m', resize=800):
+        """
+        """
+        movies.create(self.full_tif_path, self.full_tif_path.replace('.tif', ext),
+                      fps=self.metadata['TimeIncrement'],
+                      spf=spf, resize=resize, annotate=annotate, codec='mjpeg')

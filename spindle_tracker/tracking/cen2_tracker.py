@@ -954,7 +954,8 @@ class Cen2Tracker(Tracker):
         ax.plot(times, ktB['x_proj'], color='#ff2626', **kwargs)
         ax.plot(times, kts_traj, color='#00a0ff', **kwargs)
 
-        ax.set_yticks(np.arange(-2, 3, 1))
+        ax.set_ylim(-4, 4)
+        ax.set_yticks(np.arange(-4, 5, 2))
 
         ax.set_xlim(0, times[-1])
         ax.set_xticks(np.arange(0, times[-1], 50))

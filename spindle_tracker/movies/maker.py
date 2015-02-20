@@ -13,33 +13,14 @@ from PIL import ImageFont
 from PIL import ImageDraw
 
 from ..io import TiffFile
+from ..utils.progress import print_progress
 
 log = logging.getLogger(__name__)
 
-# import subprocess
-# import numpy as np
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
-
-# outf = 'test.avi'
-# rate = 1
-
-# cmdstring = ('local/bin/ffmpeg',
-#              '-r', '%d' % rate,
-#              '-f','image2pipe',
-#              '-vcodec', 'png',
-#              '-i', 'pipe:', outf
-#              )
-# p = subprocess.Popen(cmdstring, stdin=subprocess.PIPE)
-
-# plt.figure()
-# frames = 10
-# for i in range(frames):
-#     plt.imshow(np.random.randn(100,100))
-#     plt.savefig(p.stdin, format='png')
 
 def resize_same_aspect(img, size):
+    """
+    """
     wpercent = (size[0] / img.size[0])
     hsize = int((img.size[1] * wpercent))
     img = img.resize((size[0], hsize), Image.ANTIALIAS)
@@ -47,6 +28,8 @@ def resize_same_aspect(img, size):
 
 
 def draw_text(img, text, color="#ffffff", font_path="arial.ttf"):
+    """
+    """
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font_path, int(0.1 * img.size[1]))
 
@@ -59,6 +42,8 @@ def draw_text(img, text, color="#ffffff", font_path="arial.ttf"):
 
 
 def get_time(i, time_per_frame, max_digits, minute=True):
+    """
+    """
     t = i * time_per_frame
     if minute:
         t = int(t / 60)
@@ -73,6 +58,8 @@ def get_time(i, time_per_frame, max_digits, minute=True):
 
 
 def divisible_by_2(arr):
+    """
+    """
     arr = np.atleast_3d(arr)
 
     # Dimensions must be divisible by 2 (libx264)
@@ -95,9 +82,12 @@ def divisible_by_2(arr):
 def create(input, output, fps=25, spf=10,
            resize=None, annotate=None, codec='mjpeg',
            gif=False, rgb=False):
+    """
+    """
 
     font_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "arial.ttf")
 
+    log.info("Load tiff file")
     t = TiffFile(input)
     arr = t.asarray()
     arr = np.squeeze(arr)
@@ -122,9 +112,11 @@ def create(input, output, fps=25, spf=10,
 
     frames_dir = tempfile.mkdtemp()
     frames_pattern = os.path.join(frames_dir, "frame_") + "%%0%id.png" % frames_max_digits
-    log.info("Generate %i image frames from Tiff in %s" % (arr.shape[0], frames_dir))
+    log.info("Generate {} image frames from Tiff in {}".format(arr.shape[0], frames_dir))
 
+    n = len(arr)
     for i, a in enumerate(arr):
+        print_progress(i*100/n)
 
         if rgb:
             im = Image.merge('RGB', (Image.fromarray(a[0], 'L'),
@@ -158,17 +150,26 @@ def create(input, output, fps=25, spf=10,
         im.save(frame_path)
         del im
 
+    print_progress(-1)
+
     if gif:
         log.info("Generate GIF file with 'convert'")
-        cmd = "convert -delay %s -loop 0 %s/*.png %s" % (str(fps), frames_dir, output)
+        cmd = "convert -delay {} -loop 0 {}/*.png {}".format(fps, frames_dir, output)
         subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
         log.info("Generate movie with 'avconv'")
-        cmd = "avconv -y -r %s -f image2 -i %s -vcodec %s %s" % (str(fps), frames_pattern, codec, output)
+        cmd = "avconv -y -r {} -f image2 -i {} -vcodec {} {}".format(fps, frames_pattern, codec, output)
         p = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        log.info("Reencode at 30 fps")
+        tmp_output = os.path.join(tempfile.mkdtemp(), os.path.basename(output))
+        cmd = "avconv -i {} -r 30 -codec:a copy {}".format(output, tmp_output)
+        p = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    log.info("Clean image frames in %s" % frames_dir)
+        shutil.copy(tmp_output, output)
+        shutil.rmtree(os.path.dirname(tmp_output))
+
+    log.info("Clean image frames in {}".format(frames_dir))
     shutil.rmtree(frames_dir)
 
-    log.info('Movie generated to %s' % output[0])
+    log.info('Movie generated to {}'.format(output))

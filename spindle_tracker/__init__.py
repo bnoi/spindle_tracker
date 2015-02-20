@@ -49,4 +49,4 @@ def set_log_level(loglevel):
     logger.setLevel(numeric_level)
 
 setup_log()
-set_log_level('ERROR')
+set_log_level('INFO')

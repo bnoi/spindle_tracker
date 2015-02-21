@@ -356,9 +356,16 @@ class Tracker():
 
         return fig
 
-    def generate_movies(self, ext='.mov', fps=10, annotate='m', resize=800):
+    def generate_movies(self, ext='.mov', fps=10, annotate='m', resize=800,
+                        channel_order=None):
         """
         """
+        rgb = False
+        if self.metadata['Shape'][self.metadata['DimensionOrder'].index('C')] > 1:
+            rgb = True
+
         maker.create(self.full_tif_path, self.full_tif_path.replace('.tif', ext),
                      fps=fps, spf=self.metadata['TimeIncrement'],
-                     resize=resize, annotate=annotate, codec='mjpeg')
+                     resize=resize, annotate=annotate, codec='mjpeg',
+                     z_index=self.metadata['DimensionOrder'].index('Z'),
+                     rgb=rgb, channel_order=channel_order)

@@ -81,7 +81,8 @@ def divisible_by_2(arr):
 
 def create(input, output, fps=25, spf=10,
            resize=None, annotate=None, codec='mjpeg',
-           gif=False, rgb=False):
+           gif=False, rgb=False, z_index=None,
+           channel_order=None):
     """
     """
 
@@ -96,6 +97,11 @@ def create(input, output, fps=25, spf=10,
     arr = np.round(255.0 * (arr - arr.min()) / (arr.max() - arr.min() - 1.0)).astype(np.uint8)
 
     if rgb:
+        if len(arr.shape) == 5:
+            if z_index:
+                arr = arr.max(axis=z_index)
+            else:
+                log.critical("You need to provide a z_index.")
         if len(arr.shape) != 4:
             log.critical("To use RGB Tiff, array needs to have 4 dimensions.")
     else:
@@ -113,6 +119,12 @@ def create(input, output, fps=25, spf=10,
     frames_dir = tempfile.mkdtemp()
     frames_pattern = os.path.join(frames_dir, "frame_") + "%%0%id.png" % frames_max_digits
     log.info("Generate {} image frames from Tiff in {}".format(arr.shape[0], frames_dir))
+
+    if arr.shape[1] == 2:
+        arr = np.insert(arr, 0, np.zeros(arr.shape[-2:]), axis=1)
+
+    if channel_order:
+        arr[:, [0, 1, 2]] = arr[:, channel_order]
 
     n = len(arr)
     for i, a in enumerate(arr):

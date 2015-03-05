@@ -1,10 +1,11 @@
 import itertools
+import os
 
 import numpy as np
 from scipy import stats
 
 
-def infos(labels, data, test_type="ks"):
+def infos(labels, data, test_type="ks", save=None):
     """
     """
 
@@ -30,5 +31,10 @@ def infos(labels, data, test_type="ks"):
         value, pvalue = test_func(data1, data2)
         m = "{:<12} - {:<15} | {:.2e} | {:.2e}\n"
         s += m.format(label1, label2, pvalue, value)
+
+    if save:
+        os.makedirs(os.path.dirname(save), exist_ok=True)
+        with open(save, 'w') as f:
+            f.write(s)
 
     return s

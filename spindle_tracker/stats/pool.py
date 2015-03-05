@@ -3,17 +3,18 @@ import itertools
 import numpy as np
 from scipy import stats
 
+
 def infos(labels, data, test_type="ks"):
     """
     """
 
     s = ""
 
-    s += "{:<16} | {:<8} | {:<8} | {:<8}\n".format("label", "mean", "std", "sem")
+    s += "{:<16} | {:<8} | {:<8} | {:<8} | {:<8}\n".format("label", "n", "mean", "std", "sem")
     s += "\n"
     for label, d in zip(labels, data):
-        m = "{:<16} | {:<8.2e} | {:<8.2e} | {:<8.2e}\n"
-        s += m.format(label, np.mean(d), np.std(d), stats.sem(d))
+        m = "{:<16} | {:<8} | {:<8.2e} | {:<8.2e} | {:<8.2e}\n"
+        s += m.format(label, len(d), np.mean(d), np.std(d), stats.sem(d))
 
     s += "\n"
 

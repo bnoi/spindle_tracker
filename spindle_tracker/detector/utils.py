@@ -2,7 +2,9 @@ import numpy as np
 
 
 def create_log_kernel(radius, ndims, calibration):
-    """
+    """Largely inspired from Trackmate Fiji plugin.
+
+    https://github.com/fiji/TrackMate/blob/master/src/main/java/fiji/plugin/trackmate/detection/DetectionUtils.java#L53
     """
 
     # Compute sigma

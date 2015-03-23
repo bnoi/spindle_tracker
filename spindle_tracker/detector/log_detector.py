@@ -20,6 +20,28 @@ def log_detector(source, radius, ndims, calibration):
     calibration : list of float
         Pixel sizes for each dimensions
 
+    Examples
+    --------
+
+    source = TiffFile("/home/hadim/test.tif").asarray()
+
+    # Parameters
+    radius = 0.18
+    ndims = 2
+    calibration = np.array([0.0645, 0.0645])
+
+    spots = log_detector(source, radius, ndims, calibration)
+
+    # Take the 4 most intense peaks
+    filtered_spots = spots.sort('quality', ascending=False).iloc[:4]
+
+    # Plot
+    plt.figure()
+    plt.imshow(source, interpolation="none", aspect='equal')
+
+    for i, (x, y, z, radius, quality) in filtered_spots.iterrows():
+        plt.scatter(x, y, s=50, c='red', alpha=0.8)
+
     Return
     ------
     pandas.DataFrame. Each line represents a detected spots.

@@ -975,10 +975,10 @@ class Cen2Tracker(Tracker):
         ax.yaxis.set_ticks_position('none')
 
         for i in ax.spines.values():
-            i.set_linewidth(2)
+            i.set_linewidth(4)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.grid(b=True, which='major', color='#000000', linestyle='-', alpha=0.4, lw=2)
         ax.set_axisbelow(True)
 
         return fig

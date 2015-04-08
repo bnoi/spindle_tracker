@@ -929,16 +929,23 @@ class Cen2Tracker(Tracker):
 
         return fig
 
-    def kymo_hfr(self, figsize=(12, 6)):
+    def kymo_hfr(self, time_range=None, figsize=(12, 6)):
         """
         """
         import matplotlib.pyplot as plt
         import matplotlib
 
-        peaks = self.peaks_real_interpolated
+        if time_range:
+            peaks = self.peaks_real_interpolated.loc[time_range[0]:time_range[1]]
+            times = peaks['t'].unique()
+        else:
+            peaks = self.peaks_real_interpolated
+            times = self.times_interpolated #/ 60
+
+        times -= times[0]
+
         idx = pd.IndexSlice
 
-        times = self.times_interpolated #/ 60
         spbA = peaks.loc[idx[:, 'spb', 'A'], :]
         spbB = peaks.loc[idx[:, 'spb', 'B'], :]
         ktA = peaks.loc[idx[:, 'kt', 'A'], :]

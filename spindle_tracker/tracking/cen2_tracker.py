@@ -929,7 +929,7 @@ class Cen2Tracker(Tracker):
 
         return fig
 
-    def kymo_hfr(self, time_range=None, figsize=(12, 6)):
+    def kymo_hfr(self, time_range=None, figsize=(12, 6), invert=False):
         """
         """
         import matplotlib.pyplot as plt
@@ -980,5 +980,8 @@ class Cen2Tracker(Tracker):
 
         ax.grid(b=True, which='major', color='#000000', linestyle='-', alpha=0.4, lw=2)
         ax.set_axisbelow(True)
+
+        if invert:
+            ax.invert_yaxis()
 
         return fig

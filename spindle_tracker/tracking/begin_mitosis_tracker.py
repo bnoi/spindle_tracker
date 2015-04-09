@@ -169,8 +169,8 @@ class BeginMitosisTracker(Tracker):
         pole_2 = poles.loc[pd.IndexSlice[:, 1], ]
 
         times = pole_1['t'].values
-        ax.plot(times, pole_1 ['x_proj'], c='black', marker='o')
-        ax.plot(times, pole_2['x_proj'], c='black', marker='o')
+        ax.plot(times, pole_1 ['x_proj'], color='#000000', marker='o')
+        ax.plot(times, pole_2['x_proj'], color='#000000', marker='o')
 
         precision = 1000
         linewidth = 6
@@ -213,10 +213,10 @@ class BeginMitosisTracker(Tracker):
         ax.yaxis.set_ticks_position('none')
 
         for i in ax.spines.values():
-            i.set_linewidth(2)
+            i.set_linewidth(4)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.4)
+        ax.grid(b=True, which='major', color='#000000', linestyle='-', alpha=0.4, lw=2)
 
         plt.tight_layout()
         return fig

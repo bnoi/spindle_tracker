@@ -151,7 +151,7 @@ class BeginMitosisTracker(Tracker):
 
         return fig
 
-    def get_figure_publi(self, figsize, tmin, tmax):
+    def get_figure_publi(self, figsize, tmin, tmax, shift_time=0):
         """
         """
         import matplotlib
@@ -164,6 +164,7 @@ class BeginMitosisTracker(Tracker):
         poles = poles[self.poles['t'] > tmin]
         poles['t'] = poles['t'] - self.poles.loc[self.annotations['start_mitosis'], 't'].iloc[0]
         poles['t'] = poles['t'] / 60
+        poles['t'] -= shift_time
 
         pole_1 = poles.loc[pd.IndexSlice[:, 0], ]
         pole_2 = poles.loc[pd.IndexSlice[:, 1], ]

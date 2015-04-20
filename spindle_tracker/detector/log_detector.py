@@ -61,7 +61,7 @@ def log_detector(source, radius, ndims, calibration):
         else:
             z = peaks[2]
 
-        quality = source[y, x]
+        quality = fftconv[y, x]
 
         spots.append([x, y, z, radius, quality])
 

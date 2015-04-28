@@ -4,6 +4,7 @@ import os
 from dateutil import parser
 
 import pandas as pd
+import numpy as np
 
 from sktracker.io import TiffFile
 from sktracker.io import StackIO

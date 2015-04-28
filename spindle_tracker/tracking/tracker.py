@@ -16,6 +16,7 @@ from sktracker.io import OMEModel
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
+from ..utils.logic import contiguous_regions
 from ..movies import maker
 
 log = logging.getLogger(__name__)
@@ -369,3 +370,29 @@ class Tracker():
                      resize=resize, annotate=annotate, codec='mjpeg',
                      z_index=self.metadata['DimensionOrder'].index('Z'),
                      rgb=rgb, channel_order=channel_order)
+
+    def get_directions(self, traj, window, base_score):
+        """
+        """
+        window = 10 / self.metadata['TimeIncrement']
+        base_score = 0.2
+
+        smooth_traj = pd.rolling_mean(traj, window)
+
+        raw_direction = (np.diff(smooth_traj) > 0)
+        direction = np.array(['NN'] * len(smooth_traj))
+
+        def f(x):
+            return (x.sum() - (len(x) - x.sum())) / (2 * window - 1)
+        scores = pd.rolling_apply(raw_direction, window, f)
+
+        direction[scores > base_score] = 'AP'
+        direction[scores < - base_score] = 'P'
+
+        p_direction_indexes = (contiguous_regions(direction == 'P') - window)
+        p_direction_indexes *= self.metadata['TimeIncrement']
+
+        ap_direction_indexes = (contiguous_regions(direction == 'AP') - window)
+        ap_direction_indexes *= self.metadata['TimeIncrement']
+
+        return p_direction_indexes, ap_direction_indexes

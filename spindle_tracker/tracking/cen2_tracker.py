@@ -1040,3 +1040,46 @@ class Cen2Tracker(Tracker):
                 ax.axvspan(t1, t2, facecolor='b', alpha=0.15)
 
         return fig
+
+
+    def get_coherence(self):
+        """
+        N - N : 0
+        N - P : 1
+        N - AP : 2
+        AP - P : 3
+        P - P : 4
+        AP - AP : 5
+        """
+
+        peaks = self.get_peaks_interpolated_metaphase()
+
+        idx = pd.IndexSlice
+        ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
+        ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
+
+        _, _, directionsA = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
+        _, _, directionsB = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
+
+        m = np.char.add(directionsA, directionsB)
+
+        # N - N
+        m[(m == 'NNNN')] = 0
+
+        # N - P
+        m[(m == 'NNP') | (m == 'PNN')] = 1
+
+        # N - AP
+        m[(m == 'NNAP') | (m == 'APNN')] = 2
+
+        # AP - P
+        m[(m == 'APP') | (m == 'PAP')] = 3
+
+        # P - P
+        m[(m == 'PP')] = 4
+
+        # AP - AP
+        m[(m == 'APAP')] = 5
+
+        coherence = m.astype('int')
+        return coherence

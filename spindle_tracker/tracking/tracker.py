@@ -388,8 +388,12 @@ class Tracker():
             return (x.sum() - (len(x) - x.sum())) / (2 * window - 1)
         scores = pd.rolling_apply(raw_direction, window, f)
 
-        direction[scores > base_score] = 'AP'
-        direction[scores < - base_score] = 'P'
+        if side == 1:
+            direction[scores > base_score] = 'AP'
+            direction[scores < - base_score] = 'P'
+        else:
+            direction[scores > base_score] = 'P'
+            direction[scores < - base_score] = 'AP'
 
         p = (contiguous_regions(direction == 'P') - window)
         ap = (contiguous_regions(direction == 'AP') - window)
@@ -406,7 +410,4 @@ class Tracker():
             p /= self.metadata['TimeIncrement']
             ap /= self.metadata['TimeIncrement']
 
-        if side == 1:
-            return p, ap, direction
-        else:
-            return ap, p, direction
+        return p, ap, direction

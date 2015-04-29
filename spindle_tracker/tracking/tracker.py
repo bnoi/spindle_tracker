@@ -372,7 +372,7 @@ class Tracker():
                      z_index=self.metadata['DimensionOrder'].index('Z'),
                      rgb=rgb, channel_order=channel_order)
 
-    def get_directions(self, traj, window, base_score, side, second=True):
+    def get_directions(self, traj, window, base_score, side, second=True, min_duration=5):
         """
         """
         window = np.round(10 / self.metadata['TimeIncrement'], 1)
@@ -390,15 +390,22 @@ class Tracker():
         direction[scores > base_score] = 'AP'
         direction[scores < - base_score] = 'P'
 
-        p_direction_indexes = (contiguous_regions(direction == 'P') - window)
+        p = (contiguous_regions(direction == 'P') - window)
+        ap = (contiguous_regions(direction == 'AP') - window)
 
-        ap_direction_indexes = (contiguous_regions(direction == 'AP') - window)
+        # Switch to second
+        p *= self.metadata['TimeIncrement']
+        ap *= self.metadata['TimeIncrement']
 
-        if second:
-            p_direction_indexes *= self.metadata['TimeIncrement']
-            ap_direction_indexes *= self.metadata['TimeIncrement']
+        p = p[((p[:, 1] - p[:, 0]) > min_duration)]
+        ap = ap[((ap[:, 1] - ap[:, 0]) > min_duration)]
+
+        # Re switch to indexes
+        if not second:
+            p /= self.metadata['TimeIncrement']
+            ap /= self.metadata['TimeIncrement']
 
         if side == 1:
-            return p_direction_indexes, ap_direction_indexes
+            return p, ap
         else:
-            return ap_direction_indexes, p_direction_indexes
+            return ap, p

@@ -985,3 +985,58 @@ class Cen2Tracker(Tracker):
             ax.invert_yaxis()
 
         return fig
+
+
+    def kymo_directions(self, sister=True):
+        """
+        """
+
+        times = self.times_interpolated_metaphase
+        peaks = self.get_peaks_interpolated_metaphase()
+
+        idx = pd.IndexSlice
+        ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj']
+        ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj']
+        spbA = peaks.loc[idx[:, 'spb', 'A'], 'x_proj']
+        spbB = peaks.loc[idx[:, 'spb', 'B'], 'x_proj']
+        kts_traj = (ktA.values + ktB.values) / 2
+
+        if sister:
+
+            def color_run_traj(ax, times, traj, run_indexes, color, top=True):
+                for t1, t2 in run_indexes:
+                    x = times[t1:t2]
+                    y1 = traj.values[t1:t2]
+                    if top:
+                        y2 = [10] * len(y1)
+                    else:
+                        y2 = [-10] * len(y1)
+                    ax.fill_between(x, y1, y2, alpha=0.15, color=color)
+
+            fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
+            ax = fig.get_axes()[0]
+
+            p, ap = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
+            color_run_traj(ax, times, ktA, p, 'g', top=True)
+            color_run_traj(ax, times, ktA, ap, 'b', top=True)
+
+            p, ap = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
+            color_run_traj(ax, times, ktB, p, 'g', top=False)
+            color_run_traj(ax, times, ktB, ap, 'b', top=False)
+
+        else:
+
+            p, ap = self.get_directions(kts_traj, window=10, base_score=0.15, side=1, second=True)
+
+            fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
+            ax = fig.get_axes()[0]
+
+            ax.plot(times, kts_traj, color='black')
+
+            for t1, t2 in p:
+                ax.axvspan(t1, t2, facecolor='g', alpha=0.15)
+
+            for t1, t2 in ap:
+                ax.axvspan(t1, t2, facecolor='b', alpha=0.15)
+
+        return fig

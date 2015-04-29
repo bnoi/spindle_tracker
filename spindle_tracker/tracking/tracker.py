@@ -372,10 +372,10 @@ class Tracker():
                      z_index=self.metadata['DimensionOrder'].index('Z'),
                      rgb=rgb, channel_order=channel_order)
 
-    def get_directions(self, traj, window, base_score, side):
+    def get_directions(self, traj, window, base_score, side, second=True):
         """
         """
-        window = 10 / self.metadata['TimeIncrement']
+        window = np.round(10 / self.metadata['TimeIncrement'], 1)
         base_score = 0.2
 
         smooth_traj = pd.rolling_mean(traj, window)
@@ -391,10 +391,12 @@ class Tracker():
         direction[scores < - base_score] = 'P'
 
         p_direction_indexes = (contiguous_regions(direction == 'P') - window)
-        p_direction_indexes *= self.metadata['TimeIncrement']
 
         ap_direction_indexes = (contiguous_regions(direction == 'AP') - window)
-        ap_direction_indexes *= self.metadata['TimeIncrement']
+
+        if second:
+            p_direction_indexes *= self.metadata['TimeIncrement']
+            ap_direction_indexes *= self.metadata['TimeIncrement']
 
         if side == 1:
             return p_direction_indexes, ap_direction_indexes

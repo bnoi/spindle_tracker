@@ -1016,17 +1016,17 @@ class Cen2Tracker(Tracker):
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
             ax = fig.get_axes()[0]
 
-            p, ap = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
+            p, ap, _ = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
             color_run_traj(ax, times, ktA, p, 'g', top=True)
             color_run_traj(ax, times, ktA, ap, 'b', top=True)
 
-            p, ap = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
+            p, ap, _ = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
             color_run_traj(ax, times, ktB, p, 'g', top=False)
             color_run_traj(ax, times, ktB, ap, 'b', top=False)
 
         else:
 
-            p, ap = self.get_directions(kts_traj, window=10, base_score=0.15, side=1, second=True)
+            p, ap, _ = self.get_directions(kts_traj, window=10, base_score=0.15, side=1, second=True)
 
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
             ax = fig.get_axes()[0]

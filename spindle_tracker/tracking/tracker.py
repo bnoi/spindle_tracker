@@ -372,7 +372,8 @@ class Tracker():
                      z_index=self.metadata['DimensionOrder'].index('Z'),
                      rgb=rgb, channel_order=channel_order)
 
-    def get_directions(self, traj, window, base_score, side, second=True, min_duration=5):
+    def get_directions(self, traj, window, base_score, side,
+                       second=True, min_duration=5):
         """
         """
         window = np.round(10 / self.metadata['TimeIncrement'], 1)
@@ -406,6 +407,6 @@ class Tracker():
             ap /= self.metadata['TimeIncrement']
 
         if side == 1:
-            return p, ap
+            return p, ap, direction
         else:
-            return ap, p
+            return ap, p, direction

@@ -376,8 +376,7 @@ class Tracker():
                        second=True, min_duration=5):
         """
         """
-        window = np.round(10 / self.metadata['TimeIncrement'], 1)
-        base_score = 0.2
+        window = np.round(window / self.metadata['TimeIncrement'], 1)
 
         smooth_traj = pd.rolling_mean(traj, window)
 

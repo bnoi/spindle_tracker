@@ -1093,12 +1093,11 @@ class Cen2Tracker(Tracker):
         idx = pd.IndexSlice
         ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
         ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
-        kts_traj = (ktA + ktB) / 2
 
         p_A, ap_A, directions_A = self.get_directions(ktA, window=10,
-                                                         base_score=0.15, side=-1, second=True)
+                                                      base_score=0.15, side=-1, second=True)
         p_B, ap_B, directions_B = self.get_directions(ktB, window=10,
-                                                         base_score=0.15, side=1, second=True)
+                                                      base_score=0.15, side=1, second=True)
 
         def link(run1, run2, start_time_offset=10, min_time=0.8):
 
@@ -1120,6 +1119,12 @@ class Cen2Tracker(Tracker):
             if (overlap_time / (run2[1] - run2[0])) < min_time:
                 return False
 
+            # Check wether run1 and run2 are longer than 10s
+            if np.abs(run1[0] - run1[1]) < 10:
+                return False
+            if np.abs(run2[0] - run2[1]) < 10:
+                return False
+
             return True
 
         def link_runs(indexes1, indexes2, start_time_offset=10, min_time=0.8):
@@ -1131,9 +1136,9 @@ class Cen2Tracker(Tracker):
             return linked_run
 
         linked_runs = {}
-        linked_runs['P-P'] = link_runs(p_A, p_B, start_time_offset=15, min_time=0.5)
-        linked_runs['P-AP'] = link_runs(p_A, ap_B, start_time_offset=15, min_time=0.5)
-        linked_runs['AP-AP'] = link_runs(ap_A, ap_B, start_time_offset=15, min_time=0.5)
-        linked_runs['AP-P'] = link_runs(ap_A, p_B, start_time_offset=15, min_time=0.5)
+        linked_runs['P-P'] = link_runs(p_A, p_B, start_time_offset=15, min_time=0.7)
+        linked_runs['P-AP'] = link_runs(p_A, ap_B, start_time_offset=15, min_time=0.7)
+        linked_runs['AP-AP'] = link_runs(ap_A, ap_B, start_time_offset=15, min_time=0.7)
+        linked_runs['AP-P'] = link_runs(ap_A, p_B, start_time_offset=15, min_time=0.7)
 
         return linked_runs

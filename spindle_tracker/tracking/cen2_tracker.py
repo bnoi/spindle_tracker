@@ -1,5 +1,6 @@
 import logging
 import os
+import itertools
 
 import numpy as np
 import pandas as pd
@@ -1041,7 +1042,6 @@ class Cen2Tracker(Tracker):
 
         return fig
 
-
     def get_coherence(self):
         """
         N - N : 0
@@ -1083,3 +1083,57 @@ class Cen2Tracker(Tracker):
 
         coherence = m.astype('int')
         return coherence
+
+    def link_runs(self):
+        """
+        """
+
+        peaks = self.get_peaks_interpolated_metaphase()
+
+        idx = pd.IndexSlice
+        ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
+        ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
+        kts_traj = (ktA + ktB) / 2
+
+        p_A, ap_A, directions_A = self.get_directions(ktA, window=10,
+                                                         base_score=0.15, side=-1, second=True)
+        p_B, ap_B, directions_B = self.get_directions(ktB, window=10,
+                                                         base_score=0.15, side=1, second=True)
+
+        def link(run1, run2, start_time_offset=10, min_time=0.8):
+
+            # Check if they start at no more 'start_time_offset' interval
+            if np.abs(run1[0] - run2[0]) > start_time_offset:
+                return False
+
+            # Check wether they overlap
+            start = np.maximum(run1[0], run2[0])
+            end = np.minimum(run1[1], run2[1])
+            overlap_time = end - start
+
+            if overlap_time < 0:
+                return False
+
+            # Check overlap time is more than 'min_time' of each run
+            if (overlap_time / (run1[1] - run1[0])) < min_time:
+                return False
+            if (overlap_time / (run2[1] - run2[0])) < min_time:
+                return False
+
+            return True
+
+        def link_runs(indexes1, indexes2, start_time_offset=10, min_time=0.8):
+            linked_run = []
+            for run1, run2 in itertools.product(indexes1, indexes2):
+                if link(run1, run2, start_time_offset=start_time_offset, min_time=min_time):
+                    linked_run.append([run1.tolist(), run2.tolist()])
+
+            return linked_run
+
+        linked_runs = {}
+        linked_runs['P-P'] = link_runs(p_A, p_B, start_time_offset=15, min_time=0.5)
+        linked_runs['P-AP'] = link_runs(p_A, ap_B, start_time_offset=15, min_time=0.5)
+        linked_runs['AP-AP'] = link_runs(ap_A, ap_B, start_time_offset=15, min_time=0.5)
+        linked_runs['AP-P'] = link_runs(ap_A, p_B, start_time_offset=15, min_time=0.5)
+
+        return linked_runs

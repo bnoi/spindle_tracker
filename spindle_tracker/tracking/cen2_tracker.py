@@ -1136,9 +1136,9 @@ class Cen2Tracker(Tracker):
             return linked_run
 
         linked_runs = {}
-        linked_runs['P-P'] = link_runs(p_A, p_B, start_time_offset=15, min_time=0.7)
-        linked_runs['P-AP'] = link_runs(p_A, ap_B, start_time_offset=15, min_time=0.7)
-        linked_runs['AP-AP'] = link_runs(ap_A, ap_B, start_time_offset=15, min_time=0.7)
-        linked_runs['AP-P'] = link_runs(ap_A, p_B, start_time_offset=15, min_time=0.7)
+        linked_runs['P-P'] = link_runs(p_A, p_B, start_time_offset=15, min_time=0.5)
+        linked_runs['P-AP'] = link_runs(p_A, ap_B, start_time_offset=15, min_time=0.5)
+        linked_runs['AP-AP'] = link_runs(ap_A, ap_B, start_time_offset=15, min_time=0.5)
+        linked_runs['AP-P'] = link_runs(ap_A, p_B, start_time_offset=15, min_time=0.5)
 
         return linked_runs

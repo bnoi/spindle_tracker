@@ -1153,10 +1153,10 @@ class Cen2Tracker(Tracker):
             if (overlap_time / (run2[1] - run2[0])) < min_time:
                 return False
 
-            # Check wether run1 and run2 are longer than 10s
-            if np.abs(run1[0] - run1[1]) < 10:
+            # Check wether run1 and run2 are longer than 20s
+            if np.abs(run1[0] - run1[1]) < 20:
                 return False
-            if np.abs(run2[0] - run2[1]) < 10:
+            if np.abs(run2[0] - run2[1]) < 20:
                 return False
 
             return True

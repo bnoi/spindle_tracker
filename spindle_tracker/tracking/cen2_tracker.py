@@ -142,9 +142,9 @@ class Cen2Tracker(Tracker):
             elif interpolated and step == 'anaphase':
                 peaks = self.peaks_real_interpolated.loc[index_anaphase:]
             elif not interpolated and step == 'metaphase':
-                peaks = self.peaks_real_interpolated.loc[:index_anaphase]
+                peaks = self.peaks_real.loc[:index_anaphase]
             elif not interpolated and step == 'anaphase':
-                peaks = self.peaks_real_interpolated.loc[index_anaphase:]
+                peaks = self.peaks_real.loc[index_anaphase:]
             else:
                 raise Exception('Error in get_peaks()')
 
@@ -1005,6 +1005,9 @@ class Cen2Tracker(Tracker):
         if sister:
 
             def color_run_traj(ax, times, traj, run_indexes, color, top=True):
+                """
+                """
+
                 for t1, t2 in run_indexes:
                     x = times[t1:t2]
                     y1 = traj.values[t1:t2]
@@ -1017,17 +1020,20 @@ class Cen2Tracker(Tracker):
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
             ax = fig.get_axes()[0]
 
-            p, ap, _ = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
+            p, ap, _ = self.get_directions(ktA, window=10, base_score=0.15, side=-1,
+                                           second=False, t0=0)
             color_run_traj(ax, times, ktA, p, 'g', top=True)
             color_run_traj(ax, times, ktA, ap, 'b', top=True)
 
-            p, ap, _ = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
+            p, ap, _ = self.get_directions(ktB, window=10, base_score=0.15, side=1,
+                                           second=False, t0=0)
             color_run_traj(ax, times, ktB, p, 'g', top=False)
             color_run_traj(ax, times, ktB, ap, 'b', top=False)
 
         else:
 
-            p, ap, _ = self.get_directions(kts_traj, window=10, base_score=0.15, side=1, second=True)
+            p, ap, _ = self.get_directions(kts_traj, window=10, base_score=0.15, side=1,
+                                           second=True, t0=times[0])
 
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
             ax = fig.get_axes()[0]
@@ -1052,14 +1058,17 @@ class Cen2Tracker(Tracker):
         AP - AP : 5
         """
 
+        times = self.times_interpolated_metaphase
         peaks = self.get_peaks_interpolated_metaphase()
 
         idx = pd.IndexSlice
         ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
         ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
 
-        _, _, directionsA = self.get_directions(ktA, window=10, base_score=0.15, side=-1, second=False)
-        _, _, directionsB = self.get_directions(ktB, window=10, base_score=0.15, side=1, second=False)
+        _, _, directionsA = self.get_directions(ktA, window=10, base_score=0.15, side=-1,
+                                                second=False, t0=0)
+        _, _, directionsB = self.get_directions(ktB, window=10, base_score=0.15, side=1,
+                                                second=False, t0=0)
 
         m = np.char.add(directionsA, directionsB)
 
@@ -1088,16 +1097,17 @@ class Cen2Tracker(Tracker):
         """
         """
 
+        times = self.times_interpolated_metaphase
         peaks = self.get_peaks_interpolated_metaphase()
 
         idx = pd.IndexSlice
         ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
         ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
 
-        p_A, ap_A, directions_A = self.get_directions(ktA, window=10,
-                                                      base_score=0.15, side=-1, second=True)
-        p_B, ap_B, directions_B = self.get_directions(ktB, window=10,
-                                                      base_score=0.15, side=1, second=True)
+        p_A, ap_A, directions_A = self.get_directions(ktA, window=10, base_score=0.15,
+                                                      side=-1, second=True, t0=times[0])
+        p_B, ap_B, directions_B = self.get_directions(ktB, window=10, base_score=0.15,
+                                                      side=1, second=True, t0=times[0])
 
         def link(run1, run2, start_time_offset=10, min_time=0.8):
 

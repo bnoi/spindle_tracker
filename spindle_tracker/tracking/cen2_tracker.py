@@ -988,7 +988,7 @@ class Cen2Tracker(Tracker):
         return fig
 
 
-    def kymo_directions(self, sister=True):
+    def kymo_directions(self, sister=True, base_score=0.15):
         """
         """
 
@@ -1020,19 +1020,19 @@ class Cen2Tracker(Tracker):
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
             ax = fig.get_axes()[0]
 
-            p, ap, _ = self.get_directions(ktA, window=10, base_score=0.15, side=-1,
+            p, ap, _ = self.get_directions(ktA, window=10, base_score=base_score, side=-1,
                                            second=False, t0=0)
             color_run_traj(ax, times, ktA, p, 'g', top=True)
             color_run_traj(ax, times, ktA, ap, 'b', top=True)
 
-            p, ap, _ = self.get_directions(ktB, window=10, base_score=0.15, side=1,
+            p, ap, _ = self.get_directions(ktB, window=10, base_score=base_score, side=1,
                                            second=False, t0=0)
             color_run_traj(ax, times, ktB, p, 'g', top=False)
             color_run_traj(ax, times, ktB, ap, 'b', top=False)
 
         else:
 
-            p, ap, _ = self.get_directions(kts_traj, window=10, base_score=0.15, side=1,
+            p, ap, _ = self.get_directions(kts_traj, window=10, base_score=base_score, side=1,
                                            second=True, t0=times[0])
 
             fig = self.kymo(mpl_params={'ls': '-', 'marker': ''})
@@ -1048,7 +1048,7 @@ class Cen2Tracker(Tracker):
 
         return fig
 
-    def get_coherence(self):
+    def get_coherence(self, base_score=0.15):
         """
         N - N : 0
         N - P : 1
@@ -1058,16 +1058,15 @@ class Cen2Tracker(Tracker):
         AP - AP : 5
         """
 
-        times = self.times_interpolated_metaphase
         peaks = self.get_peaks_interpolated_metaphase()
 
         idx = pd.IndexSlice
         ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
         ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
 
-        _, _, directionsA = self.get_directions(ktA, window=10, base_score=0.15, side=-1,
+        _, _, directionsA = self.get_directions(ktA, window=10, base_score=base_score, side=-1,
                                                 second=False, t0=0)
-        _, _, directionsB = self.get_directions(ktB, window=10, base_score=0.15, side=1,
+        _, _, directionsB = self.get_directions(ktB, window=10, base_score=base_score, side=1,
                                                 second=False, t0=0)
 
         m = np.char.add(directionsA, directionsB)
@@ -1093,7 +1092,7 @@ class Cen2Tracker(Tracker):
         coherence = m.astype('int')
         return coherence
 
-    def link_runs(self):
+    def link_runs(self, base_score=0.15):
         """
         """
 
@@ -1104,12 +1103,37 @@ class Cen2Tracker(Tracker):
         ktA = peaks.loc[idx[:, 'kt', 'A'], 'x_proj'].values
         ktB = peaks.loc[idx[:, 'kt', 'B'], 'x_proj'].values
 
-        p_A, ap_A, directions_A = self.get_directions(ktA, window=10, base_score=0.15,
+        p_A, ap_A, directions_A = self.get_directions(ktA, window=10, base_score=base_score,
                                                       side=-1, second=True, t0=times[0])
-        p_B, ap_B, directions_B = self.get_directions(ktB, window=10, base_score=0.15,
+        p_B, ap_B, directions_B = self.get_directions(ktB, window=10, base_score=base_score,
                                                       side=1, second=True, t0=times[0])
 
+        def find_nearest(array, value):
+            idx = (np.abs(array - value)).argmin()
+            return idx
+
         def link(run1, run2, start_time_offset=10, min_time=0.8):
+
+            # # Check wether run1 or run2 contains too much interpolated timepoints
+            # # above 50%
+            # times = self.times_interpolated_metaphase
+            # raw_times = self.times_metaphase
+
+            # ## For run1
+            # interp = times[find_nearest(times, run1[0]):find_nearest(times, run1[1])].shape[0]
+            # no_interp = raw_times[find_nearest(raw_times, run1[0]):find_nearest(raw_times, run1[1])].shape[0]
+            # interpolated_ratio = 1 - (no_interp / interp)
+
+            # if interpolated_ratio > 0.6:
+            #     return False
+
+            # ## For run2
+            # interp = times[find_nearest(times, run2[0]):find_nearest(times, run2[1])].shape[0]
+            # no_interp = raw_times[find_nearest(raw_times, run2[0]):find_nearest(raw_times, run2[1])].shape[0]
+            # interpolated_ratio = 1 - (no_interp / interp)
+
+            # if interpolated_ratio > 0.6:
+            #     return False
 
             # Check if they start at no more 'start_time_offset' interval
             if np.abs(run1[0] - run2[0]) > start_time_offset:

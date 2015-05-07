@@ -6,14 +6,15 @@ from dateutil import parser
 import pandas as pd
 import numpy as np
 
-from sktracker.io import TiffFile
-from sktracker.io import StackIO
-from sktracker.io import ObjectsIO
 from sktracker.detection import peak_detector
-from sktracker.io.trackmate import trackmate_peak_import
 from sktracker.trajectories import Trajectories
-from sktracker.io import read_roi
-from sktracker.io import OMEModel
+
+from ..io.stackio import StackIO
+from ..io.objectsio import ObjectsIO
+from ..io import TiffFile
+from ..io.trackmate import trackmate_peak_import
+from ..io import read_roi
+from ..io.ome import OMEModel
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension

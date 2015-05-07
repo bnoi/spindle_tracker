@@ -870,8 +870,7 @@ class Trajectories(pd.DataFrame):
 
     # Visualization methods
 
-    def show(self, xaxis='t',
-             yaxis='x',
+    def show(self, xaxis='t', yaxis='x',
              groupby_args={'level': "label"},
              ax=None, legend=False, **kwargs):  # pragma: no cover
         """Show trajectories
@@ -940,27 +939,6 @@ class Trajectories(pd.DataFrame):
             ax.legend()
 
         return ax
-
-    def plot_stacked_coords(self):
-        '''
-        '''
-        import matplotlib.pyplot as plt
-
-        fig, axes = plt.subplots(len(coords), 1, sharex=True, figsize=(6, 9))
-
-        for coord, ax in zip(coords, axes):
-            self.show('t', coord, ax=ax)
-            ax.set_ylabel(coord)
-            ax.set_title('')
-            ax.set_xlabel('')
-
-            ax.grid(True)
-
-        axes[-1].set_xlabel('Time')
-
-        fig.tight_layout()
-
-        return axes
 
 
 # Register the trajectories for storing in HDFStore

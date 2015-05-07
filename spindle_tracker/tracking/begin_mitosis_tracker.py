@@ -165,6 +165,8 @@ class BeginMitosisTracker(Tracker):
         poles['t'] = poles['t'] - self.poles.loc[self.annotations['start_mitosis'], 't'].iloc[0]
         poles['t'] = poles['t'] / 60
         poles['t'] -= shift_time
+        poles = poles[poles['t'] > 0]
+        poles = poles[poles['t'] < 7]
 
         pole_1 = poles.loc[pd.IndexSlice[:, 0], ]
         pole_2 = poles.loc[pd.IndexSlice[:, 1], ]
@@ -202,9 +204,10 @@ class BeginMitosisTracker(Tracker):
             lc = LineCollection(segments, array=z, cmap=cmap, norm=norm, linewidth=linewidth, alpha=alpha)
             ax.add_collection(lc)
 
-        ax.set_xticks(np.arange(-8, 8, 2))
+        ax.set_xticks(np.arange(times[0], times[-1], 2))
         ax.set_xlim(times[0], times[-1])
-        ax.set_yticks(np.arange(-0.8, 0.8, 0.4))
+        ax.set_yticks(np.arange(-2, 2, 1))
+        ax.set_ylim(-1.5, 1.5)
 
         nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
         ax.xaxis.set_major_formatter(nullform)
@@ -217,7 +220,7 @@ class BeginMitosisTracker(Tracker):
             i.set_linewidth(4)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#000000', linestyle='-', alpha=0.4, lw=2)
+        ax.grid(b=True, which='major', color='#000000', linestyle='-', alpha=0.2, lw=2)
 
         plt.tight_layout()
         return fig

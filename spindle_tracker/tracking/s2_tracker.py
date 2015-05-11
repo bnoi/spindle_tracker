@@ -10,8 +10,7 @@ from ..tracking import Tracker
 class S2Tracker(Tracker):
 
     MINIMUM_METADATA = ['SizeX', 'SizeY',
-                        'PhysicalSizeX', 'PhysicalSizeY',
-                        'TimeIncrement']
+                        'PhysicalSizeX', 'PhysicalSizeY']
 
     # ANNOTATIONS = {'state': (0, [0, 1, 2], None),}
 
@@ -31,7 +30,7 @@ class S2Tracker(Tracker):
         ax1 = plt.subplot2grid((2, 2), (0, 0))
         ax2 = plt.subplot2grid((2, 2), (0, 1))
         ax3 = plt.subplot2grid((2, 2), (1, 0))
-        ax4 = plt.subplot2grid((2, 2), (1, 1), projection='3d')
+        # ax4 = plt.subplot2grid((2, 2), (1, 1), projection='3d')
 
         traj.show(xaxis='t', yaxis='x', ax=ax1)
         traj.show(xaxis='t', yaxis='y', ax=ax2)

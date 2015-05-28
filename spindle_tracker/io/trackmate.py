@@ -91,6 +91,9 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
 
         trajs = trajs.reset_index()
 
+        # Remove spot without labels
+        trajs = trajs.dropna(subset=['label'])
+
 
     trajs.set_index(['t_stamp', 'label'], inplace=True)
 

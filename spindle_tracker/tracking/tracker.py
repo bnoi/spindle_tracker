@@ -288,7 +288,7 @@ class Tracker():
 
         self.save_oio()
 
-    def get_peaks_from_trackmate(self, suffix=None):
+    def get_peaks_from_trackmate(self, suffix=None, get_tracks=True):
         """
         """
 
@@ -298,7 +298,7 @@ class Tracker():
             log.warning("No Trackmate XML file detected.")
             return None
 
-        self.raw_trackmate = trackmate_peak_import(self.full_xml_path)
+        self.raw_trackmate = trackmate_peak_import(self.full_xml_path, get_tracks=get_tracks)
         return self.raw_trackmate
 
     @property

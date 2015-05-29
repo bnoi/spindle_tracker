@@ -26,7 +26,15 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
                      'MEAN_INTENSITY': 'I',
                      'ESTIMATED_DIAMETER': 'w',
                      'QUALITY': 'q',
-                     'ID': 'spot_id'}
+                     'ID': 'spot_id',
+                     # 'MEAN_INTENSITY': 'mean_intensity',
+                     'MEDIAN_INTENSITY': 'median_intensity',
+                     'MIN_INTENSITY': 'min_intensity',
+                     'MAX_INTENSITY': 'max_intensity',
+                     'TOTAL_INTENSITY': 'total_intensity',
+                     'STANDARD_DEVIATION': 'std_intensity',
+                     'CONTRAST': 'contrast',
+                     'SNR': 'snr',}
 
 
     features = root.find('Model').find('FeatureDeclarations').find('SpotFeatures')
@@ -96,6 +104,7 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
 
 
     trajs.set_index(['t_stamp', 'label'], inplace=True)
+    trajs = trajs.sort_index()
 
     return trajs
 

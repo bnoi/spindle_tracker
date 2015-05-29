@@ -56,8 +56,6 @@ class OMEModel():
             if self.img:
                 break
 
-        print(self.img)
-
         self.pixels = None
         if not self.img:
             log.critical('OME XML does not contain Image tag or is not valid XML')

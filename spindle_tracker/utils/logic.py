@@ -17,13 +17,25 @@ def contiguous_regions(condition):
     # we'll shift the index by 1 to the right.
     idx += 1
 
-    if condition[0]:
-        # If the start of condition is True prepend a 0
-        idx = np.r_[0, idx]
+    if type(condition) == pd.Series:
 
-    if condition[-1]:
-        # If the end of condition is True, append the length of the array
-        idx = np.r_[idx, condition.size] # Edit
+        if condition.iloc[0]:
+            # If the start of condition is True prepend a 0
+            idx = np.r_[0, idx]
+
+        if condition.iloc[-1]:
+            # If the end of condition is True, append the length of the array
+            idx = np.r_[idx, condition.size] # Edit
+
+    else:
+
+        if condition[0]:
+            # If the start of condition is True prepend a 0
+            idx = np.r_[0, idx]
+
+        if condition[-1]:
+            # If the end of condition is True, append the length of the array
+            idx = np.r_[idx, condition.size] # Edit
 
     # Reshape the result into two columns
     idx.shape = (-1,2)

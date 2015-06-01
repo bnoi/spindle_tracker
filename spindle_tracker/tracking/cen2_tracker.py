@@ -641,7 +641,7 @@ class Cen2Tracker(Tracker):
     """
 
     def kymo(self, use_interpolate=False, time_in_minutes=False,
-             mpl_params={'ls': '-', 'marker': 'o'}):
+             mpl_params={'ls': '-', 'marker': 'o'}, ax=None):
         """
         Print a kymograph of DataFrame of peaks (self.peaks_real{'x_proj']})
         """
@@ -661,8 +661,11 @@ class Cen2Tracker(Tracker):
 
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(12, 7))
-        ax = plt.subplot(111)
+        if not ax:
+            fig = plt.figure(figsize=(12, 7))
+            ax = plt.subplot(111)
+        else:
+            fig = ax.get_figure()
 
         drawer = ax.plot
 

@@ -152,7 +152,7 @@ class Cen2Tracker(Tracker):
             if interpolated and step == 'metaphase':
                 peaks = self.peaks_real_interpolated
             elif not interpolated and step == 'metaphase':
-                peaks = self.peaks_real_interpolated
+                peaks = self.peaks_real
             else:
                 raise Exception('Error in get_peaks()')
 

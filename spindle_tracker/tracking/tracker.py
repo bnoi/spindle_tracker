@@ -18,7 +18,7 @@ from ..io.ome import OMEModel
 
 from ..utils.short_id import id_generator
 from ..utils.path import check_extension
-from ..utils.logic import contiguous_regions
+from ..spatial import contiguous_regions
 from ..movies import maker
 
 log = logging.getLogger(__name__)

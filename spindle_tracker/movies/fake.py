@@ -57,8 +57,18 @@ def fake_movie(peaks, save=None, noise_factor=5, border_factor=1.5):
     fakeim = fakeim.astype("uint32")
 
     if save:
-        description = '{"shape": {}}'.format(str(list(fakeim.shape)))
-        imsave(save, fakeim,
-               extratags=[(270, 's', 0, description, True)])
+        description = """ImageJ=1.47a
+images={nr_images}
+channels={nr_channels}
+slices={nr_slices}
+hyperstack=true
+mode=color
+loop=false"""
+
+        description = description.format(**{"nr_images": fakeim.shape[0],
+                                            "nr_channels": 0,
+                                            "nr_slices": fakeim.shape[1]})
+
+        imsave(save, fakeim, extratags=[(270, 's', 0, description, True)])
 
     return fakeim

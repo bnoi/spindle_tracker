@@ -57,6 +57,8 @@ def fake_movie(peaks, save=None, noise_factor=5, border_factor=1.5):
     fakeim = fakeim.astype("uint32")
 
     if save:
-        imsave(save, fakeim)
+        description = '{"shape": {}}'.format(str(list(fakeim.shape)))
+        imsave(save, fakeim,
+               extratags=[(270, 's', 0, description, True)])
 
     return fakeim

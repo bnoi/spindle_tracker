@@ -38,7 +38,7 @@ DEFAULT_PARAMETERS = {'w_s': 0.7,
                       }
 
 
-def peak_detector(data_iterator,
+def peak_detector(im,
                   metadata,
                   parallel=True,
                   show_progress=False,
@@ -47,7 +47,7 @@ def peak_detector(data_iterator,
 
     Parameters
     ----------
-    data_iterator : python iterator
+    im : numpy array
         To iterate over data.
     metadata : dict
         Metadata to scale detected peaks and parameters.
@@ -112,7 +112,7 @@ def peak_detector(data_iterator,
         pool = multiprocessing.Pool(processes=ncore, initializer=init_worker)
 
     # Build arguments list
-    arguments = zip(data_iterator,
+    arguments = zip(im,
                     itertools.repeat(parameters),
                     range(n_stack))
 
@@ -127,7 +127,6 @@ def peak_detector(data_iterator,
 
         # Get unordered results and log progress
         for i, (pos, peaks) in enumerate(results):
-            print("kkk")
 
             n_peaks = len(peaks)
             percent_progression = (i + 1) / n_stack * 100
@@ -203,6 +202,7 @@ def find_gaussian_peaks(args):  # pragma: no cover
     Buffer function for _find_gaussian_peaks
     """
     frame, detection_parameters, i = args
+    print(detection_parameters)
     return (i, _find_gaussian_peaks(frame, **detection_parameters))
 
 
@@ -253,6 +253,7 @@ def _find_gaussian_peaks(image, w_s=15, peak_radius=1.5,
     d_image = image_deflation(image, peaks, w_s)
     peaks_coords = glrt_detection(d_image, peak_radius,
                                   w_s, threshold)
+    i  = 1
     while len(peaks_coords) > 0 and len(peaks) < max_peaks:
         new_peaks = gauss_estimation(d_image, peaks_coords, w_s)
         # in case the 2D gauss fit fails
@@ -262,7 +263,9 @@ def _find_gaussian_peaks(image, w_s=15, peak_radius=1.5,
         d_image = image_deflation(d_image, new_peaks, w_s)
         peaks_coords = glrt_detection(d_image, peak_radius,
                                       w_s, threshold)
+        i += 1
     peaks = np.array(peaks)
+    print("Number of deflation loop : {}".format(i))
     return peaks
 
 

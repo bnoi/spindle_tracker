@@ -168,7 +168,7 @@ class Cen2Tracker(Tracker):
         """
 
         if use_trackmate:
-            self.get_peaks_from_trackmate()
+            self.get_peaks_from_trackmate(get_tracks=False)
 
         if hasattr(self, 'raw_trackmate') and use_trackmate:
             log.info("Use TrackMate to import detected peaks")

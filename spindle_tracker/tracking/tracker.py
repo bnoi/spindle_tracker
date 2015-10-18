@@ -7,7 +7,8 @@ import pandas as pd
 import numpy as np
 
 from sktracker.detection import peak_detector
-from sktracker.trajectories import Trajectories
+
+from ..trajectories import Trajectories
 
 from ..io.stackio import StackIO
 from ..io.objectsio import ObjectsIO

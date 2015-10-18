@@ -6,10 +6,11 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 
-from sktracker.trajectories import Trajectories
+from ..trajectories import Trajectories
+from ..utils import print_progress
+
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.tracker.solver import GapCloseSolver
-from sktracker.utils import print_progress
 
 from ..tracking import Tracker
 

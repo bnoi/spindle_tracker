@@ -11,8 +11,9 @@ log = logging.getLogger(__name__)
 
 from sktracker.tracker.solver import ByFrameSolver
 from sktracker.utils import progress_apply
-from sktracker.trajectories import Trajectories
-from sktracker.io.trackmate import trackmate_peak_import
+
+from ..trajectories import Trajectories
+from ..io.trackmate import trackmate_peak_import
 from ..tracking import Tracker
 
 

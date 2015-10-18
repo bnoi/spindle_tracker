@@ -54,7 +54,7 @@ class Trajectories(pd.DataFrame):
     Examples
     --------
     >>> from sktracker import data
-    >>> from sktracker.trajectories import Trajectories
+    >>> from spindle_tracker.trajectories import Trajectories
     >>>
     >>> trajs = data.with_gaps_df()
     >>> trajs = Trajectories(trajs)
@@ -363,7 +363,7 @@ class Trajectories(pd.DataFrame):
 
         Returns
         -------
-        Copy of modified :class:`sktracker.trajectories.Trajectories` or None wether inplace is
+        Copy of modified :class:`spindle_tracker.trajectories.Trajectories` or None wether inplace is
         True.
         """
 
@@ -442,7 +442,7 @@ class Trajectories(pd.DataFrame):
 
         Returns
         -------
-        Copy of modified :class:`sktracker.trajectories.Trajectories` or None wether inplace is
+        Copy of modified :class:`spindle_tracker.trajectories.Trajectories` or None wether inplace is
         True.
         """
 
@@ -475,11 +475,11 @@ class Trajectories(pd.DataFrame):
 
         Parameters
         ----------
-        traj : :class:`pandas.DataFrame` or :class:`sktracker.trajectories.Trajectories`
+        traj : :class:`pandas.DataFrame` or :class:`spindle_tracker.trajectories.Trajectories`
 
         Returns
         -------
-        Copy of modified :class:`sktracker.trajectories.Trajectories` or None wether inplace is
+        Copy of modified :class:`spindle_tracker.trajectories.Trajectories` or None wether inplace is
         True.
         """
 
@@ -527,7 +527,7 @@ class Trajectories(pd.DataFrame):
 
         Returns
         -------
-        Copy of modified :class:`sktracker.trajectories.Trajectories` or None wether inplace is
+        Copy of modified :class:`spindle_tracker.trajectories.Trajectories` or None wether inplace is
         True.
         """
 
@@ -561,7 +561,7 @@ class Trajectories(pd.DataFrame):
 
         Returns
         -------
-        Copy of modified :class:`sktracker.trajectories.Trajectories` or None wether inplace is
+        Copy of modified :class:`spindle_tracker.trajectories.Trajectories` or None wether inplace is
         True.
         """
 
@@ -909,7 +909,7 @@ class Trajectories(pd.DataFrame):
             ax = plt.gca()
         colors = self.get_colors()
         gp = self.groupby(**groupby_args).groups
-
+        print('kkkkkkkkkkkkk')
         # Set default kwargs if they are not provided
         # Unfortunately you can't pass somthing as '-o'
         # as a single linestyle kwarg
@@ -929,6 +929,8 @@ class Trajectories(pd.DataFrame):
             if auto_color:
                 c = colors[v[0][1]]  # that's the label
                 kwargs['color'] = c
+            print(kwargs)
+            print(k)
             ax.plot(traj[xaxis], traj[yaxis], label=str(k), **kwargs)
 
         ax.set_xlabel(xaxis)

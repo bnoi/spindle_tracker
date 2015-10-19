@@ -198,13 +198,13 @@ def pack_images(imagelist, dstfilename, padding=2, sort="maxarea"):
             else:
                 targetdim_y = targetdim_x
 
-    # reduce image to its minimum size
-    image = image.crop(image.getbbox())
-
     # save the images to the target file packed
     image = Image.new("RGBA", (targetdim_x, targetdim_y))
     for uv, name, img in placement:
         image.paste(img, (uv.x1, uv.y1))
+
+    # reduce image to its minimum size
+    image = image.crop(image.getbbox())
 
     # image.show()
     image.save(dstfilename)

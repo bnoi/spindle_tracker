@@ -2,24 +2,35 @@ import numpy as np
 import pandas as pd
 
 
-def get_msd(traj, dt, label=None):
+def get_msd(traj, dt, with_nan=True, with_std=False, label=None):
 
     shifts = np.arange(1, len(traj), dtype='int')
-    msd = np.empty(shifts.shape, dtype='float')
+    if with_std:
+        msd = np.empty((len(shifts), 3), dtype='float')
+    else:
+        msd = np.empty((len(shifts), 2), dtype='float')
     msd[:] = np.nan
 
+    msd[:, 1] = shifts * dt
+
     for i, shift in enumerate(shifts):
-        d = traj[:-shift] - traj[shift:]
-        d = d[~np.isnan(d).any(axis=1)]
-        d = np.square(d).sum(axis=1)
+        diffs = traj[:-shift] - traj[shift:]
+        if with_nan:
+            diffs = diffs[~np.isnan(diffs).any(axis=1)]
+        diffs = np.square(diffs).sum(axis=1)
 
-        if len(d) > 0:
-            msd[i] = np.mean(d)
+        if len(diffs) > 0:
+            msd[i, 0] = np.mean(diffs)
 
-    delays = shifts * dt
+            if with_std:
+                msd[i, 2] = np.std(diffs)
 
-    msd = pd.DataFrame([delays, msd]).T
-    msd.columns = ["delay", "msd"]
+
+    msd = pd.DataFrame(msd)
+    if with_std:
+        msd.columns = ["msd", "delay", "std"]
+    else:
+        msd.columns = ["msd", "delay"]
 
     if label:
         msd['label'] = label
@@ -28,6 +39,7 @@ def get_msd(traj, dt, label=None):
         msd.set_index('delay', drop=True, inplace=True)
 
     msd.dropna(inplace=True)
+
     return msd
 
 

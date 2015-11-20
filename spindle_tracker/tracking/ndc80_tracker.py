@@ -1,6 +1,5 @@
 import itertools
 import logging
-log = logging.getLogger(__name__)
 
 import numpy as np
 import pandas as pd
@@ -9,10 +8,12 @@ import scipy as sp
 from ..trajectories import Trajectories
 from ..utils import print_progress
 
-from sktracker.tracker.solver import ByFrameSolver
-from sktracker.tracker.solver import GapCloseSolver
+from ..tracker.solver import ByFrameSolver
+from ..tracker.solver import GapCloseSolver
 
 from ..tracking import Tracker
+
+log = logging.getLogger(__name__)
 
 
 class Ndc80Tracker(Tracker):

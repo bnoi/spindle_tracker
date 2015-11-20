@@ -7,14 +7,14 @@ import pandas as pd
 import scipy.spatial.distance as dist
 import scipy.cluster.hierarchy as hier
 
-log = logging.getLogger(__name__)
-
-from sktracker.tracker.solver import ByFrameSolver
-from sktracker.utils import progress_apply
+from ..tracker.solver import ByFrameSolver
+from ..utils.progress import progress_apply
 
 from ..trajectories import Trajectories
 from ..io.trackmate import trackmate_peak_import
 from ..tracking import Tracker
+
+log = logging.getLogger(__name__)
 
 
 class Cen2Tracker(Tracker):

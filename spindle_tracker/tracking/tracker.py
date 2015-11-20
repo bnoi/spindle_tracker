@@ -6,7 +6,7 @@ from dateutil import parser
 import pandas as pd
 import numpy as np
 
-from sktracker.detection import peak_detector
+from ..detector import peak_detector
 
 from ..trajectories import Trajectories
 

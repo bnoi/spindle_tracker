@@ -1,18 +1,18 @@
 import gc
 import logging
 
-log = logging.getLogger(__name__)
-
 import numpy as np
 import pandas as pd
 import scipy
 from skimage import measure
 
-from sktracker.trajectories import Trajectories
-from sktracker.tracker.solver import ByFrameSolver
-from sktracker.io import TiffFile
+from ..trajectories import Trajectories
+from ..tracker.solver import ByFrameSolver
+from ..io import TiffFile
 
 from ..tracking import Tracker
+
+log = logging.getLogger(__name__)
 
 
 class BeginMitosisTracker(Tracker):

@@ -3,10 +3,10 @@ import sys
 import re
 import logging
 
-log = logging.getLogger(__name__)
+from spindle_tracker.utils.sort import natural_keys
+from spindle_tracker.utils import print_progress
 
-from sktracker.utils.sort import natural_keys
-from sktracker.utils import print_progress
+log = logging.getLogger(__name__)
 
 
 def tracker_load(base_dir, movies_path, patterns, tracker_class=None, tracker_params={}):

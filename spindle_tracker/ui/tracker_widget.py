@@ -1,10 +1,11 @@
 import logging
-log = logging.getLogger(__name__)
 
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
 
-from sktracker.ui import TrajectoriesWidget
+from .trajectories_widget import TrajectoriesWidget
+
+log = logging.getLogger(__name__)
 
 
 class TrackersWidget(QtGui.QWidget):

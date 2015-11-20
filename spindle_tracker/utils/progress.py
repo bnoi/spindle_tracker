@@ -1,16 +1,4 @@
-
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from __future__ import print_function
-
-
 import sys
-
-__all__ = []
 
 
 def print_progress(progress, message=None, out=None):
@@ -34,7 +22,7 @@ def print_progress(progress, message=None, out=None):
     Examples
     --------
     >>> import time
-    >>> from sktracker.utils import print_progress
+    >>> from spindle_tracker.utils import print_progress
 
     >>> n = 5
     >>> for i in range(n):
@@ -93,7 +81,7 @@ def progress_apply(g, func, out=None, *args, **kwargs):
     --------
     >>> import pandas as pd
     >>> import numpy as np
-    >>> from sktracker.utils import progress_apply
+    >>> from spindle_tracker.utils import progress_apply
 
     >>> df = pd.DataFrame(np.random.choice(range(100), (1000000, 4)), columns=['A', 'B', 'C', 'D'])
     >>> gp = df.groupby('A')

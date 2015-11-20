@@ -77,11 +77,11 @@ class ObjectsIO(object):
 
     @classmethod
     def from_stackio(cls, stackio):
-        """Loads metadata from :class:`sktracker.io.stackio`
+        """Loads metadata from :class:`spindle_tracker.io.stackio`
 
         Parameters
         ----------
-        stackio : :class:`sktracker.io.StackIO`
+        stackio : :class:`spindle_tracker.io.StackIO`
         """
         return cls(metadata=stackio.metadata)
 

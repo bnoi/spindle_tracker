@@ -53,7 +53,7 @@ class Trajectories(pd.DataFrame):
 
     Examples
     --------
-    >>> from sktracker import data
+    >>> from spindle_tracker import data
     >>> from spindle_tracker.trajectories import Trajectories
     >>>
     >>> trajs = data.with_gaps_df()
@@ -891,8 +891,8 @@ class Trajectories(pd.DataFrame):
 
         Examples
         --------
-        >>> from sktracker import data
-        >>> from sktracker.tracker.solver import ByFrameSolver
+        >>> from spindle_tracker import data
+        >>> from spindle_tracker.tracker.solver import ByFrameSolver
         >>> import matplotlib.pylab as plt
         >>> true_trajs = data.brownian_trajectories_generator(p_disapear=0.1)
         >>> solver = ByFrameSolver.for_brownian_motion(true_trajs, max_speed=2)

@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
-log = logging.getLogger(__name__)
 
 import pyqtgraph as pg
 import numpy as np
@@ -18,6 +10,8 @@ import pyqtgraph.exporters as pgexporters
 
 from .viewbox import DataSelectorViewBox
 
+log = logging.getLogger(__name__)
+
 
 class TrajectoriesWidget(QtGui.QWidget):
     """Display a Trajectories object. Trajectories can be modified manually inside the widget:
@@ -26,7 +20,7 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     Parameters
     ----------
-    trajs : :class:`sktracker.trajectories.Trajectories` or list
+    trajs : :class:`spindle_tracker.trajectories.Trajectories` or list
         Trajectories or list of Trajectories to show in the widget.
     names : str or list
         Name(s) of the Trajectories (optional).
@@ -46,9 +40,9 @@ class TrajectoriesWidget(QtGui.QWidget):
 
     Examples
     --------
-    >>> from sktracker.ui import TrajectoriesWidget
-    >>> from sktracker import data
-    >>> from sktracker.trajectories import Trajectories
+    >>> from spindle_tracker.ui import TrajectoriesWidget
+    >>> from spindle_tracker import data
+    >>> from spindle_tracker.trajectories import Trajectories
     >>> trajs = data.brownian_trajs_df()
     >>> trajs = Trajectories(trajs)
     >>> # Relabel to true label

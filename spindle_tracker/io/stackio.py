@@ -1,13 +1,3 @@
-
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from __future__ import print_function
-
-
 import sys
 import os
 import logging
@@ -85,11 +75,11 @@ class StackIO(object):
 
     @classmethod
     def from_objectsio(cls, objectsio):
-        """Load images and metadata from :class:`sktracker.io.ObjectsIO`
+        """Load images and metadata from :class:`spindle_tracker.io.ObjectsIO`
 
         Parameters
         ----------
-        objectsio : :class:`sktracker.io.ObjectsIO`
+        objectsio : :class:`spindle_tracker.io.ObjectsIO`
         """
 
         return cls(image_path=objectsio.image_path, metadata=objectsio.metadata)
@@ -99,7 +89,7 @@ class StackIO(object):
 
         Returns
         -------
-        tf : :class:`sktracker.io.TiffFile`
+        tf : :class:`spindle_tracker.io.TiffFile`
         """
 
         tf = TiffFile(self.image_path, multifile=multifile)
@@ -110,7 +100,7 @@ class StackIO(object):
 
         Returns
         -------
-        tf : :class:`sktracker.io.TiffFile`
+        tf : :class:`spindle_tracker.io.TiffFile`
 
         """
 
